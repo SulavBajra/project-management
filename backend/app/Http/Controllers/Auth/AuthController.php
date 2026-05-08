@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -14,22 +15,36 @@ class AuthController extends Controller
         $credentials = $request->validate([
             "email" => "required|email",
             "password" => "required",
+            "remember" => "sometimes|boolean",
         ]);
-
-        if (!Auth::attempt($credentials)) {
+        $remember = $credentials["remember"] ?? false;
+        if (
+            Auth::attempt(
+                [
+                    "email" => $credentials["email"],
+                    "password" => $credentials["password"],
+                ],
+                $remember,
+            )
+        ) {
+            $request->session()->regenerate();
+            $role = $request->user()->getRoleNames()->first();
             return response()->json(
                 [
-                    "message" => "Invalid credentials",
+                    "message" => "Login Successful",
+                    "role" => $role,
                 ],
-                401,
+                200,
             );
         }
 
-        $token = $request->user()->createToken("api-token")->plainTextToken;
-        return response()->json([
-            "message" => "Login successful",
-            "token" => $token,
-        ]);
+        // $token = $request->user()->createToken("api-token")->plainTextToken;
+        return response()->json(
+            [
+                "message" => "Login Unsuccessful",
+            ],
+            401,
+        );
     }
 
     public function register(Request $request)
@@ -40,18 +55,18 @@ class AuthController extends Controller
             "password" => "required|confirmed|min:8",
         ]);
 
-        $user = User::create($credentials);
-        $token = $user->createToken("api-token")->plainTextToken;
-        $user->assignRole("projectManager");
+        $request->session()->regenerate();
         return response()->json([
             "message" => "Registration successful",
-            "token" => $token,
         ]);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        Log::info("User logged out");
         return response()->json([
             "message" => "Logout successful",
         ]);

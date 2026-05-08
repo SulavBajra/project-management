@@ -1,7 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\AuthController;
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get("/", function () {
+    return view("welcome");
 });
+
+Route::post("/login", [AuthController::class, "login"])->middleware(
+    "throttle:login",
+);
+
+Route::post("/logout", [AuthController::class, "logout"])->middleware("auth");

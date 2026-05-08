@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\User\UserResource;
 use Illuminate\Http\Request;
 use App\Models\User;
 
@@ -14,15 +15,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::all();
-        return response()->json($users);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return response()->json(UserResource::collection($users));
     }
 
     /**
@@ -30,7 +23,8 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $user = User::create($request->all());
+        return response()->json($user, 201);
     }
 
     /**
