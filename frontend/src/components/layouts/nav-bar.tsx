@@ -7,9 +7,13 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Bell, CircleCheckBig } from "lucide-react"
+import { Bell, CircleCheckBig, Moon, Sun } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { useTheme } from "@/components/theme-provider"
 
 export default function NavBar() {
+  const { setTheme, theme } = useTheme()
+
   return (
     <div className="flex items-center justify-between">
       <SidebarTrigger />
@@ -31,6 +35,18 @@ export default function NavBar() {
             <NavigationMenuContent>
               <NavigationMenuLink>Link</NavigationMenuLink>
             </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <Button
+              variant="ghost"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            >
+              {theme === "light" ? (
+                <Moon className="h-4 w-4" />
+              ) : (
+                <Sun className="h-4 w-4" />
+              )}
+            </Button>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>

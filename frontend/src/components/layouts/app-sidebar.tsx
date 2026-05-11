@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Separator } from "@/components/ui/separator"
 import {
   Sidebar,
@@ -36,6 +36,7 @@ import {
   Timeline,
 } from "lucide-react"
 import { authService } from "@/services/authService"
+import { toast } from "sonner"
 
 const navItems = [
   {
@@ -60,6 +61,7 @@ const navItems = [
 export function AppSidebar() {
   const { state } = useSidebar()
   const isCollapsed = state === "collapsed"
+  const navigate = useNavigate()
 
   return (
     <Sidebar collapsible="icon" variant="floating">
@@ -149,8 +151,11 @@ export function AppSidebar() {
           onClick={async () => {
             try {
               await authService.logout()
+              toast.success("Logged out successfully.", { duration: 5000 })
+              navigate("/login")
             } catch (e) {
               console.error("Logout failed", e)
+              toast.error("Logout failed. Please try again.")
             }
           }}
         >

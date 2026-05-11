@@ -46,6 +46,7 @@ export default function LoginForm() {
     try {
       await authService.login(data)
       navigate("/")
+      toast.success("Logged in successfully.")
     } catch (err) {
       if (axios.isAxiosError(err)) {
         toast.error(err.response?.data?.message ?? "Invalid email or password.")

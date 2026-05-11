@@ -13,9 +13,11 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { authService } from "@/services/authService"
 import * as z from "zod"
-import { useNavigate, Link } from "react-router-dom"
 import axios from "axios"
+import { useNavigate, Link } from "react-router-dom"
+import { useState } from "react"
 import { toast } from "sonner"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -29,6 +31,8 @@ const registerSchema = z.object({
 type RegisterData = z.infer<typeof registerSchema>
 
 export default function RegisterForm() {
+  const [showPassword, setShowPassword] = useState(false)
+
   const navigate = useNavigate()
   const {
     register,
@@ -108,12 +112,27 @@ export default function RegisterForm() {
                   <Label htmlFor="password">Password</Label>
                 </div>
 
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  {...register("password")}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    {...register("password")}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-0 right-0 h-full px-3 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="h-4 w-4" />
+                    ) : (
+                      <EyeIcon className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
 
                 {errors.password && (
                   <p className="text-sm text-red-500">
@@ -128,12 +147,27 @@ export default function RegisterForm() {
                   </Label>
                 </div>
 
-                <Input
-                  id="password_confirmation"
-                  type="password"
-                  autoComplete="current-password"
-                  {...register("password_confirmation")}
-                />
+                <div className="relative">
+                  <Input
+                    id="password_confirmation"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    {...register("password_confirmation")}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-0 right-0 h-full px-3 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="h-4 w-4" />
+                    ) : (
+                      <EyeIcon className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
 
                 {errors.password_confirmation && (
                   <p className="text-sm text-red-500">
