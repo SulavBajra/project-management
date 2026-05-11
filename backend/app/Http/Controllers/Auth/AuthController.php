@@ -3,47 +3,58 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $credentials = $request->validate([
-            "email" => "required|email",
-            "password" => "required",
-            "remember" => "sometimes|boolean",
-        ]);
-        $remember = $credentials["remember"] ?? false;
+        $request->validated();
+        $remember = $request->remember ?? false;
+
         if (
-            Auth::attempt(
+            !Auth::attempt(
                 [
-                    "email" => $credentials["email"],
-                    "password" => $credentials["password"],
+                    "email" => $request->email,
+                    "password" => $request->password,
                 ],
                 $remember,
             )
         ) {
-            $request->session()->regenerate();
-            $role = $request->user()->getRoleNames()->first();
             return response()->json(
-                [
-                    "message" => "Login Successful",
-                    "role" => $role,
-                ],
-                200,
+                ["message" => "The provided credentials are incorrect."],
+                422,
             );
         }
 
-        // $token = $request->user()->createToken("api-token")->plainTextToken;
+        $request->session()->regenerate();
+        $role = $request->user()->getRoleNames()->first();
+
+        if (is_null($role)) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return response()->json(
+                ["message" => "Account not yet activated."],
+                403,
+            );
+        }
+
         return response()->json(
             [
-                "message" => "Login Unsuccessful",
+                "message" => "Login Successful",
+                "role" => $role,
+                "user" => [
+                    "id" => $request->user()->id,
+                    "name" => $request->user()->name,
+                    "email" => $request->user()->email,
+                ],
             ],
-            401,
+            200,
         );
     }
 
@@ -56,6 +67,7 @@ class AuthController extends Controller
         ]);
 
         $request->session()->regenerate();
+
         return response()->json([
             "message" => "Registration successful",
         ]);
@@ -67,6 +79,7 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         Log::info("User logged out");
+
         return response()->json([
             "message" => "Logout successful",
         ]);

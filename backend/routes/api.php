@@ -1,9 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\RolePermissionController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Admin\UserController;
 
 Route::get("/user", function (Request $request) {
     return $request->user();
@@ -16,4 +17,9 @@ Route::post("/logout", [AuthController::class, "logout"])->middleware(
 
 Route::middleware(["auth:sanctum"])->group(function () {
     Route::resource("users", UserController::class)->except(["create", "edit"]);
+    Route::get("roles", [RolePermissionController::class, "getRoles"]);
+    Route::post("users/{user}/role", [
+        RolePermissionController::class,
+        "assignRole",
+    ]);
 });

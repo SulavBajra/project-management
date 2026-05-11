@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\User\UserResource;
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -14,8 +14,12 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::all();
-        return response()->json(UserResource::collection($users));
+        $users = User::with("roles:name")->latest()->paginate(10);
+        $usersWithoutAnyRoles = User::doesntHave("roles")->count();
+        return response()->json([
+            "users" => UserResource::collection($users),
+            "usersWithoutAnyRoles" => $usersWithoutAnyRoles,
+        ]);
     }
 
     /**
@@ -24,6 +28,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $user = User::create($request->all());
+
         return response()->json($user, 201);
     }
 
