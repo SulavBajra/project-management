@@ -1,3 +1,4 @@
+import { Controller } from "react-hook-form"
 import {
   Card,
   CardContent,
@@ -16,28 +17,34 @@ import * as z from "zod"
 import { useNavigate, Link } from "react-router-dom"
 import axios from "axios"
 import { toast } from "sonner"
+import { Checkbox } from "@/components/ui/checkbox"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { useState } from "react"
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
+  remember: z.boolean(),
 })
 
 type LoginData = z.infer<typeof loginSchema>
 
 export default function LoginForm() {
   const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false)
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
+    defaultValues: { remember: false },
   })
 
   const onSubmit = async (data: LoginData) => {
     try {
       await authService.login(data)
-
       navigate("/")
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -96,12 +103,28 @@ export default function LoginForm() {
                   </Link>
                 </div>
 
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  {...register("password")}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    className="pr-10"
+                    {...register("password")}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-0 right-0 h-full px-3 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="h-4 w-4" />
+                    ) : (
+                      <EyeIcon className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
 
                 {errors.password && (
                   <p className="text-sm text-red-500">
@@ -113,6 +136,25 @@ export default function LoginForm() {
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? "Logging in..." : "Login"}
               </Button>
+              <div className="flex items-center gap-2">
+                <Controller
+                  name="remember"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="remember"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
+                <Label
+                  htmlFor="remember"
+                  className="cursor-pointer font-normal"
+                >
+                  Remember me
+                </Label>
+              </div>
             </div>
           </form>
         </CardContent>

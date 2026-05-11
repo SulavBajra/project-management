@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import { Separator } from "@/components/ui/separator"
 import {
   Sidebar,
   SidebarContent,
@@ -31,8 +32,9 @@ import {
   FileText,
   Kanban,
   Calendar,
+  LogOut,
+  Timeline,
 } from "lucide-react"
-import { Separator } from "@/components/ui/separator"
 import { authService } from "@/services/authService"
 
 const navItems = [
@@ -128,6 +130,14 @@ export function AppSidebar() {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Timeline">
+                  <Link to="/timeline">
+                    <Timeline className="h-4 w-4" />
+                    <span>Timeline</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -144,7 +154,9 @@ export function AppSidebar() {
             }
           }}
         >
-          Logout
+          {" "}
+          <LogOut />
+          {isCollapsed ? null : <span> Logout</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>
