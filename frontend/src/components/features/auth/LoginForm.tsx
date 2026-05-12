@@ -20,6 +20,7 @@ import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/checkbox"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
 import { useState } from "react"
+import { Spinner } from "@/components/ui/spinner"
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -136,6 +137,7 @@ export default function LoginForm() {
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? "Logging in..." : "Login"}
+                {isSubmitting && <Spinner />}
               </Button>
               <div className="flex items-center gap-2">
                 <Controller

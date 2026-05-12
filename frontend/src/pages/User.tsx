@@ -9,6 +9,7 @@ import { UserTable } from "@/components/features/users/UserTable"
 import RolesContext from "@/types/RolesContext"
 import type { UserDashboardProps } from "@/types/UserDashboardProps"
 import type { User } from "@/types/User"
+import { PaginationSimple } from "@/components/layouts/simple-paginaton"
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([])
@@ -16,35 +17,39 @@ export default function Users() {
   const [loading, setLoading] = useState(true)
   const [role, setRole] = useState<string[]>([])
 
-  useEffect(() => {
-    async function fetchUsers() {
-      try {
-        const response = await api.get<UserDashboardProps>("/api/users")
-        setUsers(response.data.users)
-        setUsersWithoutAnyRoles(response.data.usersWithoutAnyRoles)
-        console.log(response.data)
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          toast.error(error.message)
-        }
-      } finally {
-        setLoading(false)
-      }
-    }
+  const [currentPage, setCurrentPage] = useState(1)
+  const [meta, setMeta] = useState<UserDashboardProps["meta"] | null>(null)
 
+  useEffect(() => {
     async function fetchRole() {
       try {
         const response = await api.get<string[]>("/api/roles")
         setRole(response.data)
       } catch (error) {
-        if (axios.isAxiosError(error)) {
-          toast.error(error.message)
-        }
+        if (axios.isAxiosError(error)) toast.error(error.message)
       }
     }
     fetchRole()
-    fetchUsers()
   }, [])
+
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        setLoading(true)
+        const response = await api.get<UserDashboardProps>(
+          `/api/users?page=${currentPage}`
+        )
+        setUsers(response.data.data)
+        setUsersWithoutAnyRoles(response.data.usersWithoutAnyRoles)
+        setMeta(response.data.meta)
+      } catch (error) {
+        if (axios.isAxiosError(error)) toast.error(error.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchUsers()
+  }, [currentPage])
 
   if (loading)
     return (
@@ -74,6 +79,14 @@ export default function Users() {
         <CardContent>
           <UserTable users={users} />
         </CardContent>
+
+        {meta && (
+          <PaginationSimple
+            currentPage={meta.current_page}
+            totalPages={meta.last_page}
+            onPageChange={setCurrentPage}
+          />
+        )}
       </Card>
     </RolesContext.Provider>
   )

@@ -18,6 +18,7 @@ import { useNavigate, Link } from "react-router-dom"
 import { useState } from "react"
 import { toast } from "sonner"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { Spinner } from "@/components/ui/spinner"
 
 const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -46,7 +47,7 @@ export default function RegisterForm() {
     try {
       await authService.register(data)
 
-      navigate("/")
+      navigate("/login")
     } catch (err) {
       if (axios.isAxiosError(err)) {
         toast.error(err.response?.data?.message ?? "Invalid email or password.")
@@ -178,6 +179,7 @@ export default function RegisterForm() {
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? "Registering..." : "Register"}
+                {isSubmitting && <Spinner />}
               </Button>
             </div>
           </form>
