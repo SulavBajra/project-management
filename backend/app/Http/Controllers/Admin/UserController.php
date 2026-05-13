@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\UserStoreRequest;
 use App\Http\Resources\User\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -14,10 +15,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with("roles:name")->latest()->paginate(10);
+        $users = User::with("roles:name")->latest()->paginate(8);
         $usersWithoutAnyRoles = User::doesntHave("roles")->count();
-        return response()->json([
-            "users" => UserResource::collection($users),
+        return UserResource::collection($users)->additional([
             "usersWithoutAnyRoles" => $usersWithoutAnyRoles,
         ]);
     }
@@ -25,9 +25,10 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(UserStoreRequest $request)
     {
-        $user = User::create($request->all());
+        $validated = $request->validated();
+        $user = User::create($validated);
 
         return response()->json($user, 201);
     }

@@ -4,3 +4,13 @@ export interface User {
   email: string
   role: string | null
 }
+
+export type LoginResponse = {
+  message: string
+  role: string
+  user: {
+    id: string
+    name: string
+    email: string
+  }
+}

@@ -1,4 +1,5 @@
 import api, { getCsrfToken } from "@/lib/axios"
+import type { LoginResponse } from "@/types/User"
 
 export const authService = {
   login: async (data: {
@@ -7,7 +8,7 @@ export const authService = {
     remember?: boolean
   }) => {
     await getCsrfToken()
-    const response = await api.post("/login", {
+    const response = await api.post<LoginResponse>("/login", {
       email: data.email,
       password: data.password,
       remember: data.remember ?? false,

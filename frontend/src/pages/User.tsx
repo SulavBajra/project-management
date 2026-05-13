@@ -6,7 +6,7 @@ import { useEffect, useState } from "react"
 import { Spinner } from "@/components/ui/spinner"
 import { toast } from "sonner"
 import { UserTable } from "@/components/features/users/UserTable"
-import RolesContext from "@/types/RolesContext"
+import RolesContext from "@/contexts/RolesContext"
 import type { UserDashboardProps } from "@/types/UserDashboardProps"
 import type { User } from "@/types/User"
 import { PaginationSimple } from "@/components/layouts/simple-paginaton"
@@ -15,7 +15,7 @@ export default function Users() {
   const [users, setUsers] = useState<User[]>([])
   const [usersWithoutAnyRoles, setUsersWithoutAnyRoles] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [role, setRole] = useState<string[]>([])
+  const [roles, setRoles] = useState<string[]>([])
 
   const [currentPage, setCurrentPage] = useState(1)
   const [meta, setMeta] = useState<UserDashboardProps["meta"] | null>(null)
@@ -24,7 +24,7 @@ export default function Users() {
     async function fetchRole() {
       try {
         const response = await api.get<string[]>("/api/roles")
-        setRole(response.data)
+        setRoles(response.data)
       } catch (error) {
         if (axios.isAxiosError(error)) toast.error(error.message)
       }
@@ -59,7 +59,7 @@ export default function Users() {
     )
 
   return (
-    <RolesContext.Provider value={{ roles: role }}>
+    <RolesContext.Provider value={{ roles: roles }}>
       <Card className="">
         <CardHeader className="flex items-center justify-between">
           <div>

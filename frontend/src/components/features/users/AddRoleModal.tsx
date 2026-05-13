@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useRoles } from "@/types/RolesContext"
+import { useRoles } from "@/contexts/RolesContext"
 import { toast } from "sonner"
 import api from "@/lib/axios"
 import axios from "axios"

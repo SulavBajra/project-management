@@ -3,8 +3,8 @@ import {
   PaginationContent,
   PaginationItem,
   PaginationLink,
-  PaginationPrevious,
   PaginationNext,
+  PaginationPrevious,
 } from "@/components/ui/pagination"
 
 interface PaginationSimpleProps {

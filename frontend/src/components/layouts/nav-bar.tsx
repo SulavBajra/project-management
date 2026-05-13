@@ -10,9 +10,11 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Bell, CircleCheckBig, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function NavBar() {
   const { setTheme, theme } = useTheme()
+  const { user } = useAuth()
 
   return (
     <div className="flex items-center justify-between">
@@ -47,6 +49,9 @@ export default function NavBar() {
                 <Sun className="h-4 w-4" />
               )}
             </Button>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <Button variant="ghost">{user?.name}</Button>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>

@@ -1,23 +1,23 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardAction,
-} from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import * as z from "zod"
+import { authService } from "@/services/authService"
+import axios from "axios"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { authService } from "@/services/authService"
-import * as z from "zod"
-import axios from "axios"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { useNavigate, Link } from "react-router-dom"
 import { useState } from "react"
 import { toast } from "sonner"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Spinner } from "@/components/ui/spinner"
 
 const registerSchema = z.object({

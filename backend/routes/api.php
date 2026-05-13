@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthController;
@@ -11,9 +12,6 @@ Route::get("/user", function (Request $request) {
 })->middleware("auth:sanctum");
 
 Route::post("/register", [AuthController::class, "register"]);
-Route::post("/logout", [AuthController::class, "logout"])->middleware(
-    "auth:sanctum",
-);
 
 Route::middleware(["auth:sanctum"])->group(function () {
     Route::resource("users", UserController::class)->except(["create", "edit"]);
@@ -22,4 +20,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
         RolePermissionController::class,
         "assignRole",
     ]);
+
+    //Projects
+    Route::get("projects", [ProjectController::class, "listActiveProjects"]);
 });

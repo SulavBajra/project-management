@@ -1,3 +1,12 @@
+import * as z from "zod"
+import { authService } from "@/services/authService"
+import axios from "axios"
+import { toast } from "sonner"
+import { useAuth } from "@/hooks/useAuth"
+import { useNavigate, Link } from "react-router-dom"
+import { useForm } from "react-hook-form"
+import { useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller } from "react-hook-form"
 import {
   Card,
@@ -10,16 +19,8 @@ import {
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { authService } from "@/services/authService"
-import * as z from "zod"
-import { useNavigate, Link } from "react-router-dom"
-import axios from "axios"
-import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/checkbox"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
-import { useState } from "react"
 import { Spinner } from "@/components/ui/spinner"
 
 const loginSchema = z.object({
@@ -32,6 +33,7 @@ type LoginData = z.infer<typeof loginSchema>
 
 export default function LoginForm() {
   const navigate = useNavigate()
+  const { setUserSession } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const {
     register,
@@ -45,7 +47,8 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginData) => {
     try {
-      await authService.login(data)
+      const response = await authService.login(data)
+      setUserSession({ ...response.user, role: response.role })
       navigate("/")
       toast.success("Logged in successfully.")
     } catch (err) {

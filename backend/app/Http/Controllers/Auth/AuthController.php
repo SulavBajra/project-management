@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Requests\User\UserStoreRequest;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -58,15 +60,11 @@ class AuthController extends Controller
         );
     }
 
-    public function register(Request $request)
+    public function register(UserStoreRequest $request)
     {
-        $credentials = $request->validate([
-            "name" => "required|string|max:100",
-            "email" => "required|email",
-            "password" => "required|confirmed|min:8",
-        ]);
-
+        $credentials = $request->validated();
         $request->session()->regenerate();
+        User::create($credentials);
 
         return response()->json([
             "message" => "Registration successful",

@@ -37,6 +37,7 @@ import {
 } from "lucide-react"
 import { authService } from "@/services/authService"
 import { toast } from "sonner"
+import { useAuth } from "@/hooks/useAuth"
 
 const navItems = [
   {
@@ -62,6 +63,7 @@ export function AppSidebar() {
   const { state } = useSidebar()
   const isCollapsed = state === "collapsed"
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   return (
     <Sidebar collapsible="icon" variant="floating">
@@ -92,37 +94,42 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
-              {navItems.map((item) => (
-                <Collapsible
-                  key={item.title}
-                  defaultOpen
-                  className="group/collapsible"
-                >
-                  <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton tooltip={item.title}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                        <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenuSub>
-                        {item.children.map((child) => (
-                          <SidebarMenuSubItem key={child.title}>
-                            <SidebarMenuSubButton asChild>
-                              <Link to={child.to}>
-                                <child.icon className="h-3.5 w-3.5" />
-                                <span>{child.title}</span>
-                              </Link>
-                            </SidebarMenuSubButton>
-                          </SidebarMenuSubItem>
-                        ))}
-                      </SidebarMenuSub>
-                    </CollapsibleContent>
-                  </SidebarMenuItem>
-                </Collapsible>
-              ))}
+              {navItems.map((item) => {
+                if (item.title === "Users" && user?.role !== "projectManager")
+                  return null
+
+                return (
+                  <Collapsible
+                    key={item.title}
+                    defaultOpen
+                    className="group/collapsible"
+                  >
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton tooltip={item.title}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                          <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          {item.children.map((child) => (
+                            <SidebarMenuSubItem key={child.title}>
+                              <SidebarMenuSubButton asChild>
+                                <Link to={child.to}>
+                                  <child.icon className="h-3.5 w-3.5" />
+                                  <span>{child.title}</span>
+                                </Link>
+                              </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                          ))}
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
+                )
+              })}
 
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Budget">
