@@ -1,6 +1,29 @@
+import axios from "axios"
+import { useState, useEffect } from "react"
+import { toast } from "sonner"
+import {
+  Calendar,
+  ChevronRight,
+  FileText,
+  FolderKanban,
+  Kanban,
+  LayoutDashboard,
+  LogOut,
+  ShieldCheck,
+  Smile,
+  Users,
+  Wallet,
+} from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
+import { Button } from "@/components/ui/button"
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible"
 import { Separator } from "@/components/ui/separator"
 import {
+  useSidebar,
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -13,50 +36,16 @@ import {
   SidebarMenuSub,
   SidebarMenuSubItem,
   SidebarMenuSubButton,
-  useSidebar,
 } from "@/components/ui/sidebar"
-import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "@/components/ui/collapsible"
-import { Button } from "@/components/ui/button"
-import {
-  LayoutDashboard,
-  FolderKanban,
-  Users,
-  ShieldCheck,
-  Wallet,
-  ChevronRight,
-  Smile,
-  FileText,
-  Kanban,
-  Calendar,
-  LogOut,
-  Timeline,
-} from "lucide-react"
-import { authService } from "@/services/authService"
-import { toast } from "sonner"
 import { useAuth } from "@/hooks/useAuth"
+import api from "@/lib/axios"
+import { authService } from "@/services/authService"
+import type { Project } from "@/types/Project"
 
-const navItems = [
-  {
-    title: "Projects",
-    icon: FolderKanban,
-    children: [
-      { title: "Overview", icon: Kanban, to: "/projects" },
-      { title: "Pages", icon: FileText, to: "/projects/pages" },
-      { title: "Timeline", icon: Calendar, to: "/projects/timeline" },
-    ],
-  },
-  {
-    title: "Users",
-    icon: Users,
-    children: [
-      { title: "All Users", icon: Users, to: "/users" },
-      { title: "Roles & Permissions", icon: ShieldCheck, to: "/users/roles" },
-    ],
-  },
+const PROJECT_SUB_ITEMS = [
+  { title: "Overview", icon: Kanban, path: "overview" },
+  { title: "Timeline", icon: Calendar, path: "timeline" },
+  { title: "Pages", icon: FileText, path: "pages" },
 ]
 
 export function AppSidebar() {
@@ -64,6 +53,21 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed"
   const navigate = useNavigate()
   const { user } = useAuth()
+  const [projects, setProjects] = useState<Project[]>([])
+
+  useEffect(() => {
+    async function fetchMyProjects() {
+      try {
+        const response = await api.get<Project[]>("api/projects")
+        setProjects(response.data)
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          toast.error("Failed to load projects")
+        }
+      }
+    }
+    fetchMyProjects()
+  }, [])
 
   return (
     <Sidebar collapsible="icon" variant="floating">
@@ -85,6 +89,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Dashboard */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Dashboard">
                   <Link to="/">
@@ -94,56 +99,96 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
 
-              {navItems.map((item) => {
-                if (item.title === "Users" && user?.role !== "projectManager")
-                  return null
-
-                return (
-                  <Collapsible
-                    key={item.title}
-                    defaultOpen
-                    className="group/collapsible"
-                  >
-                    <SidebarMenuItem>
-                      <CollapsibleTrigger asChild>
-                        <SidebarMenuButton tooltip={item.title}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                          <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                        </SidebarMenuButton>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <SidebarMenuSub>
-                          {item.children.map((child) => (
-                            <SidebarMenuSubItem key={child.title}>
-                              <SidebarMenuSubButton asChild>
-                                <Link to={child.to}>
-                                  <child.icon className="h-3.5 w-3.5" />
-                                  <span>{child.title}</span>
-                                </Link>
+              <Collapsible defaultOpen className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="Projects">
+                      <FolderKanban className="h-4 w-4" />
+                      <span>Projects</span>
+                      <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {projects.map((project) => (
+                        <Collapsible
+                          key={project.id}
+                          defaultOpen={false}
+                          className="group/collapsible"
+                        >
+                          <SidebarMenuSubItem>
+                            <CollapsibleTrigger asChild>
+                              <SidebarMenuSubButton>
+                                <Kanban className="h-3.5 w-3.5 shrink-0" />
+                                <span className="truncate">{project.name}</span>
+                                <ChevronRight className="ml-auto h-3 w-3 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                               </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          ))}
-                        </SidebarMenuSub>
-                      </CollapsibleContent>
-                    </SidebarMenuItem>
-                  </Collapsible>
-                )
-              })}
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <SidebarMenuSub>
+                                {PROJECT_SUB_ITEMS.map((sub) => (
+                                  <SidebarMenuSubItem key={sub.title}>
+                                    <SidebarMenuSubButton asChild>
+                                      <Link
+                                        to={`/projects/${project.id}/${sub.path}`}
+                                      >
+                                        <sub.icon className="h-3.5 w-3.5" />
+                                        <span>{sub.title}</span>
+                                      </Link>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                ))}
+                              </SidebarMenuSub>
+                            </CollapsibleContent>
+                          </SidebarMenuSubItem>
+                        </Collapsible>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
 
+              {/* Users — manager only */}
+              {user?.role === "projectManager" && (
+                <Collapsible defaultOpen className="group/collapsible">
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger asChild>
+                      <SidebarMenuButton tooltip="Users">
+                        <Users className="h-4 w-4" />
+                        <span>Users</span>
+                        <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild>
+                            <Link to="/users/">
+                              <Users className="h-3.5 w-3.5" />
+                              <span>All Users</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton asChild>
+                            <Link to="/users/roles">
+                              <ShieldCheck className="h-3.5 w-3.5" />
+                              <span>Roles & Permissions</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              )}
+
+              {/* Budget */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Budget">
                   <Link to="/budget">
                     <Wallet className="h-4 w-4" />
                     <span>Budget</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Timeline">
-                  <Link to="/timeline">
-                    <Timeline className="h-4 w-4" />
-                    <span>Timeline</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -158,17 +203,15 @@ export function AppSidebar() {
           onClick={async () => {
             try {
               await authService.logout()
-              toast.success("Logged out successfully.", { duration: 5000 })
+              toast.success("Logged out successfully.", { duration: 3000 })
               navigate("/login")
             } catch (e) {
-              console.error("Logout failed", e)
               toast.error("Logout failed. Please try again.")
             }
           }}
         >
-          {" "}
           <LogOut />
-          {isCollapsed ? null : <span> Logout</span>}
+          {!isCollapsed && <span>Logout</span>}
         </Button>
       </SidebarFooter>
     </Sidebar>

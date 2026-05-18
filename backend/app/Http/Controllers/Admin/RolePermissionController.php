@@ -11,21 +11,22 @@ class RolePermissionController extends Controller
 {
     public function getRoles()
     {
-        $roles = Role::all()->pluck("name");
+        $roles = Role::all()->pluck('name');
+
         return response()->json($roles);
     }
 
     public function assignRole(User $user, Request $request)
     {
         $request->validate([
-            "role" => "required|string",
+            'role' => 'required|string',
         ]);
-        $role = Role::where("name", $request->role)->first();
-        if (!$role) {
-            return response()->json(["message" => "Role not found"], 404);
+        $role = Role::where('name', $request->role)->first();
+        if (! $role) {
+            return response()->json(['message' => 'Role not found'], 404);
         }
         $user->assignRole($role);
 
-        return response()->json(["message" => "Role assigned successfully"]);
+        return response()->json(['message' => 'Role assigned successfully']);
     }
 }

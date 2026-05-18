@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\User;
+namespace App\Http\Requests\Timeline;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserStoreRequest extends FormRequest
+class TimelineStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,9 +23,8 @@ class UserStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:50',
-            'email' => 'required|string|email|max:100|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            "project_id" => ["nullable", "exists:projects,id"],
+            "start_date" => ["required", "date", "after_or_equal:today"],
         ];
     }
 }

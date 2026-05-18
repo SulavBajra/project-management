@@ -6,10 +6,10 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Bell, CircleCheckBig, Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
+import { Bell, CircleCheckBig, Moon, Sun } from "lucide-react"
+import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 
 export default function NavBar() {
@@ -51,7 +51,7 @@ export default function NavBar() {
             </Button>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <Button variant="ghost">{user?.name}</Button>
+            <Button variant="ghost">{user?.name.split(" ")[0]}</Button>
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>

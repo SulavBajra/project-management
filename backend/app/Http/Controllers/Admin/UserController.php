@@ -17,6 +17,7 @@ class UserController extends Controller
     {
         $users = User::with("roles:name")->latest()->paginate(8);
         $usersWithoutAnyRoles = User::doesntHave("roles")->count();
+
         return UserResource::collection($users)->additional([
             "usersWithoutAnyRoles" => $usersWithoutAnyRoles,
         ]);
@@ -63,5 +64,11 @@ class UserController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function getUsersByRole(string $role)
+    {
+        $users = User::role($role)->latest()->get();
+        return response()->json($users);
     }
 }

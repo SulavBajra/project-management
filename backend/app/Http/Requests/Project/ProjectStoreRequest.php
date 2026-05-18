@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\User;
+namespace App\Http\Requests\Project;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UserStoreRequest extends FormRequest
+class ProjectStoreRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,9 +23,13 @@ class UserStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:50',
-            'email' => 'required|string|email|max:100|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            "code" => "required|string|max:10",
+            "name" => "required|string|max:100",
+            "description" => "nullable|string|max:250",
+            "is_active" => "required|boolean",
+            "user_ids" => "required|array|min:1",
+            "user_ids.*" => "integer|exists:users,id",
+            "start_date" => "required|date",
         ];
     }
 }

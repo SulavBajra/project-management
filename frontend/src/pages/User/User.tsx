@@ -10,6 +10,7 @@ import RolesContext from "@/contexts/RolesContext"
 import type { UserDashboardProps } from "@/types/UserDashboardProps"
 import type { User } from "@/types/User"
 import { PaginationSimple } from "@/components/layouts/simple-paginaton"
+import { Outlet } from "react-router-dom"
 
 export default function Users() {
   const [users, setUsers] = useState<User[]>([])
@@ -77,6 +78,7 @@ export default function Users() {
           </div>
         </CardHeader>
         <CardContent>
+          <Outlet />
           <UserTable users={users} />
         </CardContent>
 

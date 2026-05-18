@@ -10,11 +10,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create("project_users", function (Blueprint $table) {
+        Schema::create("timeline_project", function (Blueprint $table) {
+            $table->foreignId("timeline_id")->constrained("timelines");
             $table->foreignId("project_id")->constrained("projects");
-            $table->foreignId("user_id")->constrained("users");
-            $table->primary(["project_id", "user_id"]);
-            $table->index(["project_id", "user_id"]);
+            $table->primary(["timeline_id", "project_id"]);
             $table->timestamps();
         });
     }
@@ -24,6 +23,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists("project_users");
+        Schema::dropIfExists("timeline_project");
     }
 };

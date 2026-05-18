@@ -14,3 +14,9 @@ export type LoginResponse = {
     email: string
   }
 }
+
+export type Employee = {
+  id: number
+  name: string
+  email: string
+}

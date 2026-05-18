@@ -18,16 +18,16 @@ class AuthController extends Controller
         $remember = $request->remember ?? false;
 
         if (
-            !Auth::attempt(
+            ! Auth::attempt(
                 [
-                    "email" => $request->email,
-                    "password" => $request->password,
+                    'email' => $request->email,
+                    'password' => $request->password,
                 ],
                 $remember,
             )
         ) {
             return response()->json(
-                ["message" => "The provided credentials are incorrect."],
+                ['message' => 'The provided credentials are incorrect.'],
                 422,
             );
         }
@@ -41,19 +41,19 @@ class AuthController extends Controller
             $request->session()->regenerateToken();
 
             return response()->json(
-                ["message" => "Account not yet activated."],
+                ['message' => 'Account not yet activated.'],
                 403,
             );
         }
 
         return response()->json(
             [
-                "message" => "Login Successful",
-                "role" => $role,
-                "user" => [
-                    "id" => $request->user()->id,
-                    "name" => $request->user()->name,
-                    "email" => $request->user()->email,
+                'message' => 'Login Successful',
+                'role' => $role,
+                'user' => [
+                    'id' => $request->user()->id,
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
                 ],
             ],
             200,
@@ -67,7 +67,7 @@ class AuthController extends Controller
         User::create($credentials);
 
         return response()->json([
-            "message" => "Registration successful",
+            'message' => 'Registration successful',
         ]);
     }
 
@@ -76,10 +76,10 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        Log::info("User logged out");
+        Log::info('User logged out');
 
         return response()->json([
-            "message" => "Logout successful",
+            'message' => 'Logout successful',
         ]);
     }
 }
