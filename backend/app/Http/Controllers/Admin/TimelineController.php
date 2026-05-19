@@ -13,8 +13,8 @@ class TimelineController extends Controller
 {
     public function getAllTimelines()
     {
-        $timelines = Timeline::with("periods")
-            ->where("end_date", ">", now())
+        $timelines = Timeline::with('periods')
+            ->where('end_date', '>', now())
             ->paginate(10);
 
         return response()->json(TimelineResource::collection($timelines));
@@ -27,8 +27,8 @@ class TimelineController extends Controller
         $timeline = $timelineService->createTimeline($request->validated());
 
         return response()->json([
-            "message" => "Timeline created successfully",
-            "timeline" => $timeline,
+            'message' => 'Timeline created successfully',
+            'timeline' => $timeline,
         ]);
     }
 

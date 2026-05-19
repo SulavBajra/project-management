@@ -8,28 +8,33 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(["name", "description", "code", "is_active", "created_by"])]
+#[Fillable(['name', 'description', 'code', 'is_active', 'created_by'])]
 class Project extends Model
 {
     protected function casts(): array
     {
         return [
-            "is_active" => "boolean",
+            'is_active' => 'boolean',
         ];
     }
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, "project_user");
+        return $this->belongsToMany(User::class, 'project_user');
     }
 
     public function timelines(): BelongsToMany
     {
-        return $this->belongsToMany(Timeline::class, "timeline_project");
+        return $this->belongsToMany(Timeline::class, 'timeline_project');
+    }
+
+    public function allocations(): HasMany
+    {
+        return $this->hasMany(BudgetHeadAllocation::class);
     }
 
     public function scopeActive(Builder $query): Builder
     {
-        return $query->where("is_active", true);
+        return $query->where('is_active', true);
     }
 }

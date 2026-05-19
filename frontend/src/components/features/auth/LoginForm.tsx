@@ -48,7 +48,7 @@ export default function LoginForm() {
   const onSubmit = async (data: LoginData) => {
     try {
       const response = await authService.login(data)
-      setUserSession({ ...response.user, role: response.role })
+      setUserSession({ ...response.user, role: response.role }, data.remember)
       navigate("/")
       toast.success("Logged in successfully.")
     } catch (err) {

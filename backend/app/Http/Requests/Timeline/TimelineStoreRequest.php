@@ -23,8 +23,8 @@ class TimelineStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "project_id" => ["nullable", "exists:projects,id"],
-            "start_date" => ["required", "date", "after_or_equal:today"],
+            'project_id' => ['nullable', 'exists:projects,id'],
+            'start_date' => ['required', 'date', 'after_or_equal:today'],
         ];
     }
 }

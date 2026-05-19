@@ -1,20 +1,7 @@
-import axios from "axios"
 import { useState, useEffect } from "react"
-import { toast } from "sonner"
-import {
-  Calendar,
-  ChevronRight,
-  FileText,
-  FolderKanban,
-  Kanban,
-  LayoutDashboard,
-  LogOut,
-  ShieldCheck,
-  Smile,
-  Users,
-  Wallet,
-} from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
+import { toast } from "sonner"
+import axios from "axios"
 import { Button } from "@/components/ui/button"
 import {
   Collapsible,
@@ -37,6 +24,19 @@ import {
   SidebarMenuSubItem,
   SidebarMenuSubButton,
 } from "@/components/ui/sidebar"
+import {
+  Calendar,
+  ChevronRight,
+  FileText,
+  FolderKanban,
+  Kanban,
+  LayoutDashboard,
+  LogOut,
+  ShieldCheck,
+  Smile,
+  Users,
+  Wallet,
+} from "lucide-react"
 import { useAuth } from "@/hooks/useAuth"
 import api from "@/lib/axios"
 import { authService } from "@/services/authService"
@@ -89,7 +89,6 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Dashboard */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Dashboard">
                   <Link to="/">
@@ -148,7 +147,6 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               </Collapsible>
 
-              {/* Users — manager only */}
               {user?.role === "projectManager" && (
                 <Collapsible defaultOpen className="group/collapsible">
                   <SidebarMenuItem>
@@ -183,7 +181,6 @@ export function AppSidebar() {
                 </Collapsible>
               )}
 
-              {/* Budget */}
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Budget">
                   <Link to="/budget">

@@ -15,7 +15,7 @@ class ProjectController extends Controller
             ->user()
             ->projects()
             ->active()
-            ->select("id", "code", "name")
+            ->select('id', 'code', 'name')
             ->get();
 
         return response()->json($activeProjects);
@@ -30,8 +30,8 @@ class ProjectController extends Controller
 
         return response()->json(
             [
-                "message" => "Project created successfully",
-                "project" => $project,
+                'message' => 'Project created successfully',
+                'project' => $project,
             ],
             201,
         );

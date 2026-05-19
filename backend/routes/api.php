@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BudgetHeadController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\TimelineController;
@@ -34,5 +35,9 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::controller(TimelineController::class)->group(function () {
         Route::get("timelines", "getAllTimelines");
         Route::post("timelines", "createTimeline");
+    });
+
+    Route::controller(BudgetHeadController::class)->group(function () {
+        Route::get("budget-heads", "getBudgetHeads");
     });
 });

@@ -15,11 +15,11 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with("roles:name")->latest()->paginate(8);
-        $usersWithoutAnyRoles = User::doesntHave("roles")->count();
+        $users = User::with('roles:name')->latest()->paginate(8);
+        $usersWithoutAnyRoles = User::doesntHave('roles')->count();
 
         return UserResource::collection($users)->additional([
-            "usersWithoutAnyRoles" => $usersWithoutAnyRoles,
+            'usersWithoutAnyRoles' => $usersWithoutAnyRoles,
         ]);
     }
 
@@ -69,6 +69,7 @@ class UserController extends Controller
     public function getUsersByRole(string $role)
     {
         $users = User::role($role)->latest()->get();
+
         return response()->json($users);
     }
 }

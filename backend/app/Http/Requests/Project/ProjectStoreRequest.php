@@ -23,13 +23,13 @@ class ProjectStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "code" => "required|string|max:10",
-            "name" => "required|string|max:100",
-            "description" => "nullable|string|max:250",
-            "is_active" => "required|boolean",
-            "user_ids" => "required|array|min:1",
-            "user_ids.*" => "integer|exists:users,id",
-            "start_date" => "required|date",
+            'code' => 'required|string|max:10',
+            'name' => 'required|string|max:100',
+            'description' => 'nullable|string|max:250',
+            'is_active' => 'required|boolean',
+            'user_ids' => 'required|array|min:1',
+            'user_ids.*' => 'integer|exists:users,id',
+            'start_date' => 'required|date',
         ];
     }
 }

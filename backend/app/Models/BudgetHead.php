@@ -4,23 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['timeline_id', 'name', 'start_date', 'end_date'])]
-class TimelinePeriod extends Model
+#[Fillable(['name', 'code', 'amount'])]
+class BudgetHead extends Model
 {
     protected function casts(): array
     {
         return [
-            'start_date' => 'date',
-            'end_date' => 'date',
+            'amount' => 'decimal:2',
         ];
-    }
-
-    protected function timeline(): BelongsTo
-    {
-        return $this->belongsTo(Timeline::class);
     }
 
     public function allocations(): HasMany
