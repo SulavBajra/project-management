@@ -13,6 +13,8 @@
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
+        "maatwebsite/excel": "^3.1",
+        "opcodesio/log-viewer": "^3.24",
         "spatie/laravel-permission": "^7.4"
     },
     "require-dev": {
@@ -62,8 +64,7 @@
             "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
-            "@php artisan boost:update --ansi"
+            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
@@ -79,7 +80,10 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": [ "laravel/telescope"]
+            "dont-discover": [
+                "laravel/telescope",
+                "*"
+            ]
         }
     },
     "config": {

@@ -5,7 +5,9 @@ namespace App\Providers;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Telescope\TelescopeServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,12 +17,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         if (
-            $this->app->environment('local') &&
-            class_exists(\Laravel\Telescope\TelescopeServiceProvider::class)
+            $this->app->environment("local") &&
+            class_exists(TelescopeServiceProvider::class)
         ) {
-            $this->app->register(
-                \Laravel\Telescope\TelescopeServiceProvider::class,
-            );
             $this->app->register(TelescopeServiceProvider::class);
         }
     }
@@ -30,13 +29,18 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        RateLimiter::for('login', function (Request $request) {
+        if ($this->app->environment("production")) {
+            URL::forceScheme("https");
+        }
+
+        RateLimiter::for("login", function (Request $request) {
             return Limit::perMinute(5)
                 ->by($request->ip())
                 ->response(function (Request $request, array $headers) {
                     return response()->json(
                         [
-                            'message' => 'Too many login attempts. Please try again later.',
+                            "message" =>
+                                "Too many login attempts. Please try again later.",
                         ],
                         429,
                         $headers,

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\TimelineController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Admin\ExpenseTransactionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,4 +41,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::controller(BudgetHeadController::class)->group(function () {
         Route::get("budget-heads", "getBudgetHeads");
     });
+
+    //using to handle csv file import
 });
+Route::post("expenses/import", [ExpenseTransactionController::class, "import"]);

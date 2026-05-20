@@ -12,7 +12,10 @@ return new class extends Migration {
     {
         Schema::create("expense_transactions", function (Blueprint $table) {
             $table->id();
-            $table->foreignId("expense_id")->constrained("expenses");
+            $table
+                ->foreignId("expense_id")
+                ->constrained("expenses")
+                ->cascadeOnDelete();
             $table->foreignId("account_head_id")->constrained("account_heads");
             $table->decimal("debit", 10, 2);
             $table->decimal("credit", 10, 2);

@@ -13,9 +13,12 @@ return new class extends Migration {
         Schema::create("expenses", function (Blueprint $table) {
             $table->id();
             $table->foreignId("user_id")->constrained("users");
-            $table->foreignId("project_id")->constrained("projects");
-            $table->string("code");
-            $table->text("description");
+            $table
+                ->foreignId("project_id")
+                ->constrained("projects")
+                ->cascadeOnDelete();
+            $table->string("code")->unique();
+            $table->string("description")->nullable();
             $table->decimal("total", 10, 2);
             $table->date("transaction_date");
             $table->timestamps();

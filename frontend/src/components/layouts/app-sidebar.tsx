@@ -28,6 +28,7 @@ import {
   Calendar,
   ChevronRight,
   FileText,
+  Folder,
   FolderKanban,
   Kanban,
   LayoutDashboard,
@@ -118,7 +119,7 @@ export function AppSidebar() {
                           <SidebarMenuSubItem>
                             <CollapsibleTrigger asChild>
                               <SidebarMenuSubButton>
-                                <Kanban className="h-3.5 w-3.5 shrink-0" />
+                                <Folder className="h-3.5 w-3.5 shrink-0" />
                                 <span className="truncate">{project.name}</span>
                                 <ChevronRight className="ml-auto h-3 w-3 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                               </SidebarMenuSubButton>
@@ -147,7 +148,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               </Collapsible>
 
-              {user?.role === "projectManager" && (
+              {user?.role === "admin" && (
                 <Collapsible defaultOpen className="group/collapsible">
                   <SidebarMenuItem>
                     <CollapsibleTrigger asChild>

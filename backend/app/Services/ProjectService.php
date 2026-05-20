@@ -14,14 +14,18 @@ class ProjectService
     {
         return DB::transaction(function () use ($request) {
             $project = Project::create(
-                $request->only(['name', 'description', 'code', 'is_active']) + [
-                    'created_by' => $request->user()->name,
+                $request->only(["name", "description", "code", "is_active"]) + [
+                    "created_by" => $request->user()->name,
                 ],
             );
-
-            $project->users()->sync($request->user_ids);
+            $userIds = collect($request->user_ids ?? [])
+                ->push($request->user()->id)
+                ->unique()
+                ->values()
+                ->all();
+            $project->users()->sync($userIds);
             $timeline = $this->timelineService->createTimeline([
-                'start_date' => $request->start_date,
+                "start_date" => $request->start_date,
             ]);
             $project->timelines()->sync([$timeline->id]);
 
