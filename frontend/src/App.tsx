@@ -1,5 +1,4 @@
 import { AuthProvider } from "./contexts/AuthContext.tsx"
-import Budget from "./pages/Budget.tsx"
 import {
   BrowserRouter,
   Navigate,
@@ -7,6 +6,7 @@ import {
   Route,
   Routes,
 } from "react-router-dom"
+import Budget from "./pages/Budget.tsx"
 import Layout from "./components/layouts/layout.tsx"
 import { useAuth } from "./hooks/useAuth.ts"
 import Dashboard from "./pages/Dashboard.tsx"
@@ -16,9 +16,9 @@ import Login from "./pages/Login.tsx"
 import Register from "./pages/Register.tsx"
 import TimeLine from "./pages/TimeLine.tsx"
 import Pages from "./pages/Project/Pages.tsx"
-import { Toaster } from "@/components/ui/sonner"
-import Roles from "./pages/User/Roles.tsx"
 import Overview from "./pages/Project/Overview.tsx"
+import Roles from "./pages/User/Roles.tsx"
+import { Toaster } from "@/components/ui/sonner"
 
 function ProtectedRoute() {
   const { user } = useAuth()
@@ -37,12 +37,13 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/projects" element={<Project />}>
-                <Route path="/projects/overview" element={<Overview />} />
-                <Route path="/projects/pages" element={<Pages />} />
+              <Route path="/projects/:projectId" element={<Project />}>
+                <Route path="overview" element={<Overview />} />
+                <Route path="timeline" element={<TimeLine />} />
+                <Route path="pages" element={<Pages />} />
               </Route>
               <Route path="/users" element={<User />}>
-                <Route path="/users/roles" element={<Roles />} />
+                <Route path="roles" element={<Roles />} />
               </Route>
               <Route path="/budget" element={<Budget />} />
               <Route path="/timeline" element={<TimeLine />} />

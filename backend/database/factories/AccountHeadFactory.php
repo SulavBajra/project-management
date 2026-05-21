@@ -18,8 +18,8 @@ class AccountHeadFactory extends Factory
     public function definition(): array
     {
         return [
-            "name" => $this->faker->name,
-            "code" => $this->faker->unique()->word,
+            'name' => $this->faker->name,
+            'code' => $this->faker->unique()->word,
         ];
     }
 }

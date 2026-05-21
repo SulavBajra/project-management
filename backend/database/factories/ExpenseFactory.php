@@ -18,12 +18,12 @@ class ExpenseFactory extends Factory
     public function definition(): array
     {
         return [
-            "user_id" => 1,
-            "project_id" => 2,
-            "code" => $this->faker->unique()->word(),
-            "description" => "Expense description" . $this->faker->sentence(),
-            "total" => 500,
-            "transaction_date" => $this->faker->date(),
+            'user_id' => 1,
+            'project_id' => 2,
+            'code' => $this->faker->unique()->word(),
+            'description' => 'Expense description'.$this->faker->sentence(),
+            'total' => 500,
+            'transaction_date' => $this->faker->date(),
         ];
     }
 }

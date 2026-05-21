@@ -18,7 +18,7 @@ class TimelinePeriod extends Model
         ];
     }
 
-    protected function timeline(): BelongsTo
+    public function timeline(): BelongsTo
     {
         return $this->belongsTo(Timeline::class);
     }

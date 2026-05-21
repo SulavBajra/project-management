@@ -10,12 +10,14 @@ class BudgetHeadController extends Controller
     public function getBudgetHeads()
     {
         $budgetHeads = BudgetHead::paginate(10);
+
         return response()->json($budgetHeads);
     }
 
     public function getBudgetHeadStats()
     {
         $count = BudgetHead::count();
-        return response()->json(["count" => $count]);
+
+        return response()->json(['count' => $count]);
     }
 }

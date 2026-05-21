@@ -1,5 +1,4 @@
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -21,10 +20,9 @@ api.interceptors.response.use(
     const excludedRoutes = ["/login", "/register", "/sanctum/csrf-cookie"]
 
     const shouldIgnore = excludedRoutes.some((route) => url.includes(route))
-    const navigate = useNavigate()
 
     if (status === 401 && !shouldIgnore) {
-      navigate("/login")
+      window.location.href = "/login"
     }
 
     return Promise.reject(error)

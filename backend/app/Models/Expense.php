@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[
     Fillable([
-        "user_id",
-        "project_id",
-        "code",
-        "description",
-        "total",
-        "transaction_date",
+        'user_id',
+        'project_id',
+        'code',
+        'description',
+        'total',
+        'transaction_date',
     ]),
 ]
 class Expense extends Model
@@ -24,8 +24,8 @@ class Expense extends Model
     protected function casts(): array
     {
         return [
-            "total" => "decimal:2",
-            "transaction_date" => "date",
+            'total' => 'decimal:2',
+            'transaction_date' => 'date',
         ];
     }
 

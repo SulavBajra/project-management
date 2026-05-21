@@ -18,9 +18,9 @@ class Timeline extends Model
         ];
     }
 
-    public function project(): BelongsToMany
+    public function projects(): BelongsToMany
     {
-        return $this->belongsToMany(Project::class);
+        return $this->belongsToMany(Project::class, 'project_timeline');
     }
 
     public function periods(): HasMany

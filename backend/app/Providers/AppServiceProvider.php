@@ -17,7 +17,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         if (
-            $this->app->environment("local") &&
+            $this->app->environment('local') &&
             class_exists(TelescopeServiceProvider::class)
         ) {
             $this->app->register(TelescopeServiceProvider::class);
@@ -29,18 +29,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if ($this->app->environment("production")) {
-            URL::forceScheme("https");
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
         }
 
-        RateLimiter::for("login", function (Request $request) {
+        RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)
                 ->by($request->ip())
                 ->response(function (Request $request, array $headers) {
                     return response()->json(
                         [
-                            "message" =>
-                                "Too many login attempts. Please try again later.",
+                            'message' => 'Too many login attempts. Please try again later.',
                         ],
                         429,
                         $headers,

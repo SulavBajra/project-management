@@ -2,41 +2,51 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exceptions\ExpenseNotBalanceException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Expense\ExpenseExtractRequest;
 use App\Services\ExpenseService;
-use Illuminate\Http\Request;
 use Maatwebsite\Excel\Validators\ValidationException;
 
 class ExpenseTransactionController extends Controller
 {
     public function __construct(protected ExpenseService $expenseService) {}
 
-    public function import(Request $request)
+    public function import(ExpenseExtractRequest $request)
     {
-        $request->validate([
-            "file" => "required|file|mimes:xlsx,csv,xls",
-            "project_id" => "required|integer|exists:projects,id",
-        ]);
+        $validated = $request->validated();
         try {
             $this->expenseService->extractExpenses(
-                $request->file("file"),
-                1,
-                $request->project_id,
+                $validated['file'],
+                $request->user()->id,
+                $validated['project_id'],
+            );
+
+            return response()->json(
+                ['message' => 'Expenses imported successfully.'],
+                201,
             );
         } catch (ValidationException $e) {
             return response()->json(
                 [
-                    "message" => "Import failed.",
-                    "errors" => $e->failures(),
+                    'message' => 'Import failed.',
+                    'errors' => $e->failures(),
+                ],
+                422,
+            );
+        } catch (ExpenseNotBalanceException $e) {
+            return response()->json(
+                [
+                    'message' => $e->getMessage(),
                 ],
                 422,
             );
         } catch (\Exception $e) {
             return response()->json(
                 [
-                    "message" => $e->getMessage(),
-                    "file" => $e->getFile(),
-                    "line" => $e->getLine(),
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
                 ],
                 500,
             );

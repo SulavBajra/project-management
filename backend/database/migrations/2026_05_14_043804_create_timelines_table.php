@@ -13,10 +13,6 @@ return new class extends Migration
     {
         Schema::create('timelines', function (Blueprint $table) {
             $table->id();
-            $table
-                ->foreignId('project_id')
-                ->nullable()
-                ->constrained('projects');
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->timestamps();

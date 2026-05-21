@@ -25,7 +25,7 @@ class Project extends Model
 
     public function timelines(): BelongsToMany
     {
-        return $this->belongsToMany(Timeline::class, 'timeline_project');
+        return $this->belongsToMany(Timeline::class, 'project_timeline');
     }
 
     public function allocations(): HasMany

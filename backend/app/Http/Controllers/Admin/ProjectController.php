@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
+    public function __construct(protected ProjectService $projectService) {}
+
     public function listActiveProjects(Request $request)
     {
         $activeProjects = $request
@@ -35,5 +37,13 @@ class ProjectController extends Controller
             ],
             201,
         );
+    }
+
+    public function getStatOfProject(Request $request)
+    {
+        $projectId = $request->route('id');
+        $stats = $this->projectService->getStatOfProject($projectId);
+
+        return response()->json($stats);
     }
 }

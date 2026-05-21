@@ -16,15 +16,15 @@ class ExpenseTransactionsImport implements ToCollection, WithHeadingRow
         $this->rows = $rows
             ->map(function ($row) {
                 return [
-                    "expense_id" => $row["expense_id"] ?? null,
-                    "account_head_id" => $row["account_head_id"] ?? null,
-                    "debit" => $row["debit"] ?? 0,
-                    "credit" => $row["credit"] ?? 0,
-                    "transaction_date" => isset($row["transaction_date"])
-                        ? Date::excelToDateTimeObject($row["transaction_date"])
+                    'expense_id' => $row['expense_id'] ?? null,
+                    'account_head_id' => $row['account_head_id'] ?? null,
+                    'debit' => $row['debit'] ?? 0,
+                    'credit' => $row['credit'] ?? 0,
+                    'transaction_date' => isset($row['transaction_date'])
+                        ? Date::excelToDateTimeObject($row['transaction_date'])
                         : now(),
                 ];
             })
-            ->filter(fn($row) => $row["expense_id"] && $row["account_head_id"]);
+            ->filter(fn ($row) => $row['expense_id'] && $row['account_head_id']);
     }
 }

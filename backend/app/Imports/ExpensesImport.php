@@ -3,14 +3,13 @@
 namespace App\Imports;
 
 use App\Models\Expense;
+use Illuminate\Database\Eloquent\Model;
 use Maatwebsite\Excel\Concerns\ToModel;
 
 class ExpensesImport implements ToModel
 {
     /**
-     * @param array $row
-     *
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @return Model|null
      */
     public function model(array $row)
     {
