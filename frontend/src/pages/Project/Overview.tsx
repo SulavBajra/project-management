@@ -1,24 +1,17 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import { toast } from "sonner"
-import ImportExpense from "@/components/features/expenses/ImportExpense"
-import { Card, CardContent } from "@/components/ui/card"
+import OverviewHeader from "@/components/features/projects/OverviewHeader"
+import ProjectActions from "@/components/features/projects/ProjectActions"
+import { Button } from "@/components/ui/button"
 import api from "@/lib/axios"
-import { TriangleAlert } from "lucide-react"
+import type { ProjectStats } from "@/types/ProjectStats"
 
-interface ProjectStats {
-  current_period: {
-    id: number
-    name: string
-    start_date: string
-    end_date: string
-  } | null
-  days_left: number | null
-}
 export default function Overview() {
   const { projectId } = useParams<{ projectId: string }>()
   const [stat, setStat] = useState<ProjectStats | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchData() {
@@ -31,45 +24,24 @@ export default function Overview() {
         if (axios.isAxiosError(error)) {
           toast.error(error.message)
         }
+      } finally {
+        setLoading(false)
       }
     }
     fetchData()
   }, [projectId])
 
   return (
-    <div className="space-y-4">
-      {stat !== null &&
-        stat.days_left !== null &&
-        (stat.days_left < 0 ? (
-          <p className="text-sm text-destructive">
-            <TriangleAlert className="inline-block h-4" />
-            Warning: Project is past due. Extend the timeline.
-          </p>
-        ) : stat.days_left < 3 ? (
-          <p className="text-sm text-destructive">
-            <TriangleAlert className="inline-block h-4" />
-            Warning: Only {stat.days_left} days left. Extend the timeline.
-          </p>
-        ) : null)}
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="col-span-1">
-          <CardContent>
-            {stat?.current_period ? (
-              <p>Current Period: {stat.current_period.name}</p>
-            ) : (
-              <p className="text-muted-foreground">No active period</p>
-            )}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            {stat?.days_left !== null && stat?.days_left !== undefined && (
-              <p>Till End Date: {stat.days_left} days</p>
-            )}
-          </CardContent>
-        </Card>
+    <div className="flex flex-col gap-4">
+      <OverviewHeader stat={stat} loading={loading} />
+      <div className="flex gap-2">
+        <Button asChild>
+          <Link to={`/projects/${projectId}/expense`}>Add Expenses</Link>
+        </Button>
+        {projectId && (
+          <ProjectActions projectId={projectId} daysLeft={stat?.days_left} />
+        )}
       </div>
-      <ImportExpense projectId={Number(projectId)} />
     </div>
   )
 }

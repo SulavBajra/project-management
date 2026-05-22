@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Http\Requests\Project\ProjectStoreRequest;
 use App\Models\Project;
+use App\Models\Timeline;
 use App\Models\TimelinePeriod;
 use Illuminate\Support\Facades\DB;
 
@@ -53,6 +54,7 @@ class ProjectService
             ->where("start_date", "<=", now())
             ->where("end_date", ">=", now())
             ->first();
+        $totalUsers = Project::find($projectId)->users()->count();
 
         $daysLeft = now()->diffInDays($projectEndDate, false);
 
@@ -64,6 +66,18 @@ class ProjectService
                 "end_date" => $currentPeriod?->end_date,
             ],
             "days_left" => (int) $daysLeft,
+            "total_users" => $totalUsers,
         ];
+    }
+
+    public function getTimeline(int $projectId)
+    {
+        $timelines = Timeline::with("periods")
+            ->whereHas("projects", function ($query) use ($projectId) {
+                $query->where("projects.id", $projectId);
+            })
+            ->get();
+
+        return $timelines;
     }
 }

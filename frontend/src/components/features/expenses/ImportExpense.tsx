@@ -51,7 +51,7 @@ export default function ImportExpense({ projectId }: { projectId: number }) {
       <DialogTrigger asChild>
         <Button>
           <Upload className="h-4 w-4" />
-          Import from Excel
+          Add expenses from Excel
         </Button>
       </DialogTrigger>
       <DialogContent>

@@ -35,6 +35,7 @@ import {
   LogOut,
   ShieldCheck,
   Smile,
+  Timeline,
   Users,
   Wallet,
 } from "lucide-react"
@@ -105,7 +106,7 @@ export function AppSidebar() {
                     <SidebarMenuButton tooltip="Projects">
                       <FolderKanban className="h-4 w-4" />
                       <span>Projects</span>
-                      <ChevronRight className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      <ChevronRight className="mProjectl-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
@@ -187,6 +188,14 @@ export function AppSidebar() {
                   <Link to="/budget">
                     <Wallet className="h-4 w-4" />
                     <span>Budget</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip="Timeline">
+                  <Link to="/timeline">
+                    <Timeline className="h-4 w-4" />
+                    <span>Timeline</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

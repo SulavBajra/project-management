@@ -54,7 +54,7 @@ export default function TimelineTable({
             <TableHead>Start Date</TableHead>
             <TableHead>End Date</TableHead>
             <TableHead>Periods</TableHead>
-            <TableHead className="w-15" />
+            <TableHead className="w-15">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

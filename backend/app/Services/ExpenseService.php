@@ -4,11 +4,13 @@ namespace App\Services;
 
 use App\Exceptions\ExpenseNotBalanceException;
 use App\Imports\ExpenseTransactionsImport;
+use App\Models\AccountHead;
 use App\Models\Expense;
 use App\Models\ExpenseTransaction;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Str;
 
 class ExpenseService
 {
@@ -30,7 +32,7 @@ class ExpenseService
                 $credit = $items->sum("credit");
                 $existingTotal =
                     DB::table("expenses")
-                        ->where("code", "EXP-" . $expenseId)
+                        ->where("code", "EXP-" . $expenseId . "-" . $projectId)
                         ->where("project_id", $projectId)
                         ->value("total") ?? 0;
 
@@ -70,6 +72,45 @@ class ExpenseService
                         ],
                     );
                 }
+            }
+        });
+    }
+
+    public function addExpenses(array $data, int $projectId, int $userId): void
+    {
+        DB::transaction(function () use ($data, $projectId, $userId) {
+            $total = collect($data["transactions"])->sum("debit");
+
+            $expense = Expense::create([
+                "user_id" => $userId,
+                "project_id" => $projectId,
+                "code" => $data["code"],
+                "description" => $data["description"] ?? null,
+                "total" => $total,
+                "transaction_date" => $data["transaction_date"],
+            ]);
+
+            $accountHeads = collect($data["transactions"])
+                ->pluck("account_head_name")
+                ->unique()
+                ->mapWithKeys(function (string $name) {
+                    $accountHead = AccountHead::firstOrCreate(
+                        ["name" => $name],
+                        ["code" => Str::slug($name)],
+                    );
+                    return [$name => $accountHead];
+                });
+
+            foreach ($data["transactions"] as $item) {
+                ExpenseTransaction::create([
+                    "expense_id" => $expense->id,
+                    "account_head_id" => $accountHeads->get(
+                        $item["account_head_name"],
+                    )->id,
+                    "debit" => $item["debit"],
+                    "credit" => $item["credit"],
+                    "transaction_date" => $item["transaction_date"],
+                ]);
             }
         });
     }
