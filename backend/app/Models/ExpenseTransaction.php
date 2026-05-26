@@ -30,4 +30,9 @@ class ExpenseTransaction extends Model
     {
         return $this->belongsTo(Expense::class);
     }
+
+    public function accountHead(): BelongsTo
+    {
+        return $this->belongsTo(AccountHead::class);
+    }
 }

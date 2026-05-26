@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class RolePermissionSeeder extends Seeder
@@ -12,8 +13,16 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::create(['name' => 'projectManager']);
+        Permission::create(['name' => 'create project']);
+        Permission::create(['name' => 'end project']);
+        Permission::create(['name' => 'add user to project']);
+
+        Role::create(['name' => 'projectManager'])->givePermissionTo([
+            'create project',
+            'end project',
+            'add user to project',
+        ]);
         Role::create(['name' => 'employee']);
-        Role::create(['name' => 'admin']);
+        Role::create(['name' => 'admin'])->givePermissionTo(Permission::all());
     }
 }

@@ -47,7 +47,7 @@ import type { Project } from "@/types/Project"
 const PROJECT_SUB_ITEMS = [
   { title: "Overview", icon: Kanban, path: "overview" },
   { title: "Timeline", icon: Calendar, path: "timeline" },
-  { title: "Pages", icon: FileText, path: "pages" },
+  { title: "Expenses", icon: FileText, path: "expenses" },
 ]
 
 export function AppSidebar() {

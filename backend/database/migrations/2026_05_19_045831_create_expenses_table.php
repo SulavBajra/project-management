@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('total', 10, 2);
             $table->date('transaction_date');
             $table->timestamps();
-            $table->index(['user_id', 'project_id']);
+            $table->index(['user_id', 'project_id', 'code']);
             $table->unique(['code', 'project_id']);
         });
     }

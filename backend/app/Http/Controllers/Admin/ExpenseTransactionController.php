@@ -6,7 +6,10 @@ use App\Exceptions\ExpenseNotBalanceException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Expense\ExpenseExtractRequest;
 use App\Http\Requests\Expense\ExpenseStoreRequest;
+use App\Http\Resources\Expenses\ExpenseTransactionsResource;
+use App\Models\Expense;
 use App\Services\ExpenseService;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Validators\ValidationException;
 
 class ExpenseTransactionController extends Controller
@@ -69,5 +72,37 @@ class ExpenseTransactionController extends Controller
             ["message" => "Expense stored successfully."],
             201,
         );
+    }
+
+    public function getExpenses(Request $request)
+    {
+        $projectId = $request->route("id");
+        $expenses = Expense::with([
+            "transactions" => function ($query) {
+                $query->orderByDesc("created_at");
+            },
+            "transactions.accountHead",
+        ])
+            ->where("project_id", $projectId)
+            ->orderByDesc("created_at")
+            ->paginate(10);
+
+        $data = $expenses
+            ->getCollection()
+            ->flatMap(
+                fn($expense) => $expense->transactions->map(
+                    fn($t) => new ExpenseTransactionsResource($t),
+                ),
+            )
+            ->values();
+
+        return response()->json([
+            "data" => $data,
+            "meta" => [
+                "current_page" => $expenses->currentPage(),
+                "last_page" => $expenses->lastPage(),
+                "total" => $expenses->total(),
+            ],
+        ]);
     }
 }

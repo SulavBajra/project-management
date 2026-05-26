@@ -15,12 +15,12 @@ import User from "./pages/User/User.tsx"
 import Login from "./pages/Login.tsx"
 import Register from "./pages/Register.tsx"
 import TimeLine from "./pages/TimeLine.tsx"
-import Pages from "./pages/Project/Pages.tsx"
 import Overview from "./pages/Project/Overview.tsx"
 import Roles from "./pages/User/Roles.tsx"
 import ProjectTimeline from "./pages/Project/ProjectTimeline.tsx"
 import Expense from "./pages/Expense.tsx"
 import { Toaster } from "@/components/ui/sonner"
+import Expenses from "./pages/Project/Expenses.tsx"
 
 function ProtectedRoute() {
   const { user } = useAuth()
@@ -42,7 +42,7 @@ export default function App() {
               <Route path="/projects/:projectId" element={<Project />}>
                 <Route path="overview" element={<Overview />} />
                 <Route path="timeline" element={<ProjectTimeline />} />
-                <Route path="pages" element={<Pages />} />
+                <Route path="expenses" element={<Expenses />} />
                 <Route path="expense" element={<Expense />} />
               </Route>
               <Route path="/users" element={<User />}>

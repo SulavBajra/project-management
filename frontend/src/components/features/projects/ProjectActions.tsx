@@ -48,7 +48,7 @@ export default function ProjectActions({
       toast.success("Project ended successfully")
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        toast.error(error.message)
+        toast.error(error.response?.data?.message ?? "Failed to end project")
       }
     } finally {
       setEndingProject(false)

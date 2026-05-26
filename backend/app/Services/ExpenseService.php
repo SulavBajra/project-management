@@ -9,8 +9,9 @@ use App\Models\Expense;
 use App\Models\ExpenseTransaction;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ExpenseService
 {
@@ -21,18 +22,19 @@ class ExpenseService
     ): void {
         $import = new ExpenseTransactionsImport();
 
-        Excel::import($import, $file);
-        $rows = $import->rows;
+        DB::transaction(function () use ($import, $file, $userId, $projectId) {
+            Excel::import($import, $file);
+            $rows = $import->rows;
+            $groupedRows = $rows->groupBy("expense_code");
+            Log::info("Imported rows count: " . $rows->count());
+            Log::info("Sample row: ", $rows->first() ?? []);
 
-        DB::transaction(function () use ($rows, $userId, $projectId) {
-            $groupedRows = $rows->groupBy("expense_id");
-
-            foreach ($groupedRows as $expenseId => $items) {
+            foreach ($groupedRows as $expenseCode => $items) {
                 $debit = $items->sum("debit");
                 $credit = $items->sum("credit");
                 $existingTotal =
                     DB::table("expenses")
-                        ->where("code", "EXP-" . $expenseId . "-" . $projectId)
+                        ->where("code", $expenseCode)
                         ->where("project_id", $projectId)
                         ->value("total") ?? 0;
 
@@ -40,13 +42,13 @@ class ExpenseService
 
                 if (bccomp((string) $debit, (string) $credit, 2) !== 0) {
                     throw new ExpenseNotBalanceException(
-                        "Debit and credit do not match for expense $expenseId. Debit: $debit, Credit: $credit",
+                        "Debit and credit do not match for expense $expenseCode. Debit: $debit, Credit: $credit",
                     );
                 }
 
                 $expense = Expense::updateOrCreate(
                     [
-                        "code" => "EXP-" . $expenseId . "-" . $projectId,
+                        "code" => $expenseCode,
                         "project_id" => $projectId,
                     ],
                     [
@@ -98,6 +100,7 @@ class ExpenseService
                         ["name" => $name],
                         ["code" => Str::slug($name)],
                     );
+
                     return [$name => $accountHead];
                 });
 

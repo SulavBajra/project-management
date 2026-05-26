@@ -11,13 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('project_timeline', function (Blueprint $table) {
-            $table
-                ->foreignId('project_id')
-                ->constrained('projects')
-                ->cascadeOnDelete();
-            $table->foreignId('timeline_id')->constrained('timelines');
-            $table->primary(['timeline_id', 'project_id']);
+        Schema::create('approval_steps', function (Blueprint $table) {
+            $table->id();
             $table->timestamps();
         });
     }
@@ -27,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('project_timeline');
+        Schema::dropIfExists('approval_steps');
     }
 };

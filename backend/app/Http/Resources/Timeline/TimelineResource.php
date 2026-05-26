@@ -15,11 +15,11 @@ class TimelineResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "id" => $this->id,
-            "start_date" => $this->start_date->format("Y-m-d"),
-            "end_date" => $this->end_date->format("Y-m-d"),
-            "periods" => TimelinePeriodResource::collection(
-                $this->whenLoaded("periods"),
+            'id' => $this->id,
+            'start_date' => $this->start_date->format('Y-m-d'),
+            'end_date' => $this->end_date->format('Y-m-d'),
+            'periods' => TimelinePeriodResource::collection(
+                $this->whenLoaded('periods'),
             ),
         ];
     }

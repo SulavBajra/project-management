@@ -19,8 +19,8 @@ class ProjectService
     {
         return DB::transaction(function () use ($request) {
             $project = Project::create(
-                $request->only(["name", "description", "code", "is_active"]) + [
-                    "created_by" => $request->user()->name,
+                $request->only(['name', 'description', 'code', 'is_active']) + [
+                    'created_by' => $request->user()->name,
                 ],
             );
             $userIds = collect($request->user_ids ?? [])
@@ -30,7 +30,7 @@ class ProjectService
                 ->all();
             $project->users()->sync($userIds);
             $timeline = $this->timelineService->createTimeline([
-                "start_date" => $request->start_date,
+                'start_date' => $request->start_date,
             ]);
             $project->timelines()->sync([$timeline->id]);
 
@@ -47,34 +47,34 @@ class ProjectService
     {
         $projectEndDate = Project::find($projectId)?->timelines()->first()
             ?->end_date;
-        $currentPeriod = TimelinePeriod::with("timeline")
-            ->whereHas("timeline.projects", function ($query) use ($projectId) {
-                $query->where("projects.id", $projectId);
+        $currentPeriod = TimelinePeriod::with('timeline')
+            ->whereHas('timeline.projects', function ($query) use ($projectId) {
+                $query->where('projects.id', $projectId);
             })
-            ->where("start_date", "<=", now())
-            ->where("end_date", ">=", now())
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
             ->first();
         $totalUsers = Project::find($projectId)->users()->count();
 
         $daysLeft = now()->diffInDays($projectEndDate, false);
 
         return [
-            "current_period" => [
-                "id" => $currentPeriod?->id,
-                "name" => $currentPeriod?->name,
-                "start_date" => $currentPeriod?->start_date,
-                "end_date" => $currentPeriod?->end_date,
+            'current_period' => [
+                'id' => $currentPeriod?->id,
+                'name' => $currentPeriod?->name,
+                'start_date' => $currentPeriod?->start_date,
+                'end_date' => $currentPeriod?->end_date,
             ],
-            "days_left" => (int) $daysLeft,
-            "total_users" => $totalUsers,
+            'days_left' => (int) $daysLeft,
+            'total_users' => $totalUsers,
         ];
     }
 
     public function getTimeline(int $projectId)
     {
-        $timelines = Timeline::with("periods")
-            ->whereHas("projects", function ($query) use ($projectId) {
-                $query->where("projects.id", $projectId);
+        $timelines = Timeline::with('periods')
+            ->whereHas('projects', function ($query) use ($projectId) {
+                $query->where('projects.id', $projectId);
             })
             ->get();
 
