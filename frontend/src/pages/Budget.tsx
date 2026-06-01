@@ -1,6 +1,7 @@
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import BudgetForm from "@/components/features/budgets/BudgetForm"
 import BudgetStats from "@/components/features/budgets/BudgetStats"
 import BudgetTable from "@/components/features/budgets/BudgetTable"
 import {
@@ -11,7 +12,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import api from "@/lib/axios"
-import type { BudgetHead } from "@/types/BudgetHead"
+import type { BudgetFormData } from "@/types/Budget/BudgetFormData"
+import type { BudgetHead } from "@/types/Budget/BudgetHead"
 
 export default function Budget() {
   const [budgetHeads, setBudgetHeads] = useState<BudgetHead[]>([])
@@ -20,7 +22,6 @@ export default function Budget() {
     async function fetchData() {
       try {
         const response = await api.get("api/budget-heads")
-        console.log(response.data.data)
         setBudgetHeads(response.data.data)
       } catch (err) {
         if (axios.isAxiosError(err)) {
@@ -31,13 +32,23 @@ export default function Budget() {
     fetchData()
   }, [])
 
+  const createBudget = async (data: BudgetFormData) => {
+    await api.post("api/budget-heads", data)
+    toast.success("Budget created successfully")
+  }
+
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Manage Budget</CardTitle>
-        <CardDescription>
-          <p>Create, edit, and track your budget</p>
-        </CardDescription>
+      <CardHeader className="flex justify-between">
+        <div>
+          <CardTitle>Manage Budget</CardTitle>
+          <CardDescription>
+            <p>Create, edit, and track your budget</p>
+          </CardDescription>
+        </div>
+        <div>
+          <BudgetForm onSubmit={createBudget} />
+        </div>
       </CardHeader>
       <CardContent>
         <BudgetStats />

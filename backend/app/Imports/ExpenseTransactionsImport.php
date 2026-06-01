@@ -20,37 +20,37 @@ class ExpenseTransactionsImport implements ToCollection, WithHeadingRow
         $this->rows = $rows
             ->map(function ($row) {
                 $accountHeadId = $this->resolveAccountHeadId(
-                    $row["account_head_name"] ?? null,
+                    $row['account_head_name'] ?? null,
                 );
 
                 return [
-                    "expense_code" => $row["code"] ?? null,
-                    "account_head_id" => $accountHeadId,
-                    "debit" => $row["debit"] ?? 0,
-                    "credit" => $row["credit"] ?? 0,
-                    "transaction_date" => isset($row["transaction_date"])
-                        ? Date::excelToDateTimeObject($row["transaction_date"])
+                    'expense_code' => $row['code'] ?? null,
+                    'account_head_id' => $accountHeadId,
+                    'debit' => $row['debit'] ?? 0,
+                    'credit' => $row['credit'] ?? 0,
+                    'transaction_date' => isset($row['transaction_date'])
+                        ? Date::excelToDateTimeObject($row['transaction_date'])
                         : now(),
                 ];
             })
             ->filter(
-                fn($row) => $row["expense_code"] && $row["account_head_id"],
+                fn ($row) => $row['expense_code'] && $row['account_head_id'],
             );
     }
 
     protected function resolveAccountHeadId(?string $name): ?int
     {
-        if (!$name) {
+        if (! $name) {
             return null;
         }
 
         $key = strtolower(trim($name));
 
-        if (!array_key_exists($key, $this->accountHeadCache)) {
+        if (! array_key_exists($key, $this->accountHeadCache)) {
             $accountHead = AccountHead::firstOrCreate(
-                ["name" => trim($name)],
+                ['name' => trim($name)],
                 [
-                    "code" => Str::slug($name),
+                    'code' => Str::slug($name),
                 ],
             );
             $this->accountHeadCache[$key] = $accountHead->id;

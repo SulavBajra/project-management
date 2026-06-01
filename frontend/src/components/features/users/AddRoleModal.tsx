@@ -1,4 +1,6 @@
+import axios from "axios"
 import { useState } from "react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,9 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useRoles } from "@/contexts/RolesContext"
-import { toast } from "sonner"
 import api from "@/lib/axios"
-import axios from "axios"
 
 interface AddRoleModalProps {
   open: boolean

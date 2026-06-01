@@ -1,17 +1,19 @@
 export interface User {
-  id: string
+  id: number
   name: string
   email: string
   role: string | null
+  permissions: string[]
 }
 
 export type LoginResponse = {
   message: string
-  role: string
   user: {
-    id: string
+    id: number
     name: string
     email: string
+    role: string
+    permissions: string[]
   }
 }
 

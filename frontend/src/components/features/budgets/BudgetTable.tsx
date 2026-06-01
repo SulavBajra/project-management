@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { BudgetHead } from "@/types/BudgetHead"
+import type { BudgetHead } from "@/types/Budget/BudgetHead"
 
 export default function BudgetTable({
   budgetHeads,
@@ -22,7 +22,6 @@ export default function BudgetTable({
           <TableHead>S.N</TableHead>
           <TableHead>Name</TableHead>
           <TableHead>Code</TableHead>
-          <TableHead>Amount</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -32,9 +31,8 @@ export default function BudgetTable({
             <TableCell>{index + 1}</TableCell>
             <TableCell>{head.name}</TableCell>
             <TableCell>{head.code}</TableCell>
-            <TableCell>{head.amount}</TableCell>
             <TableCell>
-              <Button>
+              <Button variant="destructive">
                 <Trash size={16} />
               </Button>
             </TableCell>

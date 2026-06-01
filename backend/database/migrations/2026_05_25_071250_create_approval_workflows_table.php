@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('approval_workflows', function (Blueprint $table) {
             $table->id();
+            $table->morphs('approvable');
+            $table->string('state');
+            $table->boolean('is_active')->default(true);
+            $table->string('name');
             $table->timestamps();
         });
     }

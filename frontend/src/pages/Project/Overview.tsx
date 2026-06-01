@@ -1,4 +1,5 @@
 import axios from "axios"
+import { Banknote, UserPlus } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { toast } from "sonner"
@@ -6,6 +7,16 @@ import OverviewHeader from "@/components/features/projects/OverviewHeader"
 import ProjectActions from "@/components/features/projects/ProjectActions"
 import AddUserModal from "@/components/features/users/AddUserModal"
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import api from "@/lib/axios"
 import type { ProjectStats } from "@/types/ProjectStats"
 import type { Employee } from "@/types/User"
@@ -20,8 +31,10 @@ export default function Overview() {
   useEffect(() => {
     async function fetchData() {
       try {
+        const parsedProjectId = Number(projectId)
+
         const response = await api.get<ProjectStats>(
-          `/api/projects/${projectId}/stat`
+          `/api/projects/${parsedProjectId}/stat`
         )
         setStat(response.data)
       } catch (error) {
@@ -35,7 +48,11 @@ export default function Overview() {
 
     async function fetchEmployees() {
       try {
-        const response = await api.get<Employee[]>("api/users/employee")
+        const parsedProjectId = Number(projectId)
+
+        const response = await api.get<Employee[]>(
+          `/api/projects/${parsedProjectId}/users`
+        )
         setEmployees(response.data)
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -49,11 +66,13 @@ export default function Overview() {
     fetchEmployees()
   }, [projectId])
 
-  const addEmployee = async (userIds: number[]) => {
+  const addEmployee = async () => {
     try {
-      await api.patch("/api/users", {
-        user_ids: userIds,
+      await api.patch(`/api/projects/${projectId}/users`, {
+        user_ids: selectedEmployees.map((e) => e.id),
       })
+      toast.success("Employees added successfully")
+      setSelectedEmployees([])
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data.message)
@@ -66,16 +85,42 @@ export default function Overview() {
       <OverviewHeader stat={stat} loading={loading} />
       <div className="flex gap-2">
         <Button asChild>
-          <Link to={`/projects/${projectId}/expense`}>Add Expenses</Link>
+          <Link to={`/projects/${projectId}/expense`}>
+            <Banknote />
+            Add Expenses
+          </Link>
         </Button>
         {projectId && (
           <ProjectActions projectId={projectId} daysLeft={stat?.days_left} />
         )}
-        <AddUserModal
-          employees={employees}
-          selected={selectedEmployees}
-          onChange={setSelectedEmployees}
-        />
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>
+              <UserPlus /> Add Employee
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Employees</DialogTitle>
+              <DialogDescription>
+                Select employees to add to the project.
+              </DialogDescription>
+            </DialogHeader>
+            <AddUserModal
+              employees={employees}
+              selected={selectedEmployees}
+              onChange={setSelectedEmployees}
+            />
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <Button type="button" onClick={addEmployee}>
+                Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

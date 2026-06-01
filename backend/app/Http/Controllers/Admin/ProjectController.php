@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Project\ProjectStoreRequest;
+use App\Http\Resources\Project\ProjectResource;
 use App\Http\Resources\Timeline\TimelineResource;
 use App\Models\Project;
 use App\Services\ProjectService;
@@ -25,27 +26,21 @@ class ProjectController extends Controller
             ->user()
             ->projects()
             ->active()
-            ->select('id', 'code', 'name')
+            ->select("id", "code", "name")
             ->get();
 
         return response()->json($activeProjects);
     }
 
-    public function storeProject(
-        ProjectStoreRequest $request,
-        ProjectService $projectService,
-    ) {
+    public function storeProject(ProjectStoreRequest $request)
+    {
         $request->validated();
-        $project = $projectService->createProject($request);
-
-        if (! $request->user()->can('create project')) {
-            abort(403, 'You are not authorized to create a project');
-        }
+        $project = $this->projectService->createProject($request);
 
         return response()->json(
             [
-                'message' => 'Project created successfully',
-                'project' => $project,
+                "message" => "Project created successfully",
+                "project" => $project,
             ],
             201,
         );
@@ -53,7 +48,7 @@ class ProjectController extends Controller
 
     public function getStatOfProject(Request $request)
     {
-        $projectId = $request->route('id');
+        $projectId = $request->route("id");
         $stats = $this->projectService->getStatOfProject($projectId);
 
         return response()->json($stats);
@@ -61,7 +56,7 @@ class ProjectController extends Controller
 
     public function getProjectTimeline(Request $request)
     {
-        $projectId = $request->route('id');
+        $projectId = $request->route("id");
         $timeline = $this->projectService->getTimeline($projectId);
 
         return response()->json(TimelineResource::collection($timeline));
@@ -69,31 +64,64 @@ class ProjectController extends Controller
 
     public function extendProjectTimeline(Request $request)
     {
-        $projectId = $request->route('id');
+        $projectId = $request->route("id");
         $data = [
-            'project_id' => $projectId,
-            'start_date' => $request->input('start_date'),
+            "project_id" => $projectId,
+            "start_date" => $request->input("start_date"),
         ];
         $this->timelineService->extendTimeline($data);
 
         return response()->json([
-            'message' => 'Timeline extended successfully',
+            "message" => "Timeline extended successfully",
         ]);
     }
 
     public function endProject(Request $request)
     {
-        if (! $request->user()->can('end project')) {
-            abort(403, 'You are not authorized to end a project');
-        }
+        // if (!$request->user()->can("end project")) {
+        //     abort(403, "You are not authorized to end a project");
+        // }
 
-        $projectId = $request->route('id');
+        $projectId = $request->route("id");
         $project = Project::findOrFail($projectId);
         $project->is_active = false;
         $project->save();
 
         return response()->json([
-            'message' => 'Project ended successfully',
+            "message" => "Project ended successfully",
         ]);
+    }
+
+    public function getUsers(Request $request)
+    {
+        $projectId = $request->route("id");
+        $users = $this->projectService->getUsersNotInProject($projectId);
+
+        return response()->json($users);
+    }
+
+    public function addUsers(Request $request)
+    {
+        $validated = $request->validate([
+            "user_ids" => "required|array",
+            "user_ids.*" => "integer|exists:users,id",
+        ]);
+        // if (!$request->user()->can("add user to project")) {
+        //     abort(403, "You are not authorized to add users to a project");
+        // }
+        $projectId = $request->route("id");
+
+        Project::findOrFail($projectId)
+            ->users()
+            ->syncWithoutDetaching($validated["user_ids"]);
+
+        return response()->json(["message" => "Users added successfully."]);
+    }
+
+    public function getAllProjects()
+    {
+        $projects = Project::active()->withCount("users")->paginate(10);
+
+        return response()->json(ProjectResource::collection($projects));
     }
 }

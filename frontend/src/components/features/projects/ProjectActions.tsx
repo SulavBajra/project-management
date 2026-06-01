@@ -1,4 +1,5 @@
 import axios from "axios"
+import { CheckLine, ClockPlus } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import {
@@ -64,6 +65,7 @@ export default function ProjectActions({
             className="h-8"
             disabled={daysLeft == null || daysLeft >= 2}
           >
+            <ClockPlus />
             Extend Timeline
           </Button>
         </AlertDialogTrigger>
@@ -90,6 +92,7 @@ export default function ProjectActions({
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button variant="outline" className="h-8">
+            <CheckLine />
             Complete Project
           </Button>
         </AlertDialogTrigger>

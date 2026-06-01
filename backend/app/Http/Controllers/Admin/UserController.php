@@ -15,12 +15,17 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::with('roles:name')->latest()->paginate(8);
-        $usersWithoutAnyRoles = User::doesntHave('roles')->count();
+        $users = User::with("roles.permissions")->latest()->paginate(8);
+        $usersWithoutAnyRoles = User::doesntHave("roles")->count();
 
         return UserResource::collection($users)->additional([
-            'usersWithoutAnyRoles' => $usersWithoutAnyRoles,
+            "usersWithoutAnyRoles" => $usersWithoutAnyRoles,
         ]);
+
+        // return response()->json([
+        //     "users" => $users,
+        //     "usersWithoutAnyRoles" => $usersWithoutAnyRoles,
+        // ]);
     }
 
     /**

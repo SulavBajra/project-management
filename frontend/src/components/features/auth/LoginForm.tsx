@@ -1,7 +1,7 @@
 import * as z from "zod"
-import { authService } from "@/services/authService"
 import axios from "axios"
 import { toast } from "sonner"
+import { authService } from "@/services/authService"
 import { useAuth } from "@/hooks/useAuth"
 import { useNavigate, Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
 import { Spinner } from "@/components/ui/spinner"
+import type { User } from "@/types/User"
+import type { LoginResponse } from "@/types/User"
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -30,6 +32,16 @@ const loginSchema = z.object({
 })
 
 type LoginData = z.infer<typeof loginSchema>
+
+function mapAuthUser(response: LoginResponse): User {
+  return {
+    id: response.user.id,
+    name: response.user.name,
+    email: response.user.email,
+    role: response.user.role,
+    permissions: response.user.permissions,
+  }
+}
 
 export default function LoginForm() {
   const navigate = useNavigate()
@@ -48,7 +60,7 @@ export default function LoginForm() {
   const onSubmit = async (data: LoginData) => {
     try {
       const response = await authService.login(data)
-      setUserSession({ ...response.user, role: response.role }, data.remember)
+      setUserSession(mapAuthUser(response), data.remember)
       navigate("/")
       toast.success("Logged in successfully.")
     } catch (err) {

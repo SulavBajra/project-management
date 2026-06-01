@@ -13,6 +13,16 @@ return new class extends Migration
     {
         Schema::create('approvals', function (Blueprint $table) {
             $table->id();
+            $table->morphs('approvable');
+            $table
+                ->foreignId('approval_workflow_id')
+                ->constrained('approval_workflows');
+            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('current_step_id')->constrained('approval_steps');
+            $table->string('state');
+            $table->timestamp('submitted_at');
+            $table->timestamp('completed_at');
+            $table->timestamp('cancelled_at');
             $table->timestamps();
         });
     }

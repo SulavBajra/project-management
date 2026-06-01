@@ -10,7 +10,7 @@ import {
 import Budget from "./pages/Budget.tsx"
 import { useAuth } from "./hooks/useAuth.ts"
 import Dashboard from "./pages/Dashboard.tsx"
-import Project from "./pages/Project/Project.tsx"
+import ProjectLayout from "./pages/Project/ProjectLayout.tsx"
 import User from "./pages/User/User.tsx"
 import Login from "./pages/Login.tsx"
 import Register from "./pages/Register.tsx"
@@ -19,8 +19,10 @@ import Overview from "./pages/Project/Overview.tsx"
 import Roles from "./pages/User/Roles.tsx"
 import ProjectTimeline from "./pages/Project/ProjectTimeline.tsx"
 import Expense from "./pages/Expense.tsx"
-import { Toaster } from "@/components/ui/sonner"
 import Expenses from "./pages/Project/Expenses.tsx"
+import { Toaster } from "@/components/ui/sonner"
+import UsersData from "./pages/User/UserData.tsx"
+import ProjectIndex from "./pages/Project/ProjectIndex.tsx"
 
 function ProtectedRoute() {
   const { user } = useAuth()
@@ -39,13 +41,18 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/projects/:projectId" element={<Project />}>
+              <Route path="/project" element={<ProjectIndex />} />
+
+              <Route path="/projects/:projectId" element={<ProjectLayout />}>
+                <Route index element={<Navigate to="overview" replace />} />
                 <Route path="overview" element={<Overview />} />
                 <Route path="timeline" element={<ProjectTimeline />} />
                 <Route path="expenses" element={<Expenses />} />
                 <Route path="expense" element={<Expense />} />
               </Route>
-              <Route path="/users" element={<User />}>
+
+              <Route path="/user" element={<User />}>
+                <Route path="" element={<UsersData />} />
                 <Route path="roles" element={<Roles />} />
               </Route>
               <Route path="/budget" element={<Budget />} />

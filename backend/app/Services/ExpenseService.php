@@ -33,10 +33,10 @@ class ExpenseService
                 $debit = $items->sum("debit");
                 $credit = $items->sum("credit");
                 $existingTotal =
-                    DB::table("expenses")
-                        ->where("code", $expenseCode)
-                        ->where("project_id", $projectId)
-                        ->value("total") ?? 0;
+                    Expense::where([
+                        "code" => $expenseCode,
+                        "project_id" => $projectId,
+                    ])->value("total") ?? 0;
 
                 $total = bcadd((string) $existingTotal, (string) $debit, 2);
 
@@ -61,19 +61,25 @@ class ExpenseService
                     ],
                 );
 
-                foreach ($items as $item) {
-                    ExpenseTransaction::updateOrCreate(
-                        [
+                $transactions = $items
+                    ->map(
+                        fn($item) => [
                             "expense_id" => $expense->id,
                             "account_head_id" => $item["account_head_id"],
                             "transaction_date" => $item["transaction_date"],
-                        ],
-                        [
                             "debit" => $item["debit"] ?? 0,
                             "credit" => $item["credit"] ?? 0,
+                            "created_at" => now(),
+                            "updated_at" => now(),
                         ],
-                    );
-                }
+                    )
+                    ->toArray();
+
+                ExpenseTransaction::upsert(
+                    $transactions,
+                    ["expense_id", "account_head_id", "transaction_date"],
+                    ["debit", "credit", "updated_at"],
+                );
             }
         });
     }
@@ -95,26 +101,31 @@ class ExpenseService
             $accountHeads = collect($data["transactions"])
                 ->pluck("account_head_name")
                 ->unique()
-                ->mapWithKeys(function (string $name) {
-                    $accountHead = AccountHead::firstOrCreate(
+                ->mapWithKeys(function ($name) {
+                    $model = AccountHead::firstOrCreate(
                         ["name" => $name],
                         ["code" => Str::slug($name)],
                     );
 
-                    return [$name => $accountHead];
+                    return [$name => $model->id];
                 });
 
-            foreach ($data["transactions"] as $item) {
-                ExpenseTransaction::create([
-                    "expense_id" => $expense->id,
-                    "account_head_id" => $accountHeads->get(
-                        $item["account_head_name"],
-                    )->id,
-                    "debit" => $item["debit"],
-                    "credit" => $item["credit"],
-                    "transaction_date" => $item["transaction_date"],
-                ]);
-            }
+            $transactions = collect($data["transactions"])
+                ->map(function ($item) use ($expense, $accountHeads) {
+                    return [
+                        "expense_id" => $expense->id,
+                        "account_head_id" =>
+                            $accountHeads[$item["account_head_name"]],
+                        "debit" => $item["debit"],
+                        "credit" => $item["credit"],
+                        "transaction_date" => $item["transaction_date"],
+                        "created_at" => now(),
+                        "updated_at" => now(),
+                    ];
+                })
+                ->toArray();
+
+            ExpenseTransaction::insert($transactions);
         });
     }
 }

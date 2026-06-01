@@ -23,8 +23,8 @@ class ProjectStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => 'required|string|max:10',
-            'name' => 'required|string|max:100',
+            'code' => 'required|string|max:10|unique:projects,code',
+            'name' => 'required|string|max:100|unique:projects,name',
             'description' => 'nullable|string|max:250',
             'is_active' => 'required|boolean',
             'user_ids' => 'required|array|min:1',

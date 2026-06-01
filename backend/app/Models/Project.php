@@ -28,6 +28,11 @@ class Project extends Model
         return $this->belongsToMany(Timeline::class, 'project_timeline');
     }
 
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
+
     public function allocations(): HasMany
     {
         return $this->hasMany(BudgetHeadAllocation::class);

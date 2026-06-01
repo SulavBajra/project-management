@@ -1,6 +1,7 @@
 import axios from "axios"
 import { Upload } from "lucide-react"
 import { useRef, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
@@ -19,6 +20,7 @@ export default function ImportExpense({ projectId }: { projectId: number }) {
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const navigate = useNavigate()
 
   const handleImport = async () => {
     if (!file) return toast.error("Please select a file.")
@@ -34,6 +36,7 @@ export default function ImportExpense({ projectId }: { projectId: number }) {
       setFile(null)
       if (fileInputRef.current) fileInputRef.current.value = ""
       setOpen(false)
+      navigate(`/projects/${projectId}/expenses`)
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(

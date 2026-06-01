@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('code');
-            $table->decimal('amount', 10, 2);
             $table->timestamps();
         });
     }

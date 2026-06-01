@@ -11,58 +11,64 @@ use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
+Route::get("/user", function (Request $request) {
     return $request->user();
-})->middleware('auth:sanctum');
+})->middleware("auth:sanctum");
 
-Route::post('/register', [AuthController::class, 'register']);
+Route::post("/register", [AuthController::class, "register"]);
 
-Route::get('/dashboard', [DashboardController::class, 'index']);
+Route::get("/dashboard", [DashboardController::class, "index"]);
 
-// Route::post("/expenses/import", [ExpenseTransactionController::class, "import"]);
-Route::get('/expenses/{id}', [
-    ExpenseTransactionController::class,
-    'getExpenses',
-]);
-
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::get('users/{role}', [UserController::class, 'getUsersByRole']);
-    Route::resource('users', UserController::class)->except(['create', 'edit']);
-
-    Route::get('roles', [RolePermissionController::class, 'getRoles']);
-    Route::post('users/{user}/role', [
-        RolePermissionController::class,
-        'assignRole',
-    ]);
+Route::middleware(["auth:sanctum"])->group(function () {
+    Route::get("users/{role}", [UserController::class, "getUsersByRole"]);
+    Route::resource("users", UserController::class)->except(["create", "edit"]);
 
     // Projects
-    Route::controller(ProjectController::class)->group(function () {
-        Route::get('projects', 'listActiveProjects');
-        Route::post('projects', 'storeProject');
-        Route::post('projects/{id}', 'endProject');
-        Route::get('projects/{id}/stat', 'getStatOfProject');
-        Route::get('projects/{id}/timeline', 'getProjectTimeline');
-        Route::post('projects/{id}/timeline', 'extendProjectTimeline');
+    Route::prefix("projects")
+        ->name("projects.")
+        ->controller(ProjectController::class)
+        ->group(function () {
+            Route::get("/", "getAllProjects");
+            Route::get("/list", "listActiveProjects");
+            Route::post("/", "storeProject");
 
-        // Route::patch("");
-    });
+            Route::post("{id}", "endProject");
+
+            Route::get("{id}/stat", "getStatOfProject");
+            Route::get("{id}/timeline", "getProjectTimeline");
+            Route::post("{id}/timeline", "extendProjectTimeline");
+
+            Route::get("{id}/users", "getUsers");
+            Route::patch("{id}/users", "addUsers");
+        });
 
     // Timeline
-    Route::controller(TimelineController::class)->group(function () {
-        Route::get('timelines', 'getAllTimelines');
-        Route::post('timelines', 'createTimeline');
-    });
+    Route::prefix("timelines")
+        ->name("timelines.")
+        ->controller(TimelineController::class)
+        ->group(function () {
+            Route::get("/", "getAllTimelines");
+            Route::post("/", "createTimeline");
+        });
 
     Route::controller(BudgetHeadController::class)->group(function () {
-        Route::get('budget-heads', 'getBudgetHeads');
+        Route::get("budget-heads", "getBudgetHeads");
+        Route::get("budget-heads/stats", "getBudgetHeadStats");
+        Route::post("budget-heads", "createBudgetHead");
+    });
+
+    Route::controller(RolePermissionController::class)->group(function () {
+        Route::get("roles", "getRoles");
+        Route::post("roles", "assignPermissionToRole");
+        Route::post("users/{user}/role", "assignRole");
     });
 
     Route::controller(ExpenseTransactionController::class)->group(function () {
         // using to handle csv file import
-        Route::post('expenses/import', 'import');
+        Route::post("expenses/import", "import")->middleware("throttle:import");
 
         // Manual Addition of expenses
-        Route::post('projects/{project_id}/expenses', 'storeExpenses');
-        // Route::get("expenses", "getExpenses");
+        Route::post("projects/{project_id}/expenses", "storeExpenses");
+        Route::get("expenses/{project_id}", "getExpenses");
     });
 });
