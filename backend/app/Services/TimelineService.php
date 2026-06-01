@@ -11,9 +11,9 @@ class TimelineService
 {
     public function createTimeline(array $data)
     {
-        $startDate = Carbon::parse($data["start_date"]);
+        $startDate = Carbon::parse($data['start_date']);
         $endDate = $startDate->copy()->addYear();
-        $data["end_date"] = $endDate->toDateString();
+        $data['end_date'] = $endDate->toDateString();
 
         $existingTimeline = $this->checkIfTimelineExists($startDate, $endDate);
         if ($existingTimeline) {
@@ -31,7 +31,7 @@ class TimelineService
                 $timeline->periods()->create($period);
             }
 
-            return $timeline->load("periods");
+            return $timeline->load('periods');
         });
     }
 
@@ -46,24 +46,24 @@ class TimelineService
         $quarter4_end = $endDate;
         $periods = [
             [
-                "name" => "Q1",
-                "start_date" => $startDate,
-                "end_date" => $quarter1_end,
+                'name' => 'Q1',
+                'start_date' => $startDate,
+                'end_date' => $quarter1_end,
             ],
             [
-                "name" => "Q2",
-                "start_date" => $quarter1_end,
-                "end_date" => $quarter2_end,
+                'name' => 'Q2',
+                'start_date' => $quarter1_end,
+                'end_date' => $quarter2_end,
             ],
             [
-                "name" => "Q3",
-                "start_date" => $quarter2_end,
-                "end_date" => $quarter3_end,
+                'name' => 'Q3',
+                'start_date' => $quarter2_end,
+                'end_date' => $quarter3_end,
             ],
             [
-                "name" => "Q4",
-                "start_date" => $quarter3_end,
-                "end_date" => $quarter4_end,
+                'name' => 'Q4',
+                'start_date' => $quarter3_end,
+                'end_date' => $quarter4_end,
             ],
         ];
 
@@ -72,14 +72,14 @@ class TimelineService
 
     public function checkIfTimelineExists(Carbon $startDate, Carbon $endDate)
     {
-        return Timeline::where("start_date", $startDate)
-            ->where("end_date", $endDate)
+        return Timeline::where('start_date', $startDate)
+            ->where('end_date', $endDate)
             ->first();
     }
 
     public function extendTimeline(array $data): void
     {
-        $project = Project::findOrFail($data["project_id"]);
+        $project = Project::findOrFail($data['project_id']);
 
         $timeline = $this->createTimeline($data);
         $project->timelines()->attach($timeline);

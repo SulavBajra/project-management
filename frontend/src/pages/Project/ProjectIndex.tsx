@@ -1,7 +1,11 @@
 import axios from "axios"
+import { PlusIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { Badge } from "@/components/ui/badge"
+import CreateProjectForm from "@/components/features/projects/CreateProjectForm"
+import ProjectTable from "@/components/features/projects/ProjectTable"
+import { PaginationSimple } from "@/components/layouts/simple-paginaton"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -9,25 +13,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { Spinner } from "@/components/ui/spinner"
+import { useAuth } from "@/hooks/useAuth"
 import api from "@/lib/axios"
+import type { Meta } from "@/types/Meta"
 import type { ProjectResponse } from "@/types/Project"
 
 export default function ProjectIndex() {
   const [projects, setProjects] = useState<ProjectResponse[]>([])
+  const [loading, setLoading] = useState(true)
+  const [open, setOpen] = useState(false)
+  const [meta, setMeta] = useState<Meta>()
+  const [currentPage, setCurrentPage] = useState(1)
+  const { user } = useAuth()
 
   useEffect(() => {
     async function fetchProjects() {
       try {
-        const response = await api.get("/api/projects")
-        setProjects(response.data)
+        const response = await api.get(`/api/projects/?page=${currentPage}`)
+        setLoading(false)
+        setProjects(response.data.data)
+        setMeta(response.data.meta)
       } catch (error) {
         if (axios.isAxiosError(error)) {
           toast.error(error.response?.data?.message || error.message)
@@ -35,48 +42,38 @@ export default function ProjectIndex() {
       }
     }
     fetchProjects()
-  }, [])
+  }, [currentPage])
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Projects</CardTitle>
-        <CardDescription>
-          Check info about all the active projects
-        </CardDescription>
+      <CardHeader className="flex items-center justify-between">
+        <div>
+          <CardTitle>Projects</CardTitle>
+          <CardDescription>
+            Check info about all the active projects
+          </CardDescription>
+        </div>
+        <div>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusIcon /> Create Project
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <CreateProjectForm onSubmit={() => setOpen(false)} />
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>S.N</TableHead>
-              <TableHead>Code</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Created By</TableHead>
-              <TableHead>Users</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {projects.map((project, index) => (
-              <TableRow key={project.id}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{project.code}</TableCell>
-                <TableCell>{project.name}</TableCell>
-                <TableCell>
-                  <Badge>{project.is_active ? "Active" : "Inactive"}</Badge>
-                </TableCell>
-                <TableCell>{project.description}</TableCell>
-                <TableCell>{project.created_by}</TableCell>
-                <TableCell>{project.users_count}</TableCell>
-                <TableCell>{project.created_at}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        {loading && <Spinner className="size-10" />}
+        <ProjectTable projects={projects} user={user} />
+        <PaginationSimple
+          currentPage={meta?.current_page ?? 1}
+          totalPages={meta?.last_page ?? 1}
+          onPageChange={setCurrentPage}
+        />
       </CardContent>
     </Card>
   )

@@ -14,7 +14,10 @@ use Maatwebsite\Excel\Validators\ValidationException;
 
 class ExpenseTransactionController extends Controller
 {
-    public function __construct(protected ExpenseService $expenseService) {}
+    public function __construct(protected ExpenseService $expenseService)
+    {
+        //
+    }
 
     public function import(ExpenseExtractRequest $request)
     {

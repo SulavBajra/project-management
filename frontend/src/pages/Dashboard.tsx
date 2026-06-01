@@ -31,7 +31,6 @@ export default function Dashboard() {
       </CardHeader>
       <CardContent>
         <DashboardHeader data={dashboardData} />
-        <CreateProjectForm />
       </CardContent>
     </Card>
   )

@@ -19,19 +19,19 @@ class DatabaseSeeder extends Seeder
 
         $this->call(RolePermissionSeeder::class);
         $user = User::factory()->create([
-            "name" => "Test User",
-            "email" => "test@example.com",
+            'name' => 'Test User',
+            'email' => 'test@example.com',
         ]);
         $employee = User::factory()->create([
-            "name" => "Employees User",
-            "email" => "emp@example.com",
+            'name' => 'Employees User',
+            'email' => 'emp@example.com',
         ]);
         $admin = User::factory()->create([
-            "name" => "Admin User",
-            "email" => "admin@example.com",
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
         ]);
-        $user->assignRole("project_manager");
-        $employee->assignRole("employee");
-        $admin->assignRole("admin");
+        $user->assignRole('project_manager');
+        $employee->assignRole('employee');
+        $admin->assignRole('admin');
     }
 }

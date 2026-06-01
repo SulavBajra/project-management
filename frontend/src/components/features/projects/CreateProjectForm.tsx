@@ -18,7 +18,11 @@ import type { Employee } from "@/types/User"
 import TimelinePopOver from "../timelines/TimelinePopOver"
 import AddUserModal from "../users/AddUserModal"
 
-export default function CreateProjectForm() {
+export default function CreateProjectForm({
+  onSubmit,
+}: {
+  onSubmit?: () => void
+}) {
   const [name, setName] = useState("")
   const [code, setCode] = useState("")
   const [description, setDescription] = useState("")
@@ -60,6 +64,12 @@ export default function CreateProjectForm() {
         user_ids: selectedEmployees.map((e) => e.id),
       })
       toast.success(response.data.message)
+      setName("")
+      setCode("")
+      setDescription("")
+      setTimeline(undefined)
+      setSelectedEmployees([])
+      onSubmit?.()
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message ?? "Failed to create project")
