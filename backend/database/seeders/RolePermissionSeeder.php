@@ -9,32 +9,34 @@ use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionSeeder extends Seeder
 {
-    private array $baseActions = ['create', 'read', 'update', 'delete'];
+    private array $baseActions = ["create", "read", "update", "delete"];
 
-    private array $workflowActions = ['approve', 'check', 'reject'];
+    private array $workflowActions = ["approve", "check", "reject"];
 
     private array $modules = [
-        'project' => ['end', 'add_user'],
-        'budget' => [],
-        'expense' => [],
-        'timeline' => [],
+        "project" => ["end", "add_user"],
+        "budget" => [],
+        "expense" => [],
+        "timeline" => [],
+        "approval_workflow" => [],
+        "status" => [],
     ];
 
     private array $roles = [
-        'admin' => '*',
+        "admin" => "*",
 
-        'project_manager' => [
-            'create_project',
-            'read_project',
-            'update_project',
-            'end_project',
-            'add_user_project',
-            'approve_project',
-            'read_budget',
-            'read_expense',
-            'read_timeline',
-            'approve_expense',
-            'approve_budget',
+        "project_manager" => [
+            "create_project",
+            "read_project",
+            "update_project",
+            "end_project",
+            "add_user_project",
+            "approve_project",
+            "read_budget",
+            "read_expense",
+            "read_timeline",
+            "approve_expense",
+            "approve_budget",
         ],
 
         // "finance_officer" => [
@@ -53,15 +55,15 @@ class RolePermissionSeeder extends Seeder
         //     "reject_expense",
         // ],
 
-        'employee' => [
-            'read_project',
-            'read_budget',
-            'create_expense',
-            'read_expense',
-            'read_timeline',
+        "employee" => [
+            "read_project",
+            "read_budget",
+            "create_expense",
+            "read_expense",
+            "read_timeline",
         ],
 
-        'viewer' => [],
+        "viewer" => [],
     ];
 
     public function run(): void
@@ -80,37 +82,37 @@ class RolePermissionSeeder extends Seeder
 
         foreach ($permissionNames as $name) {
             Permission::firstOrCreate([
-                'name' => $name,
-                'guard_name' => 'web',
+                "name" => $name,
+                "guard_name" => "web",
             ]);
         }
 
-        $this->roles['viewer'] = array_values(
+        $this->roles["viewer"] = array_values(
             array_filter(
                 $permissionNames,
-                fn ($p) => str_starts_with($p, 'read_'),
+                fn($p) => str_starts_with($p, "read_"),
             ),
         );
 
         foreach ($this->roles as $roleName => $permissions) {
             $role = Role::firstOrCreate([
-                'name' => $roleName,
-                'guard_name' => 'web',
+                "name" => $roleName,
+                "guard_name" => "web",
             ]);
 
-            if ($permissions === '*') {
+            if ($permissions === "*") {
                 $role->syncPermissions(
-                    Permission::where('guard_name', 'web')->pluck('name'),
+                    Permission::where("guard_name", "web")->pluck("name"),
                 );
 
                 continue;
             }
 
             $invalid = array_diff($permissions, $permissionNames);
-            if (! empty($invalid)) {
+            if (!empty($invalid)) {
                 $this->command->warn(
-                    "Role [{$roleName}] references unknown permissions: ".
-                        implode(', ', $invalid),
+                    "Role [{$roleName}] references unknown permissions: " .
+                        implode(", ", $invalid),
                 );
             }
 
@@ -121,7 +123,7 @@ class RolePermissionSeeder extends Seeder
 
         $this->command->info(
             sprintf(
-                'Seeded %d permissions across %d modules and %d roles.',
+                "Seeded %d permissions across %d modules and %d roles.",
                 count($permissionNames),
                 count($this->modules),
                 count($this->roles),

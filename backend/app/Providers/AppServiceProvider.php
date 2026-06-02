@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Expense;
+use App\Models\Project;
 use App\Models\User;
+use App\Services\BudgetAllocationService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
@@ -19,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         if (
-            $this->app->environment('local') &&
+            $this->app->environment("local") &&
             class_exists(TelescopeServiceProvider::class)
         ) {
             $this->app->register(TelescopeServiceProvider::class);
@@ -31,21 +34,25 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if ($this->app->environment('production')) {
-            URL::forceScheme('https');
+        if ($this->app->environment("production")) {
+            URL::forceScheme("https");
         }
 
         Relation::morphMap([
-            'user' => User::class,
+            "user" => User::class,
+            "expense" => Expense::class,
+            "project" => Project::class,
+            "budget" => BudgetAllocationService::class,
         ]);
 
-        RateLimiter::for('login', function (Request $request) {
+        RateLimiter::for("login", function (Request $request) {
             return Limit::perMinute(5)
                 ->by($request->ip())
                 ->response(function (Request $request, array $headers) {
                     return response()->json(
                         [
-                            'message' => 'Too many login attempts. Please try again later.',
+                            "message" =>
+                                "Too many login attempts. Please try again later.",
                         ],
                         429,
                         $headers,
@@ -53,13 +60,14 @@ class AppServiceProvider extends ServiceProvider
                 });
         });
 
-        RateLimiter::for('import', function (Request $request) {
+        RateLimiter::for("import", function (Request $request) {
             return Limit::perMinute(5)
                 ->by($request->ip())
                 ->response(function (Request $request, array $headers) {
                     return response()->json(
                         [
-                            'message' => 'Too many import attempts. Please try again later.',
+                            "message" =>
+                                "Too many import attempts. Please try again later.",
                         ],
                         429,
                         $headers,

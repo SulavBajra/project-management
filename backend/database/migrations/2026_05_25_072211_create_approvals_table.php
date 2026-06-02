@@ -15,14 +15,13 @@ return new class extends Migration
             $table->id();
             $table->morphs('approvable');
             $table
-                ->foreignId('approval_workflow_id')
-                ->constrained('approval_workflows');
-            $table->foreignId('user_id')->constrained('users');
+                ->foreignId('approval_workflow_version_id')
+                ->constrained('approval_workflow_versions');
+            $table->foreignId('created_by')->constrained('users');
             $table->foreignId('current_step_id')->constrained('approval_steps');
-            $table->string('state');
-            $table->timestamp('submitted_at');
-            $table->timestamp('completed_at');
-            $table->timestamp('cancelled_at');
+            $table
+                ->foreignId('current_status_id')
+                ->constrained('approval_statuses');
             $table->timestamps();
         });
     }

@@ -13,14 +13,15 @@ return new class extends Migration
     {
         Schema::create('approval_histories', function (Blueprint $table) {
             $table->id();
-            $table
-                ->foreignId('approval_workflow_id')
-                ->constrained('approval_workflows')
-                ->cascadeOnDelete();
+            $table->foreignId('approval_id')->constrained('approvals');
             $table
                 ->foreignId('approval_step_id')
-                ->nullable()
+                ->nullOnDelete()
                 ->constrained('approval_steps');
+            $table
+                ->foreignId('approval_workflow_version_id')
+                ->nullOnDelete()
+                ->constrained('approval_workflow_versions');
             $table->foreignId('acted_by')->constrained('users');
             $table->string('from_state');
             $table->string('to_state');

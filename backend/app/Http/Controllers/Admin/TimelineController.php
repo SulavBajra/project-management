@@ -11,24 +11,29 @@ use Illuminate\Http\Request;
 
 class TimelineController extends Controller
 {
+    public function __construct(private TimelineService $timelineService)
+    {
+        //
+    }
+
     public function getAllTimelines()
     {
-        $timelines = Timeline::with('periods')
-            ->where('end_date', '>', now())
+        $timelines = Timeline::with("periods")
+            ->where("end_date", ">", now())
             ->paginate(10);
 
         return response()->json(TimelineResource::collection($timelines));
     }
 
-    public function createTimeline(
-        TimelineStoreRequest $request,
-        TimelineService $timelineService,
-    ) {
-        $timeline = $timelineService->createTimeline($request->validated());
+    public function createTimeline(TimelineStoreRequest $request)
+    {
+        $timeline = $this->$timelineService->createTimeline(
+            $request->validated(),
+        );
 
         return response()->json([
-            'message' => 'Timeline created successfully',
-            'timeline' => $timeline,
+            "message" => "Timeline created successfully",
+            "timeline" => $timeline,
         ]);
     }
 

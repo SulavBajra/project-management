@@ -8,14 +8,17 @@ use App\Http\Requests\Expense\ExpenseExtractRequest;
 use App\Http\Requests\Expense\ExpenseStoreRequest;
 use App\Http\Resources\Expenses\ExpenseTransactionsResource;
 use App\Models\ExpenseTransaction;
+use App\Services\ApprovalService;
 use App\Services\ExpenseService;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Validators\ValidationException;
 
 class ExpenseTransactionController extends Controller
 {
-    public function __construct(protected ExpenseService $expenseService)
-    {
+    public function __construct(
+        private ExpenseService $expenseService,
+        private ApprovalService $approvalService,
+    ) {
         //
     }
 
@@ -65,11 +68,12 @@ class ExpenseTransactionController extends Controller
         $validated = $request->validated();
         $projectId = $request->route("project_id");
 
-        $this->expenseService->addExpenses(
+        $expense = $this->expenseService->addExpenses(
             $validated,
             (int) $projectId,
             $request->user()->id,
         );
+        $this->approvalService->beginApproval($expense, $request->user());
 
         return response()->json(
             ["message" => "Expense stored successfully."],

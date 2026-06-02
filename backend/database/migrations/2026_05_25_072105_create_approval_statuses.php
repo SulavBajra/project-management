@@ -10,10 +10,12 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create("approval_workflows", function (Blueprint $table) {
+        Schema::create("approval_statuses", function (Blueprint $table) {
             $table->id();
-            $table->string("approvable_type")->unique();
-            $table->boolean("is_active")->default(true);
+            $table
+                ->foreignId("approval_workflow_version_id")
+                ->constrained("approval_workflow_versions")
+                ->cascadeOnDelete();
             $table->string("name");
             $table->timestamps();
         });
@@ -24,6 +26,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists("approval_workflows");
+        Schema::dropIfExists("approval_statuses");
     }
 };
