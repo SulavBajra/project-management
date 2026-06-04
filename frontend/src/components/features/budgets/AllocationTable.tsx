@@ -10,16 +10,26 @@ import {
 import { monthRange } from "@/lib/utils"
 import type { BudgetPlanItem } from "@/types/Budget/Item"
 import AllocateDialog from "./AllocateDialog"
+import AllocationRemove from "./AllocationRemove"
 
 export function AllocationTable({
   plans,
   onUpdate,
+  onRemove,
 }: {
-  plans: BudgetPlanItem[]
+  plans: BudgetPlanItem[] | null
   onUpdate: (itemId: number, amounts: Record<number, string>) => void
+  onRemove: (itemId: number) => void
 }) {
-  const periods = useMemo(() => plans[0]?.allocations ?? [], [plans])
+  const periods = useMemo(() => plans?.[0]?.allocations ?? [], [plans])
 
+  if (!plans || plans.length === 0) {
+    return (
+      <div className="rounded-md border p-6 text-center text-sm text-muted-foreground">
+        No budget plan items found.
+      </div>
+    )
+  }
   return (
     <div className="overflow-x-auto rounded-md border">
       <Table>
@@ -66,6 +76,7 @@ export function AllocationTable({
                   item={item}
                   onSubmit={onUpdate}
                 />
+                <AllocationRemove itemId={item.id} onRemove={onRemove} />
               </TableCell>
             </TableRow>
           ))}

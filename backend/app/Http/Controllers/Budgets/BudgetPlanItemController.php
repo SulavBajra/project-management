@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Budgets;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Budget\BudgetAllocationResource;
 use App\Http\Resources\Budget\BudgetItemResource;
 use App\Models\Project;
 use App\Repositories\BudgetPlanItemRepository;
@@ -21,6 +20,11 @@ class BudgetPlanItemController extends Controller
     public function show(Project $project)
     {
         $planId = $this->planRepository->getId($project->id);
+
+        if (!$planId) {
+            return response()->json(["data" => []]);
+        }
+
         $items = $this->planItemRepository->findAllocationsByBudgetPlanId(
             $planId,
         );

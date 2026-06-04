@@ -66,4 +66,12 @@ class BudgetPlanController extends Controller
             "message" => "Allocations updated successfully",
         ]);
     }
+
+    public function destroy(BudgetPlanItem $item)
+    {
+        $this->budgetAllocationService->removeAllocations($item);
+        return response()->json([
+            "message" => "Item removed successfully",
+        ]);
+    }
 }

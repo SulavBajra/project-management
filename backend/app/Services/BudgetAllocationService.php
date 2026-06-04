@@ -65,4 +65,9 @@ class BudgetAllocationService
                 ]);
         }
     }
+
+    public function removeAllocations(BudgetPlanItem $item): void
+    {
+        $item->allocations()->update(["allocated_amount" => null]);
+    }
 }

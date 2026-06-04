@@ -96,6 +96,7 @@ Route::controller(BudgetPlanController::class)->group(function () {
     Route::get("projects/{project}/budget-plan", "show");
     Route::post("projects/{project}/budget-plan", "store");
     Route::patch("projects/budget-plan/items/{item}/allocations", "update");
+    Route::delete("projects/budget-plan/items/{item}", "destroy");
 });
 
 Route::controller(BudgetPlanItemController::class)->group(function () {

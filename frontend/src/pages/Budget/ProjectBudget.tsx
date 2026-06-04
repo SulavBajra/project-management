@@ -12,7 +12,7 @@ import type { BudgetPlanItem } from "@/types/Budget/Item"
 export default function ProjectBudget() {
   const [budgetHeads, setBudgetHeads] = useState<BudgetHead[]>([])
   const { projectId } = useParams<{ projectId: string }>()
-  const [plans, setPlans] = useState<BudgetPlanItem[]>([])
+  const [plans, setPlans] = useState<BudgetPlanItem[] | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -63,6 +63,18 @@ export default function ProjectBudget() {
         toast.error(error.response?.data?.message ?? error.message)
     }
   }
+
+  const handleRemove = async (itemId: number) => {
+    try {
+      await api.delete(`api/projects/budget-plan/items/${itemId}`)
+      fetchItems()
+      toast.success("Allocation removed")
+    } catch (error) {
+      if (axios.isAxiosError(error))
+        toast.error(error.response?.data?.message ?? error.message)
+    }
+  }
+
   if (!projectId) return null
   if (loading) return <Spinner className="size-20" />
   return (
@@ -73,7 +85,11 @@ export default function ProjectBudget() {
         <BudgetPlan budgetHeads={budgetHeads} projectId={projectId} />
       </div>
 
-      <AllocationTable plans={plans} onUpdate={handleUpdate} />
+      <AllocationTable
+        plans={plans}
+        onUpdate={handleUpdate}
+        onRemove={handleRemove}
+      />
     </div>
   )
 }
