@@ -4,17 +4,18 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create("approval_workflows", function (Blueprint $table) {
+        Schema::create('approval_workflows', function (Blueprint $table) {
             $table->id();
-            $table->string("approvable_type")->unique();
-            $table->boolean("is_active")->default(true);
-            $table->string("name");
+            $table->string('approvable_type')->unique();
+            $table->boolean('is_active')->default(true);
+            $table->string('name');
             $table->timestamps();
         });
     }
@@ -24,6 +25,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists("approval_workflows");
+        Schema::dropIfExists('approval_workflows');
     }
 };

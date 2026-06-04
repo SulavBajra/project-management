@@ -12,12 +12,12 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 #[
     Fillable([
-        "user_id",
-        "project_id",
-        "code",
-        "description",
-        "total",
-        "transaction_date",
+        'user_id',
+        'project_id',
+        'code',
+        'description',
+        'total',
+        'transaction_date',
     ]),
 ]
 class Expense extends Model
@@ -27,8 +27,8 @@ class Expense extends Model
     protected function casts(): array
     {
         return [
-            "total" => "decimal:2",
-            "transaction_date" => "date",
+            'total' => 'decimal:2',
+            'transaction_date' => 'date',
         ];
     }
 
@@ -49,6 +49,6 @@ class Expense extends Model
 
     public function approval(): MorphOne
     {
-        return $this->morphOne(Approval::class, "approvable");
+        return $this->morphOne(Approval::class, 'approvable');
     }
 }

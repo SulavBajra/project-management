@@ -7,7 +7,7 @@ use RuntimeException;
 class FlowAlreadyExistsException extends RuntimeException
 {
     public function __construct(
-        string $message = "Workflow for this already exists.",
+        string $message = 'Workflow for this already exists.',
         int $code = 409,
         ?\Throwable $previous = null,
     ) {

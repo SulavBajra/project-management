@@ -1,4 +1,11 @@
-import { Calendar, ChevronRight, FileText, Folder, Kanban } from "lucide-react"
+import {
+  Calendar,
+  ChevronRight,
+  FileText,
+  Folder,
+  Kanban,
+  Wallet,
+} from "lucide-react"
 import { useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 import {
@@ -21,6 +28,7 @@ const PROJECT_SUB_ITEMS = [
   { title: "Overview", icon: Kanban, path: "overview" },
   { title: "Timeline", icon: Calendar, path: "timeline" },
   { title: "Expenses", icon: FileText, path: "expenses" },
+  { title: "Budget", icon: Wallet, path: "budget" },
 ]
 
 export function ProjectSidebar({

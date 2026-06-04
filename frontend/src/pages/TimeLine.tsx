@@ -1,8 +1,7 @@
 import axios from "axios"
 import { format } from "date-fns"
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import TimelinePopOver from "@/components/features/timelines/TimelinePopOver"
 import TimelineTable from "@/components/features/timelines/TimelineTable"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -26,20 +25,6 @@ export default function TimeLine() {
 
     fetchTimelines()
   }, [])
-
-  async function createTimeline(date: Date) {
-    try {
-      const response = await api.post("/api/timelines", {
-        start_date: format(date, "yyyy-MM-dd"),
-      })
-      toast.success(response.data.message)
-      await fetchTimelines()
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data.message)
-      }
-    }
-  }
 
   return (
     <Card>

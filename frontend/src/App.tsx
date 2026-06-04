@@ -7,7 +7,7 @@ import {
   Route,
   Routes,
 } from "react-router-dom"
-import Budget from "./pages/Budget.tsx"
+import Budget from "./pages/Budget/Budget.tsx"
 import { useAuth } from "./hooks/useAuth.ts"
 import Dashboard from "./pages/Dashboard.tsx"
 import ProjectLayout from "./pages/Project/ProjectLayout.tsx"
@@ -23,6 +23,8 @@ import Expenses from "./pages/Project/Expenses.tsx"
 import { Toaster } from "@/components/ui/sonner"
 import UsersData from "./pages/User/UserData.tsx"
 import ProjectIndex from "./pages/Project/ProjectIndex.tsx"
+import Approval from "./pages/Approval.tsx"
+import ProjectBudget from "./pages/Budget/ProjectBudget.tsx"
 
 function ProtectedRoute() {
   const { user } = useAuth()
@@ -49,6 +51,7 @@ export default function App() {
                 <Route path="timeline" element={<ProjectTimeline />} />
                 <Route path="expenses" element={<Expenses />} />
                 <Route path="expense" element={<Expense />} />
+                <Route path="budget" element={<ProjectBudget />} />
               </Route>
 
               <Route path="/user" element={<User />}>
@@ -57,6 +60,7 @@ export default function App() {
               </Route>
               <Route path="/budget" element={<Budget />} />
               <Route path="/timeline" element={<TimeLine />} />
+              <Route path="/approval" element={<Approval />} />
             </Route>
           </Route>
         </Routes>

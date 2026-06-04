@@ -1,3 +1,6 @@
+import { Bell, CircleCheckBig, Moon, Sun } from "lucide-react"
+import { useTheme } from "@/components/theme-provider"
+import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -6,9 +9,6 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu"
-import { Button } from "@/components/ui/button"
-import { useTheme } from "@/components/theme-provider"
-import { Bell, CircleCheckBig, Moon, Sun } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useAuth } from "@/hooks/useAuth"
 

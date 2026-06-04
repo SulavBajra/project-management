@@ -7,9 +7,12 @@ use App\Http\Requests\Project\ProjectStoreRequest;
 use App\Http\Resources\Project\ProjectResource;
 use App\Http\Resources\Timeline\TimelineResource;
 use App\Models\Project;
+use App\Models\Timeline;
+use App\Models\TimelinePeriod;
 use App\Services\ProjectService;
 use App\Services\TimelineService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller
 {
@@ -124,4 +127,12 @@ class ProjectController extends Controller
 
         return ProjectResource::collection($projects);
     }
+
+    // public function getProjectTimelinePeriod(Request $request)
+    // {
+    //     $projectId = $request->route("id");
+    //     $period = Timeline::where("project_id", $projectId)->get();
+
+    //     return response()->json($timeline);
+    // }
 }

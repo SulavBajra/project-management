@@ -12,7 +12,7 @@ class ApprovalService
     {
         DB::transaction(function () use ($model, $user) {
             $model->approvals()->create([
-                "user_id" => $user->id,
+                'user_id' => $user->id,
             ]);
         });
     }

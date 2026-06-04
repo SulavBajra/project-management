@@ -1,0 +1,76 @@
+import { useMemo } from "react"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { monthRange } from "@/lib/utils"
+import type { BudgetPlanItem } from "@/types/Budget/Item"
+import AllocateDialog from "./AllocateDialog"
+
+export function AllocationTable({
+  plans,
+  onUpdate,
+}: {
+  plans: BudgetPlanItem[]
+  onUpdate: (itemId: number, amounts: Record<number, string>) => void
+}) {
+  const periods = useMemo(() => plans[0]?.allocations ?? [], [plans])
+
+  return (
+    <div className="overflow-x-auto rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="min-w-40">Budget Head</TableHead>
+            {periods.map((p) => (
+              <TableHead key={p.period_id} className="min-w-32 text-center">
+                <div className="font-medium">{p.period_name}</div>
+                <div className="text-xs font-normal text-muted-foreground">
+                  {monthRange(p.period_start, p.period_end)}
+                </div>
+              </TableHead>
+            ))}
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {plans.map((item) => (
+            <TableRow key={item.id}>
+              <TableCell>
+                <div className="font-medium">{item.budget_head_name}</div>
+                <div className="text-xs text-muted-foreground">
+                  {item.budget_head_code}
+                </div>
+              </TableCell>
+              {item.allocations.map((alloc) => (
+                <TableCell key={alloc.period_id} className="text-center">
+                  {alloc.allocated_amount ? (
+                    parseFloat(alloc.allocated_amount).toLocaleString(
+                      undefined,
+                      {
+                        minimumFractionDigits: 2,
+                      }
+                    )
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+              ))}
+              <TableCell>
+                <AllocateDialog
+                  periods={item.allocations}
+                  item={item}
+                  onSubmit={onUpdate}
+                />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}

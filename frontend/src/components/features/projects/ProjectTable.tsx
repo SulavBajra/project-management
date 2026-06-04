@@ -17,7 +17,7 @@ export default function ProjectTable({
   user,
 }: {
   projects: ProjectResponse[]
-  user: User
+  user: User | null
 }) {
   return (
     <Table>
@@ -35,6 +35,13 @@ export default function ProjectTable({
         </TableRow>
       </TableHeader>
       <TableBody>
+        {projects.length === 0 && (
+          <TableRow>
+            <TableCell colSpan={9} className="text-center">
+              <p>No projects available.</p>
+            </TableCell>
+          </TableRow>
+        )}
         {projects.map((project, index) => (
           <TableRow key={project.id}>
             <TableCell>{index + 1}</TableCell>
@@ -51,7 +58,7 @@ export default function ProjectTable({
               <Button variant="ghost">
                 <EyeIcon className="h-4 w-4" />
               </Button>
-              {user.permissions.includes("delete_project") && (
+              {user?.permissions?.includes("delete_project") && (
                 <Button variant="destructive">
                   <TrashIcon className="h-4 w-4" />
                 </Button>

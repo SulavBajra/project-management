@@ -16,7 +16,7 @@ class RolePermissionSeeder extends Seeder
     private array $modules = [
         "project" => ["end", "add_user"],
         "budget" => [],
-        "expense" => [],
+        "expense" => ["import"],
         "timeline" => [],
         "approval_workflow" => [],
         "status" => [],
@@ -36,6 +36,7 @@ class RolePermissionSeeder extends Seeder
             "read_expense",
             "read_timeline",
             "approve_expense",
+            "import_expense",
             "approve_budget",
         ],
 
@@ -60,6 +61,7 @@ class RolePermissionSeeder extends Seeder
             "read_budget",
             "create_expense",
             "read_expense",
+            "import_expense",
             "read_timeline",
         ],
 

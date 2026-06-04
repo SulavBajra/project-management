@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Expense\ExpenseExtractRequest;
 use App\Http\Requests\Expense\ExpenseStoreRequest;
 use App\Http\Resources\Expenses\ExpenseTransactionsResource;
+use App\Jobs\ProcessExcelImport;
+use App\Models\ExpenseImport;
 use App\Models\ExpenseTransaction;
 use App\Services\ApprovalService;
 use App\Services\ExpenseService;
@@ -25,42 +27,35 @@ class ExpenseTransactionController extends Controller
     public function import(ExpenseExtractRequest $request)
     {
         $validated = $request->validated();
-        try {
-            $this->expenseService->extractExpenses(
-                $validated["file"],
-                $request->user()->id,
-                $validated["project_id"],
-            );
+        $path = $validated["file"]->store("imports/expneses", "local");
+        $import = ExpenseImport::create([
+            "user_id" => $request->user()->id,
+            "project_id" => $validated["project_id"],
+            "status" => "pending",
+        ]);
 
-            return response()->json(
-                ["message" => "Expenses imported successfully."],
-                201,
-            );
-        } catch (ValidationException $e) {
-            return response()->json(
-                [
-                    "message" => "Import failed.",
-                    "errors" => $e->failures(),
-                ],
-                422,
-            );
-        } catch (ExpenseNotBalanceException $e) {
-            return response()->json(
-                [
-                    "message" => $e->getMessage(),
-                ],
-                422,
-            );
-        } catch (\Exception $e) {
-            return response()->json(
-                [
-                    "message" => $e->getMessage(),
-                    "file" => $e->getFile(),
-                    "line" => $e->getLine(),
-                ],
-                500,
-            );
-        }
+        ProcessExcelImport::dispatch(
+            $path,
+            $request->user()->id,
+            $validated["project_id"],
+            $import->id,
+        );
+
+        return response()->json(
+            [
+                "message" => "Import started. Check back for results.",
+                "import_id" => $import->id,
+            ],
+            202,
+        );
+    }
+
+    public function importStatus(ExpenseImport $import)
+    {
+        return response()->json([
+            "status" => $import->status,
+            "errors" => $import->errors,
+        ]);
     }
 
     public function storeExpenses(ExpenseStoreRequest $request)
@@ -73,7 +68,7 @@ class ExpenseTransactionController extends Controller
             (int) $projectId,
             $request->user()->id,
         );
-        $this->approvalService->beginApproval($expense, $request->user());
+        // $this->approvalService->beginApproval($expense, $request->user());
 
         return response()->json(
             ["message" => "Expense stored successfully."],

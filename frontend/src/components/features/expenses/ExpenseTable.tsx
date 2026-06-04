@@ -52,6 +52,13 @@ export default function ExpenseTable({ expenses }: { expenses: Expense[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
+        {sorted.length === 0 && (
+          <TableRow>
+            <TableCell colSpan={6} className="text-center">
+              <p>No expenses available.</p>
+            </TableCell>
+          </TableRow>
+        )}
         {sorted.map((expense, index) => (
           <TableRow key={expense.transaction_id}>
             <TableCell>{index + 1}</TableCell>

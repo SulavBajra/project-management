@@ -10,12 +10,12 @@ use Spatie\Permission\Models\Role;
 
 #[
     Fillable([
-        "approval_workflow_version_id",
-        "role_id",
-        "approval_status_id",
-        "order_no",
-        "name",
-        "is_final",
+        'approval_workflow_version_id',
+        'role_id',
+        'approval_status_id',
+        'order_no',
+        'name',
+        'is_final',
     ]),
 ]
 class ApprovalStep extends Model
@@ -23,7 +23,7 @@ class ApprovalStep extends Model
     protected function casts(): array
     {
         return [
-            "is_final" => "boolean",
+            'is_final' => 'boolean',
         ];
     }
 
@@ -39,6 +39,6 @@ class ApprovalStep extends Model
 
     public function scopeIsFinal(Builder $query): Builder
     {
-        return $query->where("is_final", true);
+        return $query->where('is_final', true);
     }
 }

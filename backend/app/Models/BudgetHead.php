@@ -5,19 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
-#[Fillable(['name', 'code', 'amount'])]
+#[Fillable(["name", "code"])]
 class BudgetHead extends Model
 {
-    protected function casts(): array
+    public function items(): HasMany
     {
-        return [
-            'amount' => 'decimal:2',
-        ];
+        return $this->hasMany(BudgetPlanItem::class);
     }
 
-    public function allocations(): HasMany
+    public function plans(): HasManyThrough
     {
-        return $this->hasMany(BudgetHeadAllocation::class);
+        return $this->hasManyThrough(BudgetPlan::class, BudgetPlanItem::class);
     }
 }

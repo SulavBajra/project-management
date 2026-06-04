@@ -60,20 +60,25 @@ export default function ProjectIndex() {
                 <PlusIcon /> Create Project
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="w-5xl">
               <CreateProjectForm onSubmit={() => setOpen(false)} />
             </DialogContent>
           </Dialog>
         </div>
       </CardHeader>
-      <CardContent>
-        {loading && <Spinner className="size-10" />}
-        <ProjectTable projects={projects} user={user} />
-        <PaginationSimple
-          currentPage={meta?.current_page ?? 1}
-          totalPages={meta?.last_page ?? 1}
-          onPageChange={setCurrentPage}
-        />
+      <CardContent className="flex flex-col gap-3.5">
+        {loading ? (
+          <Spinner className="flex size-25 w-full items-center justify-center" />
+        ) : (
+          <>
+            <ProjectTable projects={projects} user={user} />
+            <PaginationSimple
+              currentPage={meta?.current_page ?? 1}
+              totalPages={meta?.last_page ?? 1}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        )}
       </CardContent>
     </Card>
   )

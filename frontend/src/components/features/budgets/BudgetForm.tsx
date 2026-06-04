@@ -34,7 +34,7 @@ export default function BudgetForm({ onSubmit }: Props) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="w-3xs">
         <DialogHeader>
           <DialogTitle>Create Budget</DialogTitle>
         </DialogHeader>

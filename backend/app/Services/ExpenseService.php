@@ -16,7 +16,7 @@ use Maatwebsite\Excel\Facades\Excel;
 class ExpenseService
 {
     public function extractExpenses(
-        UploadedFile $file,
+        UploadedFile|string $file,
         int $userId,
         int $projectId,
     ): void {

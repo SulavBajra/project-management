@@ -7,13 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(["is_active", "name", "approvable_type"])]
+#[Fillable(['is_active', 'name', 'approvable_type'])]
 class ApprovalWorkflow extends Model
 {
     protected function casts(): array
     {
         return [
-            "is_active" => "boolean",
+            'is_active' => 'boolean',
         ];
     }
 
@@ -26,7 +26,7 @@ class ApprovalWorkflow extends Model
     {
         return $this->hasOne(ApprovalWorkflowVersion::class)->ofMany(
             [],
-            fn($q) => $q->where("is_current", true),
+            fn ($q) => $q->where('is_current', true),
         );
     }
 }

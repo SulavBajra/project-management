@@ -6,31 +6,19 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[
-    Fillable([
-        'budget_head_id',
-        'project_id',
-        'timeline_period_id',
-        'allocated_amount',
-    ]),
-]
+#[Fillable(["budget_plan_item_id", "timeline_period_id", "allocated_amount"])]
 class BudgetHeadAllocation extends Model
 {
     protected function casts(): array
     {
         return [
-            'allocated_amount' => 'decimal:2',
+            "allocated_amount" => "decimal:2",
         ];
     }
 
-    public function budgetHead(): BelongsTo
+    public function planItem(): BelongsTo
     {
-        return $this->belongsTo(BudgetHead::class);
-    }
-
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(BudgetPlanItem::class, "budget_plan_item_id");
     }
 
     public function timelinePeriod(): BelongsTo

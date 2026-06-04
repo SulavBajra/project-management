@@ -8,13 +8,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(["version", "is_current"])]
+#[Fillable(['version', 'is_current'])]
 class ApprovalWorkflowVersion extends Model
 {
     protected function casts(): array
     {
         return [
-            "is_current" => "boolean",
+            'is_current' => 'boolean',
         ];
     }
 
@@ -25,7 +25,7 @@ class ApprovalWorkflowVersion extends Model
 
     public function steps(): HasMany
     {
-        return $this->hasMany(ApprovalStep::class)->orderBy("order_no");
+        return $this->hasMany(ApprovalStep::class)->orderBy('order_no');
     }
 
     public function statuses(): HasMany
@@ -36,7 +36,7 @@ class ApprovalWorkflowVersion extends Model
     public function firstStep(): HasOne
     {
         return $this->hasOne(ApprovalStep::class)
-            ->orderBy("order_no")
-            ->ofMany("order_no", "min");
+            ->orderBy('order_no')
+            ->ofMany('order_no', 'min');
     }
 }

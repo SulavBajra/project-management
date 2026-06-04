@@ -1,7 +1,20 @@
-import { useState, useEffect } from "react"
-import { Link, useNavigate, useLocation } from "react-router-dom"
-import { toast } from "sonner"
 import axios from "axios"
+import {
+  ChevronRight,
+  FolderKanban,
+  LayoutDashboard,
+  ListChecks,
+  LogOut,
+  ShieldCheck,
+  Smile,
+  Timeline,
+  Users,
+  Wallet,
+} from "lucide-react"
+import { useEffect, useState } from "react"
+import { useNavigate, useLocation, Link } from "react-router-dom"
+import { toast } from "sonner"
+import { ProjectSidebar } from "@/components/features/projects/ProjectSidebar"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -16,22 +29,10 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar"
-import {
-  ChevronRight,
-  FolderKanban,
-  LayoutDashboard,
-  LogOut,
-  ShieldCheck,
-  Smile,
-  Timeline,
-  Users,
-  Wallet,
-} from "lucide-react"
-import { cn } from "@/lib/utils"
 import { useAuth } from "@/hooks/useAuth"
 import api from "@/lib/axios"
+import { cn } from "@/lib/utils"
 import { authService } from "@/services/authService"
-import { ProjectSidebar } from "@/components/features/projects/ProjectSidebar"
 import type { Project } from "@/types/Project"
 
 export function AppSidebar() {
@@ -44,6 +45,7 @@ export function AppSidebar() {
   const [showProjectSidebar, setShowProjectSidebar] = useState(false)
 
   useEffect(() => {
+    if (user?.role === "admin" || !user) return
     async function fetchMyProjects() {
       try {
         const response = await api.get<Project[]>("api/projects/list")
@@ -55,7 +57,7 @@ export function AppSidebar() {
       }
     }
     fetchMyProjects()
-  }, [])
+  }, [user])
 
   useEffect(() => {
     if (location.pathname.startsWith("/projects/")) {
@@ -171,6 +173,17 @@ export function AppSidebar() {
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+
+                {user?.permissions.includes("create_approval_workflow") && (
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild tooltip="Approval">
+                      <Link to="/approval">
+                        <ListChecks className="h-4 w-4" />
+                        <span>Approval</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

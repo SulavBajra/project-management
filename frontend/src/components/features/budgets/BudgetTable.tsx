@@ -26,6 +26,13 @@ export default function BudgetTable({
         </TableRow>
       </TableHeader>
       <TableBody>
+        {budgetHeads.length === 0 && (
+          <TableRow>
+            <TableCell colSpan={4} className="text-center">
+              <p>No budget heads available.</p>
+            </TableCell>
+          </TableRow>
+        )}
         {budgetHeads.map((head, index) => (
           <TableRow key={head.id}>
             <TableCell>{index + 1}</TableCell>
