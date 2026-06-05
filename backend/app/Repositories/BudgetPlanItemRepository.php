@@ -2,8 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Models\BudgetPlan;
 use App\Models\BudgetPlanItem;
 use App\Repositories\Contracts\BudgetPlanItemRepositoryInterface;
+use Illuminate\Support\Facades\DB;
 
 class BudgetPlanItemRepository implements BudgetPlanItemRepositoryInterface
 {
@@ -20,5 +22,27 @@ class BudgetPlanItemRepository implements BudgetPlanItemRepositoryInterface
                 "allocations.timelinePeriod:id,name,start_date,end_date",
             ])
             ->get();
+    }
+
+    public function deleteItemWithAllocations(BudgetPlanItem $item): void
+    {
+        DB::transaction(function () use ($item) {
+            $item->allocations()->delete();
+            $item->delete();
+        });
+    }
+
+    public function firstOrCreate(
+        BudgetPlan $plan,
+        int $budgetHeadId,
+    ): BudgetPlanItem {
+        return $plan->items()->firstOrCreate([
+            "budget_head_id" => $budgetHeadId,
+        ]);
+    }
+
+    public function delete(BudgetPlanItem $item): void
+    {
+        $item->delete();
     }
 }

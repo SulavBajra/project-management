@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Models\BudgetHead;
 use App\Repositories\Contracts\BudgetHeadRepositoryInterface;
-use Illuminate\Support\Facades\DB;
 
 class BudgetHeadRepository implements BudgetHeadRepositoryInterface
 {
@@ -20,12 +19,17 @@ class BudgetHeadRepository implements BudgetHeadRepositoryInterface
         return $this->model->find($id);
     }
 
-    public function createBudgetPlan(int $projectId, array $budgetHeads)
+    public function getBudgetHeadsNotInPlan(int $planId): array
     {
-        DB::transaction(function () use ($projectId, $budgetHeads) {
-            $plan = $this->model->create([
-                "project_id" => $projectId,
-            ]);
-        });
+        return $this->model
+            ->whereNotIn("id", function ($query) use ($planId) {
+                $query
+                    ->select("budget_head_id")
+                    ->from("budget_plan_items")
+                    ->where("budget_plan_id", $planId);
+            })
+            ->select("id", "name", "code")
+            ->get()
+            ->toArray();
     }
 }

@@ -22,7 +22,7 @@ export default function Budget() {
     async function fetchData() {
       try {
         const response = await api.get("api/budget-heads")
-        setBudgetHeads(response.data.data)
+        setBudgetHeads(response.data)
       } catch (err) {
         if (axios.isAxiosError(err)) {
           toast.error(err.response?.data?.message || "An error occurred")

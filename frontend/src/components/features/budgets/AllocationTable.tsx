@@ -10,15 +10,18 @@ import {
 import { monthRange } from "@/lib/utils"
 import type { BudgetPlanItem } from "@/types/Budget/Item"
 import AllocateDialog from "./AllocateDialog"
+import AllocationClear from "./AllocationClear"
 import AllocationRemove from "./AllocationRemove"
 
 export function AllocationTable({
   plans,
   onUpdate,
+  onClear,
   onRemove,
 }: {
   plans: BudgetPlanItem[] | null
   onUpdate: (itemId: number, amounts: Record<number, string>) => void
+  onClear: (itemId: number) => void
   onRemove: (itemId: number) => void
 }) {
   const periods = useMemo(() => plans?.[0]?.allocations ?? [], [plans])
@@ -35,7 +38,7 @@ export function AllocationTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="min-w-40">Budget Head</TableHead>
+            <TableHead className="">Budget Head</TableHead>
             {periods.map((p) => (
               <TableHead key={p.period_id} className="min-w-32 text-center">
                 <div className="font-medium">{p.period_name}</div>
@@ -70,12 +73,13 @@ export function AllocationTable({
                   )}
                 </TableCell>
               ))}
-              <TableCell>
+              <TableCell className="">
                 <AllocateDialog
                   periods={item.allocations}
                   item={item}
                   onSubmit={onUpdate}
                 />
+                <AllocationClear itemId={item.id} onClear={onClear} />
                 <AllocationRemove itemId={item.id} onRemove={onRemove} />
               </TableCell>
             </TableRow>

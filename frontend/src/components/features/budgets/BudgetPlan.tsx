@@ -1,4 +1,5 @@
 import axios from "axios"
+import { Sprout } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
@@ -14,7 +15,6 @@ import { Field, FieldLabel, FieldSet } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import api from "@/lib/axios"
 import type { BudgetHead } from "@/types/Budget/BudgetHead"
-import { Sprout } from "lucide-react"
 
 export default function BudgetPlan({
   budgetHeads,

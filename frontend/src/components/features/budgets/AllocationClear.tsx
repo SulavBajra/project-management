@@ -1,4 +1,4 @@
-import { Trash } from "lucide-react"
+import { BrushCleaning } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,30 +10,30 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
-export default function AllocationRemove({
+export default function AllocationClear({
   itemId,
-  onRemove,
+  onClear,
 }: {
   itemId: number
-  onRemove: (itemId: number) => void
+  onClear: (itemId: number) => void
 }) {
   const [open, setOpen] = useState(false)
 
   const handleDelete = () => {
-    onRemove(itemId)
+    onClear(itemId)
     setOpen(false)
   }
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost">
-          <Trash className="h-4 w-4 text-red-500" />
+        <Button variant="ghost">
+          <BrushCleaning className="h-4 w-4 text-blue-600" />
         </Button>
       </DialogTrigger>
       <DialogContent className="w-2/6">
         <DialogTitle>Remove Allocation</DialogTitle>
         <DialogDescription>
-          Are you sure you want to remove this allocation?
+          Are you sure you want to remove this allocation from this budget head
         </DialogDescription>
         <div className="flex gap-1.5">
           <DialogClose>

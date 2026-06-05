@@ -15,6 +15,7 @@ export type ItemAllocation = {
 }
 
 export type BudgetPlanItem = {
+  budget_plan_id: number
   id: number
   budget_head_id: number
   budget_head_name: string

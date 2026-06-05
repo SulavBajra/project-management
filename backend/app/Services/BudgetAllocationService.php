@@ -3,16 +3,21 @@
 namespace App\Services;
 
 use App\Models\BudgetHeadAllocation;
+use App\Models\BudgetPlan;
 use App\Models\BudgetPlanItem;
 use App\Models\Project;
-use App\Models\Timeline;
 use App\Models\TimelinePeriod;
+use App\Repositories\BudgetHeadAllocationRepository;
+use App\Repositories\BudgetPlanItemRepository;
+use Illuminate\Support\Facades\DB;
 
 class BudgetAllocationService
 {
-    public function allocateBudget(array $data)
-    {
-        BudgetHeadAllocation::create($data);
+    public function __construct(
+        private BudgetPlanItemRepository $itemRepo,
+        private BudgetHeadAllocationRepository $allocationRepo,
+    ) {
+        //
     }
 
     public function createAllocationModel(
@@ -69,5 +74,25 @@ class BudgetAllocationService
     public function removeAllocations(BudgetPlanItem $item): void
     {
         $item->allocations()->update(["allocated_amount" => null]);
+    }
+
+    public function createItemWithAllocations(
+        BudgetPlan $plan,
+        array $data,
+    ): void {
+        DB::transaction(function () use ($plan, $data) {
+            $item = $this->itemRepo->firstOrCreate(
+                $plan,
+                $data["budget_head_id"],
+            );
+
+            foreach ($data["allocations"] as $allocation) {
+                $this->allocationRepo->updateForPeriod(
+                    $item,
+                    $allocation["period_id"],
+                    $allocation["allocated_amount"],
+                );
+            }
+        });
     }
 }

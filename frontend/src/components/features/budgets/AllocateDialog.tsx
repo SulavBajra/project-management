@@ -40,7 +40,7 @@ export default function AllocateDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="icon" variant="ghost">
-          <BadgePlus className="h-4 w-4" />
+          <BadgePlus className="h-4 w-4 text-green-600" />
         </Button>
       </DialogTrigger>
       <DialogContent className="w-2/6">

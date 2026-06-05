@@ -22,15 +22,6 @@ Route::post("/register", [AuthController::class, "register"]);
 
 Route::get("/dashboard", [DashboardController::class, "index"]);
 
-Route::prefix("budget-heads")
-    ->name("budget-heads.")
-    ->controller(BudgetHeadController::class)
-    ->group(function () {
-        Route::get("/", "index");
-        Route::post("/", "createBudgetHead");
-        Route::get("/stats", "getBudgetHeadStats");
-    });
-
 Route::middleware(["auth:sanctum"])->group(function () {
     Route::get("users/{role}", [UserController::class, "getUsersByRole"]);
     Route::resource("users", UserController::class)->except(["create", "edit"]);
@@ -87,18 +78,35 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::get("expenses/{project_id}", "getExpenses");
     });
 
+    Route::prefix("budget-heads")
+        ->name("budget-heads.")
+        ->controller(BudgetHeadController::class)
+        ->group(function () {
+            Route::get("/", "index");
+            Route::post("/", "store");
+            Route::get("/stats", "getBudgetHeadStats");
+            Route::get("/{item}", "show");
+        });
+
+    Route::prefix("projects")
+        ->name("projects.")
+        ->controller(BudgetPlanController::class)
+        ->group(function () {
+            Route::get("{project}/budget-plan", "show");
+            Route::post("{project}/budget-plan", "store");
+            Route::patch("budget-plan/items/{item}/allocations", "update");
+            //this is to clear the allocated value in the budget head
+            Route::delete("budget-plan/items/{item}", "destroy");
+        });
+
+    Route::controller(BudgetPlanItemController::class)->group(function () {
+        Route::get("projects/{project}/budget-plan/items", "show");
+        //this is to delete the allocated budget head
+        Route::delete("projects/budget-plan/{item}", "destroy");
+        Route::post("projects/budget-plan/{plan}", "store");
+    });
+
     Route::controller(ApprovalController::class)->group(function () {
         Route::get("approvals", "index");
     });
-});
-
-Route::controller(BudgetPlanController::class)->group(function () {
-    Route::get("projects/{project}/budget-plan", "show");
-    Route::post("projects/{project}/budget-plan", "store");
-    Route::patch("projects/budget-plan/items/{item}/allocations", "update");
-    Route::delete("projects/budget-plan/items/{item}", "destroy");
-});
-
-Route::controller(BudgetPlanItemController::class)->group(function () {
-    Route::get("projects/{project}/budget-plan/items", "show");
 });

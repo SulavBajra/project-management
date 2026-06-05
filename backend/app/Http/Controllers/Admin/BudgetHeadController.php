@@ -4,15 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Budget\BudgetHeadRequest;
-use App\Http\Resources\Budget\BudgetAllocationResource;
 use App\Models\BudgetHead;
-use App\Models\BudgetHeadAllocation;
+use App\Models\BudgetPlan;
 use App\Models\BudgetPlanItem;
-use App\Models\Project;
-use Illuminate\Http\Request;
+use App\Repositories\BudgetHeadRepository;
 
 class BudgetHeadController extends Controller
 {
+    public function __construct(private BudgetHeadRepository $budgetHeadRepo)
+    {
+        //
+    }
+
     public function index()
     {
         $budgetHeads = BudgetHead::select("id", "name", "code")
@@ -29,7 +32,7 @@ class BudgetHeadController extends Controller
         return response()->json(["count" => $count]);
     }
 
-    public function createBudgetHead(BudgetHeadRequest $request)
+    public function store(BudgetHeadRequest $request)
     {
         $request->validated();
 
@@ -38,21 +41,11 @@ class BudgetHeadController extends Controller
         return response()->json($budgetHead, 201);
     }
 
-    public function allocateBudgetHead(Request $request, Project $project)
+    public function show(BudgetPlanItem $item)
     {
-        $request->validate([
-            "budget_heads" => "required|exists:budget_heads,id",
-            "amount" => "required|numeric",
-        ]);
-
-        BudgetHeadAllocation::create([
-            "project_id" => $project->id,
-            "budget_head_id" => $request->budget_head_id,
-            "amount" => $request->amount,
-        ]);
-
-        return response()->json([
-            "message" => "Budget head allocated successfully",
-        ]);
+        $heads = $this->budgetHeadRepo->getBudgetHeadsNotInPlan(
+            $item->budget_plan_id,
+        );
+        return response()->json($heads);
     }
 }

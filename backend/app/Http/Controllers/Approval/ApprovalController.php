@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Approval;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Approval\ApprovalFlowStoreRequest;
-use App\Http\Resources\Approval\ApprovalResource;
 use App\Models\Approvals\ApprovalWorkflow;
 use App\Services\ApprovalFlowService;
 
@@ -18,8 +17,8 @@ class ApprovalController extends Controller
     public function index()
     {
         $flows = ApprovalWorkflow::with(
-            'currentVersion.statuses',
-            'currentVersion.steps',
+            "currentVersion.statuses",
+            "currentVersion.steps",
         )->get();
 
         // return response()->json(ApprovalResource::collection($flows));
@@ -32,7 +31,7 @@ class ApprovalController extends Controller
 
         return response()->json(
             [
-                'message' => 'Flow created successfully',
+                "message" => "Flow created successfully",
             ],
             201,
         );
