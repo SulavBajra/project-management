@@ -7,12 +7,9 @@ use App\Http\Requests\Project\ProjectStoreRequest;
 use App\Http\Resources\Project\ProjectResource;
 use App\Http\Resources\Timeline\TimelineResource;
 use App\Models\Project;
-use App\Models\Timeline;
-use App\Models\TimelinePeriod;
 use App\Services\ProjectService;
 use App\Services\TimelineService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller
 {
@@ -109,9 +106,7 @@ class ProjectController extends Controller
             "user_ids" => "required|array",
             "user_ids.*" => "integer|exists:users,id",
         ]);
-        // if (!$request->user()->can("add user to project")) {
-        //     abort(403, "You are not authorized to add users to a project");
-        // }
+
         $projectId = $request->route("id");
 
         Project::findOrFail($projectId)
@@ -128,11 +123,13 @@ class ProjectController extends Controller
         return ProjectResource::collection($projects);
     }
 
-    // public function getProjectTimelinePeriod(Request $request)
-    // {
-    //     $projectId = $request->route("id");
-    //     $period = Timeline::where("project_id", $projectId)->get();
+    public function destroy(Project $project)
+    {
+        $project->users()->detach();
+        $project->delete();
 
-    //     return response()->json($timeline);
-    // }
+        return response()->json([
+            "message" => "Project deleted successfully.",
+        ]);
+    }
 }

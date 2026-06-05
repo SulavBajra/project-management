@@ -19,14 +19,16 @@ type Props = {
 
 export default function BudgetForm({ onSubmit }: Props) {
   const [form, setForm] = useState<BudgetFormData>({ name: "", code: "" })
+  const [open, setOpen] = useState(false)
 
   const submitForm = async (e: React.FormEvent) => {
     e.preventDefault()
     onSubmit(form)
+    setOpen(false)
   }
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />

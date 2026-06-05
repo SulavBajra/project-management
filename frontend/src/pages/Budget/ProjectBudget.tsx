@@ -130,13 +130,15 @@ export default function ProjectBudget() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Budget Allocations</h2>
-        <AddBudgetHead
-          loadBudgetHeads={fetchBudgetHeads}
-          heads={heads}
-          periods={periods}
-          onSubmit={handleSubmit}
-        />
-        <BudgetPlan budgetHeads={budgetHeads} projectId={projectId} />
+        <div className="flex justify-center gap-2">
+          <AddBudgetHead
+            loadBudgetHeads={fetchBudgetHeads}
+            heads={heads}
+            periods={periods}
+            onSubmit={handleSubmit}
+          />
+          <BudgetPlan budgetHeads={budgetHeads} projectId={projectId} />
+        </div>
       </div>
 
       <AllocationTable

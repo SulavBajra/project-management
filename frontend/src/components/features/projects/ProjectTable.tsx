@@ -1,4 +1,7 @@
-import { EyeIcon, TrashIcon } from "lucide-react"
+import axios from "axios"
+import { EyeIcon } from "lucide-react"
+import { toast } from "sonner"
+import DeleteDialog from "@/components/DeleteDialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -9,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import api from "@/lib/axios"
 import type { ProjectResponse } from "@/types/Project"
 import type { User } from "@/types/User"
 
@@ -19,6 +23,19 @@ export default function ProjectTable({
   projects: ProjectResponse[]
   user: User | null
 }) {
+  const handleDelete = (id: number) => {
+    try {
+      api.delete(`api/projects/${id}`)
+      toast.success("Project deleted successfully")
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "Failed to delete project")
+      } else {
+        toast.error("An unexpected error occurred")
+      }
+    }
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -59,9 +76,7 @@ export default function ProjectTable({
                 <EyeIcon className="h-4 w-4" />
               </Button>
               {user?.permissions?.includes("delete_project") && (
-                <Button variant="destructive">
-                  <TrashIcon className="h-4 w-4" />
-                </Button>
+                <DeleteDialog itemId={project.id} onRemove={handleDelete} />
               )}
             </TableCell>
           </TableRow>

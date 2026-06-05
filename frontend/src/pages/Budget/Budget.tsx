@@ -11,12 +11,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { useAuth } from "@/hooks/useAuth"
 import api from "@/lib/axios"
 import type { BudgetFormData } from "@/types/Budget/BudgetFormData"
 import type { BudgetHead } from "@/types/Budget/BudgetHead"
 
 export default function Budget() {
   const [budgetHeads, setBudgetHeads] = useState<BudgetHead[]>([])
+  const { user } = useAuth()
 
   useEffect(() => {
     async function fetchData() {
@@ -47,7 +49,9 @@ export default function Budget() {
           </CardDescription>
         </div>
         <div>
-          <BudgetForm onSubmit={createBudget} />
+          {user?.permissions?.includes("create_budget") && (
+            <BudgetForm onSubmit={createBudget} />
+          )}
         </div>
       </CardHeader>
       <CardContent>

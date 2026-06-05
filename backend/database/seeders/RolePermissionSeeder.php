@@ -20,6 +20,8 @@ class RolePermissionSeeder extends Seeder
         "timeline" => [],
         "approval_workflow" => [],
         "status" => [],
+        "role" => [],
+        "permission" => [],
     ];
 
     private array $roles = [

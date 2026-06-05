@@ -34,6 +34,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
             Route::get("/", "getAllProjects");
             Route::get("/list", "listActiveProjects");
             Route::post("/", "storeProject");
+            Route::delete("/{project}", "destroy");
 
             Route::post("{id}", "endProject");
 

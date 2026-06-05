@@ -36,7 +36,7 @@ import { authService } from "@/services/authService"
 import type { Project } from "@/types/Project"
 
 export function AppSidebar() {
-  const { state } = useSidebar()
+  const { state, isMobile } = useSidebar()
   const isCollapsed = state === "collapsed"
   const navigate = useNavigate()
   const location = useLocation()
@@ -60,14 +60,10 @@ export function AppSidebar() {
   }, [user])
 
   useEffect(() => {
-    if (location.pathname.startsWith("/projects/")) {
-      setShowProjectSidebar(true)
-    }
-  }, [location.pathname])
-
-  useEffect(() => {
-    if (isCollapsed) setShowProjectSidebar(false)
-  }, [isCollapsed])
+    setShowProjectSidebar(
+      location.pathname.startsWith("/projects/") && !isCollapsed && !isMobile
+    )
+  }, [location.pathname, isCollapsed, isMobile])
 
   const isOnProjectsRoute = location.pathname.startsWith("/projects")
 

@@ -25,10 +25,20 @@ import UsersData from "./pages/User/UserData.tsx"
 import ProjectIndex from "./pages/Project/ProjectIndex.tsx"
 import Approval from "./pages/Approval.tsx"
 import ProjectBudget from "./pages/Budget/ProjectBudget.tsx"
+import NotFound from "./pages/NotFound.tsx"
 
 function ProtectedRoute() {
   const { user } = useAuth()
   return user ? <Outlet /> : <Navigate to="/login" replace />
+}
+
+function PermittedRoute() {
+  const { user } = useAuth()
+  return user?.permissions.includes("approve_budget") ? (
+    <Outlet />
+  ) : (
+    <Navigate to="*" replace />
+  )
 }
 
 export default function App() {
@@ -39,6 +49,7 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/*" element={<NotFound />} />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
@@ -54,10 +65,13 @@ export default function App() {
                 <Route path="budget" element={<ProjectBudget />} />
               </Route>
 
-              <Route path="/user" element={<User />}>
-                <Route path="" element={<UsersData />} />
-                <Route path="roles" element={<Roles />} />
+              <Route element={<PermittedRoute />}>
+                <Route path="/user" element={<User />}>
+                  <Route path="" element={<UsersData />} />
+                  <Route path="roles" element={<Roles />} />
+                </Route>
               </Route>
+
               <Route path="/budget" element={<Budget />} />
               <Route path="/timeline" element={<TimeLine />} />
               <Route path="/approval" element={<Approval />} />
