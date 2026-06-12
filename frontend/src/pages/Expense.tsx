@@ -1,6 +1,6 @@
 import axios from "axios"
 import { Plus, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import ExpenseDetails from "@/components/features/expenses/ExpenseDetails"
@@ -10,9 +10,8 @@ import { Input } from "@/components/ui/input"
 import api from "@/lib/axios"
 import type { TransactionRow } from "@/types/TransactionRow"
 
-let nextId = 1
-const makeRow = (): TransactionRow => ({
-  id: nextId++,
+const makeRow = (nextId: React.MutableRefObject<number>): TransactionRow => ({
+  id: nextId.current++,
   accountHead: "",
   debit: "",
   credit: "",
@@ -20,13 +19,14 @@ const makeRow = (): TransactionRow => ({
 })
 
 export default function Expense() {
+  const nextId = useRef(1)
   const { projectId } = useParams()
 
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [code, setCode] = useState("")
   const [description, setDescription] = useState("")
   const [transactionDate, setTransactionDate] = useState("")
-  const [rows, setRows] = useState<TransactionRow[]>([makeRow()])
+  const [rows, setRows] = useState<TransactionRow[]>(() => [makeRow(nextId)])
   const [submitting, setSubmitting] = useState(false)
 
   const hasDetails = code.trim() !== "" && transactionDate !== ""
@@ -51,7 +51,7 @@ export default function Expense() {
     )
   }
 
-  const addRow = () => setRows((prev) => [...prev, makeRow()])
+  const addRow = () => setRows((prev) => [...prev, makeRow(nextId)])
 
   const removeRow = (id: number) => {
     if (rows.length === 1) return
@@ -81,7 +81,7 @@ export default function Expense() {
       setCode("")
       setDescription("")
       setTransactionDate("")
-      setRows([makeRow()])
+      setRows([makeRow(nextId)])
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const msg = error.response?.data?.message ?? error.message
@@ -96,7 +96,7 @@ export default function Expense() {
     setCode("")
     setDescription("")
     setTransactionDate("")
-    setRows([makeRow()])
+    setRows([makeRow(nextId)])
   }
 
   return (

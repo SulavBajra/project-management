@@ -25,7 +25,7 @@ class ProjectService
                     "created_by" => $request->user()->name,
                 ],
             );
-            if ($request->user()->role === "employee") {
+            if ($request->user()->hasRole("project_manager")) {
                 $userIds = collect($request->user_ids ?? [])
                     ->push($request->user()->id)
                     ->unique()

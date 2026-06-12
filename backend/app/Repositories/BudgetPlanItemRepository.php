@@ -16,7 +16,9 @@ class BudgetPlanItemRepository implements BudgetPlanItemRepositoryInterface
 
     public function findAllocationsByBudgetPlanId(int $budgetPlanId)
     {
-        return BudgetPlanItem::where("budget_plan_id", $budgetPlanId)
+        return $this->model
+            ->query()
+            ->where("budget_plan_id", $budgetPlanId)
             ->with([
                 "budgetHead:id,name,code",
                 "allocations.timelinePeriod:id,name,start_date,end_date",
@@ -44,5 +46,14 @@ class BudgetPlanItemRepository implements BudgetPlanItemRepositoryInterface
     public function delete(BudgetPlanItem $item): void
     {
         $item->delete();
+    }
+
+    public function getItemsAndAllocations(int $planId)
+    {
+        return $this->model
+            ->query()
+            ->where("budget_plan_id", $planId)
+            ->with(["budgetHead:id,name,code"])
+            ->get();
     }
 }

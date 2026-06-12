@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/spinner"
 import api from "@/lib/axios"
 import type { BudgetHead } from "@/types/Budget/BudgetHead"
 import type { BudgetPlanItem } from "@/types/Budget/Item"
+import { Button } from "@/components/ui/button"
 
 export default function ProjectBudget() {
   const [budgetHeads, setBudgetHeads] = useState<BudgetHead[]>([])
@@ -50,7 +51,6 @@ export default function ProjectBudget() {
   useEffect(() => {
     fetchItems()
   }, [fetchItems])
-  console.log(planId)
 
   const handleUpdate = async (
     itemId: number,
@@ -124,6 +124,27 @@ export default function ProjectBudget() {
     }
   }
 
+  const handleDownload = async () => {
+    try {
+      const response = await api.get(
+        `api/projects/${projectId}/budget-plan/${planId}/export`,
+        { responseType: "blob" }
+      )
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement("a")
+      link.href = url
+      link.setAttribute("download", "budget-template.xlsx")
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success("Template downloaded")
+    } catch (error) {
+      if (axios.isAxiosError(error))
+        toast.error(error.response?.data?.message ?? error.message)
+    }
+  }
+
   if (!projectId) return null
   if (loading) return <Spinner className="size-20" />
   return (
@@ -140,6 +161,10 @@ export default function ProjectBudget() {
           <BudgetPlan budgetHeads={budgetHeads} projectId={projectId} />
         </div>
       </div>
+
+      <Button variant="outline" onClick={handleDownload}>
+        Download Template
+      </Button>
 
       <AllocationTable
         plans={plans}

@@ -32,12 +32,12 @@ function ProtectedRoute() {
   return user ? <Outlet /> : <Navigate to="/login" replace />
 }
 
-function PermittedRoute() {
+function PermittedRoute({ permission }: { permission: string }) {
   const { user } = useAuth()
-  return user?.permissions.includes("approve_budget") ? (
+  return user?.permissions.includes(permission) ? (
     <Outlet />
   ) : (
-    <Navigate to="*" replace />
+    <Navigate to="/unauthorized" replace />
   )
 }
 
@@ -65,7 +65,7 @@ export default function App() {
                 <Route path="budget" element={<ProjectBudget />} />
               </Route>
 
-              <Route element={<PermittedRoute />}>
+              <Route element={<PermittedRoute permission="create_role" />}>
                 <Route path="/user" element={<User />}>
                   <Route path="" element={<UsersData />} />
                   <Route path="roles" element={<Roles />} />

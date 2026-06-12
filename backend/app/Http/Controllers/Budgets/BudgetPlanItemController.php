@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers\Budgets;
 
+use App\Exports\BudgetPlanExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Budget\BudgetAllocateStoreRequest;
 use App\Http\Resources\Budget\BudgetItemResource;
 use App\Models\BudgetPlan;
 use App\Models\BudgetPlanItem;
 use App\Models\Project;
+use App\Models\TimelinePeriod;
 use App\Repositories\BudgetPlanItemRepository;
 use App\Repositories\BudgetPlanRepository;
 use App\Services\BudgetAllocationService;
+use App\Services\BudgetService;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BudgetPlanItemController extends Controller
 {
@@ -18,6 +22,7 @@ class BudgetPlanItemController extends Controller
         private BudgetAllocationService $allocationService,
         private BudgetPlanItemRepository $itemRepo,
         private BudgetPlanRepository $planRepository,
+        private BudgetService $budgetService,
     ) {
         //
     }
@@ -55,5 +60,18 @@ class BudgetPlanItemController extends Controller
         return response()->json([
             "message" => "Budget plan item deleted successfully",
         ]);
+    }
+
+    public function export(Project $project, BudgetPlan $plan)
+    {
+        $periods = TimelinePeriod::select("start_date", "end_date")
+            ->where("timeline_id", $project->timelines()->pluck("id"))
+            ->get()
+            ->toArray();
+        $data = $this->budgetService->createExcelSkeleton($plan->id);
+        return Excel::download(
+            new BudgetPlanExport($data, $periods),
+            "budget-plan-" . $plan->id . ".xlsx",
+        );
     }
 }

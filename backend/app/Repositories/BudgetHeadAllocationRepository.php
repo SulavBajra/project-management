@@ -7,6 +7,11 @@ use App\Models\BudgetPlanItem;
 
 class BudgetHeadAllocationRepository
 {
+    public function __construct(private BudgetHeadAllocation $allocation)
+    {
+        //
+    }
+
     public function bulkInsert(array $allocations): void
     {
         BudgetHeadAllocation::insert($allocations);
@@ -23,5 +28,13 @@ class BudgetHeadAllocationRepository
                 "allocated_amount" => $amount,
             ],
         ]);
+    }
+
+    public function getAllocations(int $planId)
+    {
+        return $this->allocation
+            ->with(["planItem.budgetHead", "timelinePeriod"])
+            ->where("budget_plan_id", $planId)
+            ->get();
     }
 }

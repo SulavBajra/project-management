@@ -100,14 +100,24 @@ Route::middleware(["auth:sanctum"])->group(function () {
             Route::delete("budget-plan/items/{item}", "destroy");
         });
 
-    Route::controller(BudgetPlanItemController::class)->group(function () {
-        Route::get("projects/{project}/budget-plan/items", "show");
-        //this is to delete the allocated budget head
-        Route::delete("projects/budget-plan/{item}", "destroy");
-        Route::post("projects/budget-plan/{plan}", "store");
-    });
+    Route::prefix("projects")
+        ->name("projects.budget-plan.")
+        ->controller(BudgetPlanItemController::class)
+        ->group(function () {
+            Route::get("{project}/budget-plan/items", "show");
+            //this is to delete the allocated budget head
+            Route::delete("budget-plan/{item}", "destroy");
+            Route::post("budget-plan/{plan}", "store");
+            Route::get("{project}/budget-plan/{plan}/export", "export");
+        });
 
     Route::controller(ApprovalController::class)->group(function () {
         Route::get("approvals", "index");
     });
 });
+
+//test field
+// Route::get("projects/budget-plan/{plan}/export", [
+//     BudgetPlanItemController::class,
+//     "export",
+// ]);
