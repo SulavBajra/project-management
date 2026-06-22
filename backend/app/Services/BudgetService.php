@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Imports\BudgetPlanItem;
 use App\Repositories\BudgetHeadAllocationRepository;
 use App\Repositories\BudgetPlanItemRepository;
-use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -25,8 +24,8 @@ class BudgetService
 
         DB::transaction(function () use ($import, $file) {
             Excel::import($import, $file);
-            $rows = $import->rows;
-            $groupedRows = $rows->groupBy("budget code");
+            $rows = $import->data;
+            $groupedRows = $rows->groupBy("budget head");
             foreach ($groupedRows as $budgetCode => $group) {
                 $group->each(function ($row) use ($budgetCode) {
                     $budgetHead = $row["budget head"];
@@ -42,7 +41,8 @@ class BudgetService
         $allocations = $this->itemRepo
             ->getItemsAndAllocations($planId)
             ->toArray();
-        $periods = $data = [];
+        $periods = $allocations;
+        $data = [];
         foreach ($allocations as $item) {
             $data[] = [
                 "budget_head" => $item["budget_head"]["name"],

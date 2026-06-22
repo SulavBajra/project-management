@@ -32,6 +32,11 @@ function ProtectedRoute() {
   return user ? <Outlet /> : <Navigate to="/login" replace />
 }
 
+function GuestRoute() {
+  const { user } = useAuth()
+  return user ? <Navigate to="/" replace /> : <Outlet />
+}
+
 function PermittedRoute({ permission }: { permission: string }) {
   const { user } = useAuth()
   return user?.permissions.includes(permission) ? (
@@ -47,8 +52,10 @@ export default function App() {
       <BrowserRouter>
         <Toaster richColors position="top-right" closeButton />
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route element={<GuestRoute />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+          </Route>
           <Route path="/*" element={<NotFound />} />
 
           <Route element={<ProtectedRoute />}>

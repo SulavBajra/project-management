@@ -74,4 +74,9 @@ class BudgetPlanItemController extends Controller
             "budget-plan-" . $plan->id . ".xlsx",
         );
     }
+
+    public function upload()
+    {
+        //
+    }
 }

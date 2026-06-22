@@ -56,4 +56,9 @@ class BudgetPlanItemRepository implements BudgetPlanItemRepositoryInterface
             ->with(["budgetHead:id,name,code"])
             ->get();
     }
+
+    public function insert(array $items)
+    {
+        $this->model->allocations()->upsert($items);
+    }
 }

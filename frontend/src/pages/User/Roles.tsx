@@ -11,20 +11,25 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import api from "@/lib/axios"
 import type { Role } from "@/types/RolePermission"
+import { Spinner } from "@/components/ui/spinner"
 
 export default function Roles() {
   const [roles, setRoles] = useState<Role[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const fetchRoles = async () => {
       try {
         const { data } = await api.get<Role[]>("/api/roles")
+        setLoading(true)
         setRoles(data)
       } catch (error) {
         if (axios.isAxiosError(error)) {
           toast.error(error.response?.data?.message || "Failed to fetch roles")
         }
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -55,7 +60,11 @@ export default function Roles() {
           </div>
         </CardHeader>
         <CardContent>
-          <RoleAndPermissionTable roles={roles} />
+          {loading ? (
+            <Spinner className="size-8" />
+          ) : (
+            <RoleAndPermissionTable roles={roles} />
+          )}
         </CardContent>
       </Card>
 

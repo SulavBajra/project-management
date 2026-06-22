@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   ListChecks,
   LogOut,
+  LogOutIcon,
   ShieldCheck,
   Smile,
   Timeline,
@@ -34,6 +35,7 @@ import api from "@/lib/axios"
 import { cn } from "@/lib/utils"
 import { authService } from "@/services/authService"
 import type { Project } from "@/types/Project"
+import ConfirmDialog from "../ConfirmDialog"
 
 export function AppSidebar() {
   const { state, isMobile } = useSidebar()
@@ -64,6 +66,23 @@ export function AppSidebar() {
       location.pathname.startsWith("/projects/") && !isCollapsed && !isMobile
     )
   }, [location.pathname, isCollapsed, isMobile])
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout()
+      clearSession()
+      toast.success("Logged out successfully.", { duration: 3000 })
+      navigate("/login")
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message || "Logout failed. Please try again."
+        )
+      } else {
+        toast.error("Logout failed. Please try again.")
+      }
+    }
+  }
 
   const isOnProjectsRoute = location.pathname.startsWith("/projects")
 
@@ -186,29 +205,21 @@ export function AppSidebar() {
         </SidebarContent>
 
         <SidebarFooter>
-          <Button
-            variant="destructive"
-            onClick={async () => {
-              try {
-                await authService.logout()
-                clearSession()
-                toast.success("Logged out successfully.", { duration: 3000 })
-                navigate("/login")
-              } catch (error) {
-                if (axios.isAxiosError(error)) {
-                  toast.error(
-                    error.response?.data?.message ||
-                      "Logout failed. Please try again."
-                  )
-                } else {
-                  toast.error("Logout failed. Please try again.")
-                }
-              }
-            }}
-          >
-            <LogOut />
-            {!isCollapsed && <span>Logout</span>}
-          </Button>
+          <ConfirmDialog
+            trigger={
+              <Button variant="destructive">
+                {" "}
+                <LogOut />
+                {!isCollapsed && <span>Logout</span>}
+              </Button>
+            }
+            title="Logout"
+            description="Are you sure you want to logout?"
+            onConfirm={handleLogout}
+            confirmLabel="Logout"
+            cancelLabel="Cancel"
+            icon={LogOutIcon}
+          />
         </SidebarFooter>
       </Sidebar>
 

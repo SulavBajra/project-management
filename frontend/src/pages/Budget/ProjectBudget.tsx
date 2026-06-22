@@ -9,7 +9,9 @@ import { Spinner } from "@/components/ui/spinner"
 import api from "@/lib/axios"
 import type { BudgetHead } from "@/types/Budget/BudgetHead"
 import type { BudgetPlanItem } from "@/types/Budget/Item"
-import { Button } from "@/components/ui/button"
+import { Download, FileWarning, Upload } from "lucide-react"
+import HoverButton from "@/components/hovering/HoverButton"
+import ConfirmDialog from "@/components/ConfirmDialog"
 
 export default function ProjectBudget() {
   const [budgetHeads, setBudgetHeads] = useState<BudgetHead[]>([])
@@ -138,11 +140,15 @@ export default function ProjectBudget() {
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
-      toast.success("Template downloaded")
     } catch (error) {
       if (axios.isAxiosError(error))
         toast.error(error.response?.data?.message ?? error.message)
     }
+    toast.success("Template downloaded")
+  }
+
+  const uploadBudget = async () => {
+    //
   }
 
   if (!projectId) return null
@@ -152,19 +158,40 @@ export default function ProjectBudget() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Budget Allocations</h2>
         <div className="flex justify-center gap-2">
+          <BudgetPlan budgetHeads={budgetHeads} projectId={projectId} />
           <AddBudgetHead
             loadBudgetHeads={fetchBudgetHeads}
             heads={heads}
             periods={periods}
             onSubmit={handleSubmit}
           />
-          <BudgetPlan budgetHeads={budgetHeads} projectId={projectId} />
+          <ConfirmDialog
+            trigger={
+              <HoverButton icon={Download} description="Download template" />
+            }
+            title="Download File"
+            description="Are you sure you want to download the template?"
+            confirmLabel="Download"
+            icon={Download}
+            onConfirm={handleDownload}
+          />
+          <ConfirmDialog
+            trigger={
+              <HoverButton
+                icon={Upload}
+                description="Upload budget file"
+                onClick={uploadBudget}
+              />
+            }
+            title="Upload File"
+            description="Before uploading make sure you have downloaded the template. Have you downloaded the template file?"
+            confirmLabel="Yes"
+            icon={FileWarning}
+            onConfirm={handleDownload}
+            importance="high"
+          />
         </div>
       </div>
-
-      <Button variant="outline" onClick={handleDownload}>
-        Download Template
-      </Button>
 
       <AllocationTable
         plans={plans}
