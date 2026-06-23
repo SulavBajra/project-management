@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import HoverButton from "@/components/hovering/HoverButton"
 
 export default function AllocationRemove({
   itemId,
@@ -26,9 +27,12 @@ export default function AllocationRemove({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="icon" variant="ghost">
-          <Trash className="h-4 w-4 text-red-500" />
-        </Button>
+        <HoverButton
+          description="Delete this allocation"
+          icon={Trash}
+          variant="ghost"
+          className="h-4 w-4 text-red-600"
+        />
       </DialogTrigger>
       <DialogContent className="w-2/6">
         <DialogTitle>Remove Allocation</DialogTitle>

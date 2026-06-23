@@ -1,17 +1,17 @@
 import axios from "axios"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { Download, FileWarning, Upload } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
+import ConfirmDialog from "@/components/ConfirmDialog"
 import AddBudgetHead from "@/components/features/budgets/AddBudgetHead"
 import { AllocationTable } from "@/components/features/budgets/AllocationTable"
 import BudgetPlan from "@/components/features/budgets/BudgetPlan"
+import HoverButton from "@/components/hovering/HoverButton"
 import { Spinner } from "@/components/ui/spinner"
 import api from "@/lib/axios"
 import type { BudgetHead } from "@/types/Budget/BudgetHead"
 import type { BudgetPlanItem } from "@/types/Budget/Item"
-import { Download, FileWarning, Upload } from "lucide-react"
-import HoverButton from "@/components/hovering/HoverButton"
-import ConfirmDialog from "@/components/ConfirmDialog"
 
 export default function ProjectBudget() {
   const [budgetHeads, setBudgetHeads] = useState<BudgetHead[]>([])
@@ -22,6 +22,8 @@ export default function ProjectBudget() {
   const periods = useMemo(() => plans?.[0]?.allocations ?? [], [plans])
   const [planId, setPlanId] = useState<number | null>(null)
   const itemId = useMemo(() => plans?.[0]?.id, [plans])
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploadConfirmed, setUploadConfirmed] = useState(false)
 
   useEffect(() => {
     async function fetchBudgetHeads() {
@@ -147,8 +149,33 @@ export default function ProjectBudget() {
     toast.success("Template downloaded")
   }
 
-  const uploadBudget = async () => {
-    //
+  const handleUploadConfirm = () => {
+    setUploadConfirmed(true)
+    fileInputRef.current?.click()
+  }
+
+  const uploadBudget = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append("file", file)
+
+    try {
+      await api.post(
+        `api/projects/${projectId}/budget-plan/${planId}/import`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      )
+      fetchItems()
+      toast.success("Budget uploaded successfully")
+    } catch (error) {
+      if (axios.isAxiosError(error))
+        toast.error(error.response?.data?.message ?? error.message)
+    } finally {
+      e.target.value = ""
+      setUploadConfirmed(false)
+    }
   }
 
   if (!projectId) return null
@@ -187,7 +214,7 @@ export default function ProjectBudget() {
             description="Before uploading make sure you have downloaded the template. Have you downloaded the template file?"
             confirmLabel="Yes"
             icon={FileWarning}
-            onConfirm={handleDownload}
+            onConfirm={handleUploadConfirm}
             importance="high"
           />
         </div>
@@ -198,6 +225,13 @@ export default function ProjectBudget() {
         onUpdate={handleUpdate}
         onRemove={handleRemove}
         onClear={handleClear}
+      />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".xlsx"
+        className="hidden"
+        onChange={uploadBudget}
       />
     </div>
   )

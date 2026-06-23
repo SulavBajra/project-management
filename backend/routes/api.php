@@ -109,6 +109,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
             Route::delete("budget-plan/{item}", "destroy");
             Route::post("budget-plan/{plan}", "store");
             Route::get("{project}/budget-plan/{plan}/export", "export");
+            Route::post("{project}/budget-plan/{plan}/import", "import");
         });
 
     Route::controller(ApprovalController::class)->group(function () {

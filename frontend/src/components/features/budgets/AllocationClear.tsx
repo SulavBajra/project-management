@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import HoverButton from "@/components/hovering/HoverButton"
 
 export default function AllocationClear({
   itemId,
@@ -26,9 +27,12 @@ export default function AllocationClear({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost">
-          <BrushCleaning className="h-4 w-4 text-blue-600" />
-        </Button>
+        <HoverButton
+          description="Clear allocations"
+          icon={BrushCleaning}
+          variant="ghost"
+          className="h-4 w-4 text-blue-600"
+        />
       </DialogTrigger>
       <DialogContent className="w-2/6">
         <DialogTitle>Remove Allocation</DialogTitle>

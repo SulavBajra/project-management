@@ -16,7 +16,8 @@ class BudgetPlanExport implements FromCollection, WithHeadings, ShouldAutoSize
         foreach ($periods as $period) {
             $startDate = Carbon::parse($period["start_date"])->format("M");
             $endDate = Carbon::parse($period["end_date"])->format("M");
-            $this->date[] = "{$startDate}-{$endDate}";
+            $name = $period["name"];
+            $this->date[] = "{$startDate}-{$endDate}" . "({$name})";
         }
     }
 
@@ -29,6 +30,7 @@ class BudgetPlanExport implements FromCollection, WithHeadings, ShouldAutoSize
     public function headings(): array
     {
         return [
+            "budget code",
             "budget head",
             $this->date[0] ?? "",
             $this->date[1] ?? "",
