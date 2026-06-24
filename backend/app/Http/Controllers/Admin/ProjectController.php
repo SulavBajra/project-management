@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Project\ProjectStoreRequest;
+use App\Http\Resources\Project\BudgetExpenseOverviewResource;
 use App\Http\Resources\Project\ProjectResource;
 use App\Http\Resources\Timeline\TimelineResource;
 use App\Models\Project;
@@ -52,6 +53,13 @@ class ProjectController extends Controller
         $stats = $this->projectService->getStatOfProject($projectId);
 
         return response()->json($stats);
+    }
+
+    public function getBudgetVsExpense(Request $request)
+    {
+        $projectId = $request->route("id");
+        $compare = $this->projectService->getBudgetExpenseOverview($projectId);
+        return new BudgetExpenseOverviewResource($compare);
     }
 
     public function getProjectTimeline(Request $request)

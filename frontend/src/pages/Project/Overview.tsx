@@ -3,6 +3,7 @@ import { Banknote, UserPlus } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { toast } from "sonner"
+import OverviewChart from "@/components/charts/OverviewChart"
 import OverviewHeader from "@/components/features/projects/OverviewHeader"
 import ProjectActions from "@/components/features/projects/ProjectActions"
 import AddUserModal from "@/components/features/users/AddUserModal"
@@ -18,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import api from "@/lib/axios"
+import type { CompareData } from "@/types/Chart/Overview"
 import type { ProjectStats } from "@/types/ProjectStats"
 import type { Employee } from "@/types/User"
 
@@ -27,6 +29,7 @@ export default function Overview() {
   const [employees, setEmployees] = useState<Employee[]>([])
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([])
   const [loading, setLoading] = useState(true)
+  const [compare, setCompare] = useState<CompareData | null>(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -62,6 +65,22 @@ export default function Overview() {
         }
       }
     }
+
+    async function fetchCompareStats() {
+      try {
+        const parsedProjectId = Number(projectId)
+        const response = await api.get(
+          `/api/projects/${parsedProjectId}/stat/compare`
+        )
+        setCompare(response.data.data)
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          toast.error(error.response?.data?.message ?? "Failed to load stats")
+        }
+      }
+    }
+
+    fetchCompareStats()
     fetchData()
     fetchEmployees()
   }, [projectId])
@@ -122,6 +141,7 @@ export default function Overview() {
           </DialogContent>
         </Dialog>
       </div>
+      <OverviewChart data={compare} />
     </div>
   )
 }

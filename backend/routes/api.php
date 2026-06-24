@@ -41,6 +41,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
             Route::get("{id}/stat", "getStatOfProject");
             Route::get("{id}/timeline", "getProjectTimeline");
             Route::post("{id}/timeline", "extendProjectTimeline");
+            // Route::get("{id}/stat/compare", "getBudgetVsExpense");
 
             Route::get("{id}/users", "getUsers");
             Route::patch("{id}/users", "addUsers");
@@ -122,3 +123,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
 //     BudgetPlanItemController::class,
 //     "export",
 // ]);
+Route::get("projects/{id}/stat/compare", [
+    ProjectController::class,
+    "getBudgetVsExpense",
+]);

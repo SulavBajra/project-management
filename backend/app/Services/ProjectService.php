@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\Http\Requests\Project\ProjectStoreRequest;
+use App\Models\BudgetHeadAllocation;
+use App\Models\BudgetPlan;
+use App\Models\Expense;
 use App\Models\Project;
 use App\Models\Timeline;
 use App\Models\TimelinePeriod;
@@ -76,6 +79,26 @@ class ProjectService
             ],
             "days_left" => (int) $daysLeft,
             "total_users" => $totalUsers,
+        ];
+    }
+
+    public function getBudgetExpenseOverview(int $projectId)
+    {
+        $allocations = BudgetPlan::query()
+            ->where("project_id", $projectId)
+            ->select("id")
+            ->with("items.allocations.timelinePeriod")
+            ->get();
+
+        $expenses = Expense::query()
+            ->select("id")
+            ->where("project_id", $projectId)
+            ->with("transactions")
+            ->get();
+
+        return [
+            "allocation" => $allocations,
+            "expenses" => $expenses,
         ];
     }
 
