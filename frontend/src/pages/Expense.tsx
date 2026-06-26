@@ -104,13 +104,6 @@ export default function Expense() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Add Expense Transactions</h2>
         <div className="flex gap-2">
-          {/*<Button
-            variant="outline"
-            size="sm"
-            onClick={() => setDetailsOpen(true)}
-          >
-            {hasDetails ? `${code} · ${transactionDate}` : "Add Transaction"}
-          </Button>*/}
           <ExpenseDetails
             open={detailsOpen}
             onOpenChange={setDetailsOpen}

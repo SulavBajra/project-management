@@ -10,12 +10,14 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        $totalProject = Project::count();
         $projectCount = Project::active()->count();
         $totalUser = User::count();
 
         return response()->json([
-            'projectCount' => $projectCount,
-            'totalUsers' => $totalUser,
+            "total_project" => $totalProject,
+            "project_count" => $projectCount,
+            "total_users" => $totalUser,
         ]);
     }
 }

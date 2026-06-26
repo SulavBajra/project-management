@@ -1,4 +1,5 @@
 export type DashboardData = {
-  projectCount: number
-  totalUsers: number
+  total_project: number
+  project_count: number
+  total_users: number
 }

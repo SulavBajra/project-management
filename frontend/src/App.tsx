@@ -56,7 +56,6 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Route>
-          <Route path="/*" element={<NotFound />} />
 
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>
@@ -84,6 +83,7 @@ export default function App() {
               <Route path="/approval" element={<Approval />} />
             </Route>
           </Route>
+          <Route path="/*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

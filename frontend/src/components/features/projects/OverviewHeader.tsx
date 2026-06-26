@@ -1,4 +1,9 @@
-import { TriangleAlert } from "lucide-react"
+import {
+  CalendarArrowDown,
+  CalendarDays,
+  TriangleAlert,
+  User,
+} from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 import type { ProjectStats } from "@/types/ProjectStats"
@@ -30,7 +35,10 @@ export default function OverviewHeader({
             {loading ? (
               <Spinner data-icon="inline-start" />
             ) : stat?.current_period ? (
-              <p>Current Period: {stat.current_period.name}</p>
+              <div className="flex items-center gap-2">
+                <CalendarArrowDown />
+                <p>Current Period: {stat.current_period.name}</p>
+              </div>
             ) : (
               <p className="text-muted-foreground">No active period</p>
             )}
@@ -38,15 +46,18 @@ export default function OverviewHeader({
         </Card>
         <Card>
           <CardContent>
-            <p>
+            <div>
               {loading ? (
                 <Spinner data-icon="inline-start" />
               ) : stat?.days_left != null ? (
-                `Days remaining: ${stat.days_left} days`
+                <div className="flex items-center gap-2">
+                  <CalendarDays />
+                  Days remaining: {stat.days_left} days
+                </div>
               ) : (
                 <span className="text-muted-foreground">No active period</span>
               )}
-            </p>
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -54,7 +65,10 @@ export default function OverviewHeader({
             {loading ? (
               <Spinner data-icon="inline-start" />
             ) : (
-              <p>Total Users: {stat?.total_users}</p>
+              <div className="flex items-center gap-2">
+                <User />
+                <p>Total Users: {stat?.total_users}</p>
+              </div>
             )}
           </CardContent>
         </Card>

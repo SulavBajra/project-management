@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\RolePermissionController;
 use App\Http\Controllers\Admin\TimelineController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Approval\ApprovalController;
+use App\Http\Controllers\Approval\ApprovalFlowController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Budgets\BudgetPlanController;
 use App\Http\Controllers\Budgets\BudgetPlanItemController;
@@ -20,9 +21,8 @@ Route::get("/user", function (Request $request) {
 
 Route::post("/register", [AuthController::class, "register"]);
 
-Route::get("/dashboard", [DashboardController::class, "index"]);
-
 Route::middleware(["auth:sanctum"])->group(function () {
+    Route::get("/dashboard", [DashboardController::class, "index"]);
     Route::get("users/{role}", [UserController::class, "getUsersByRole"]);
     Route::resource("users", UserController::class)->except(["create", "edit"]);
 
@@ -41,7 +41,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
             Route::get("{id}/stat", "getStatOfProject");
             Route::get("{id}/timeline", "getProjectTimeline");
             Route::post("{id}/timeline", "extendProjectTimeline");
-            // Route::get("{id}/stat/compare", "getBudgetVsExpense");
+            Route::get("{id}/stat/compare", "getBudgetVsExpense");
 
             Route::get("{id}/users", "getUsers");
             Route::patch("{id}/users", "addUsers");
@@ -113,8 +113,14 @@ Route::middleware(["auth:sanctum"])->group(function () {
             Route::post("{project}/budget-plan/{plan}/import", "import");
         });
 
-    Route::controller(ApprovalController::class)->group(function () {
+    Route::controller(ApprovalFlowController::class)->group(function () {
         Route::get("approvals", "index");
+        // Route::post("approvals", "store");
+        // Route::get("approvals/{id}", "show");
+    });
+
+    Route::controller(ApprovalController::class)->group(function () {
+        // Route::get()
     });
 });
 
@@ -123,7 +129,9 @@ Route::middleware(["auth:sanctum"])->group(function () {
 //     BudgetPlanItemController::class,
 //     "export",
 // ]);
-Route::get("projects/{id}/stat/compare", [
-    ProjectController::class,
-    "getBudgetVsExpense",
-]);
+// Route::get("projects/{id}/stat/compare", [
+//     ProjectController::class,
+//     "getBudgetVsExpense",
+// ]);
+// Route::put("approvals/{id}", [ApprovalController::class, "store"]);
+Route::get("approvals/{id}", [ApprovalFlowController::class, "show"]);

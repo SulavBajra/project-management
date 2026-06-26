@@ -3,37 +3,37 @@
 namespace App\Http\Controllers\Approval;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Approval\ApprovalFlowStoreRequest;
-use App\Models\Approvals\ApprovalWorkflow;
-use App\Services\ApprovalFlowService;
+use App\Services\ApprovalService;
+use Illuminate\Http\Request;
 
 class ApprovalController extends Controller
 {
-    public function __construct(private ApprovalFlowService $flowService)
+    public function __construct(protected ApprovalService $approvalService)
     {
         //
     }
 
-    public function index()
+    public function store(Request $request, int $projectId)
     {
-        $flows = ApprovalWorkflow::with(
-            "currentVersion.statuses",
-            "currentVersion.steps",
-        )->get();
+        $user = $request->user();
+        if ($request->current_step_id == 1) {
+            $this->approvalService->beginApproval(
+                $projectId,
+                $request->toArray(),
+                1,
+            );
 
-        // return response()->json(ApprovalResource::collection($flows));
-        return response()->json($flows);
-    }
-
-    public function store(ApprovalFlowStoreRequest $request)
-    {
-        $this->flowService->createApprovalFlow($request->validated());
-
+            return response()->json(
+                [
+                    "message" => "Approval flow started",
+                ],
+                201,
+            );
+        }
+        $this->approvalService->nextStep();
         return response()->json(
-            [
-                "message" => "Flow created successfully",
-            ],
-            201,
+            ["message" => "Approval request has been sent"],
+            200,
         );
     }
 }

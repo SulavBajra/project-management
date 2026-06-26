@@ -32,10 +32,10 @@ export default function ImportExpense({ projectId }: { projectId: number }) {
       await api.post("/api/expenses/import", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
-      toast.success("Expenses imported successfully.")
       setFile(null)
       if (fileInputRef.current) fileInputRef.current.value = ""
       setOpen(false)
+      toast.success("Expenses imported successfully.")
       navigate(`/projects/${projectId}/expenses`)
     } catch (error) {
       if (axios.isAxiosError(error)) {

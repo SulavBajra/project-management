@@ -102,7 +102,7 @@ export default function Overview() {
   return (
     <div className="flex flex-col gap-4">
       <OverviewHeader stat={stat} loading={loading} />
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button asChild>
           <Link to={`/projects/${projectId}/expense`}>
             <Banknote />

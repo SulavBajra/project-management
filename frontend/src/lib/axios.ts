@@ -22,6 +22,8 @@ api.interceptors.response.use(
     const shouldIgnore = excludedRoutes.some((route) => url.includes(route))
 
     if (status === 401 && !shouldIgnore) {
+      localStorage.removeItem("user")
+      sessionStorage.removeItem("user")
       window.location.href = "/login"
     }
 

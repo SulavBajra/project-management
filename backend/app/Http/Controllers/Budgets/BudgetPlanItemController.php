@@ -15,6 +15,7 @@ use App\Models\Project;
 use App\Models\TimelinePeriod;
 use App\Repositories\BudgetPlanItemRepository;
 use App\Repositories\BudgetPlanRepository;
+use App\Services\ApprovalService;
 use App\Services\BudgetAllocationService;
 use App\Services\BudgetService;
 use Illuminate\Http\Request;
@@ -27,6 +28,7 @@ class BudgetPlanItemController extends Controller
         private BudgetPlanItemRepository $itemRepo,
         private BudgetPlanRepository $planRepository,
         private BudgetService $budgetService,
+        private ApprovalService $approvalService,
     ) {
         //
     }
@@ -97,6 +99,11 @@ class BudgetPlanItemController extends Controller
             $project->id,
             $import->id,
             $plan->id,
+        );
+        $this->approvalService->beginApproval(
+            $project->id,
+            "budget",
+            $request->user()->id,
         );
 
         return response()->json(

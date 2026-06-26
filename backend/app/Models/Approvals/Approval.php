@@ -11,12 +11,12 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 #[
     Fillable([
-        'approvable_type',
-        'approvable_id',
-        'approval_workflow_version_id',
-        'created_by',
-        'current_step_id',
-        'current_status_id',
+        "approvable_type",
+        "approvable_id",
+        "approval_workflow_version_id",
+        "created_by",
+        "current_step_id",
+        "current_status_id",
     ]),
 ]
 class Approval extends Model
@@ -28,7 +28,10 @@ class Approval extends Model
 
     public function version(): BelongsTo
     {
-        return $this->belongsTo(ApprovalWorkflowVersion::class);
+        return $this->belongsTo(
+            ApprovalWorkflowVersion::class,
+            "approval_workflow_version_id",
+        );
     }
 
     public function currentStep(): BelongsTo
@@ -43,7 +46,7 @@ class Approval extends Model
 
     public function createdBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class, "created_by");
     }
 
     public function histories(): HasMany

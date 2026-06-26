@@ -23,6 +23,13 @@ class ProjectController extends Controller
 
     public function listActiveProjects(Request $request)
     {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json([
+                "error" => "User instance not found",
+            ]);
+        }
+
         $activeProjects = $request
             ->user()
             ->projects()

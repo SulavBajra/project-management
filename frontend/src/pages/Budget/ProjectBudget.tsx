@@ -8,10 +8,13 @@ import AddBudgetHead from "@/components/features/budgets/AddBudgetHead"
 import { AllocationTable } from "@/components/features/budgets/AllocationTable"
 import BudgetPlan from "@/components/features/budgets/BudgetPlan"
 import HoverButton from "@/components/hovering/HoverButton"
+import StatusBadge from "@/components/status-badge/StatusBadge"
 import { Spinner } from "@/components/ui/spinner"
 import api from "@/lib/axios"
 import type { BudgetHead } from "@/types/Budget/BudgetHead"
+import type { BudgetStatus } from "@/types/Budget/BudgetStatus"
 import type { BudgetPlanItem } from "@/types/Budget/Item"
+import FlowButton from "@/components/features/approvals/FlowButton"
 
 export default function ProjectBudget() {
   const [budgetHeads, setBudgetHeads] = useState<BudgetHead[]>([])
@@ -19,11 +22,13 @@ export default function ProjectBudget() {
   const { projectId } = useParams<{ projectId: string }>()
   const [plans, setPlans] = useState<BudgetPlanItem[] | null>(null)
   const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
   const periods = useMemo(() => plans?.[0]?.allocations ?? [], [plans])
   const [planId, setPlanId] = useState<number | null>(null)
   const itemId = useMemo(() => plans?.[0]?.id, [plans])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploadConfirmed, setUploadConfirmed] = useState(false)
+  const [budgetStatus, setBudgetStatus] = useState<BudgetStatus>()
 
   useEffect(() => {
     async function fetchBudgetHeads() {
@@ -52,9 +57,21 @@ export default function ProjectBudget() {
     }
   }, [projectId])
 
+  const fetchBudgetStatus = useCallback(async () => {
+    try {
+      const response = await api.get(`api/approvals/${projectId}/?name=budget`)
+      setBudgetStatus(response.data.data)
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message ?? error.message)
+      }
+    }
+  }, [projectId])
+
   useEffect(() => {
     fetchItems()
-  }, [fetchItems])
+    fetchBudgetStatus()
+  }, [fetchItems, fetchBudgetStatus])
 
   const handleUpdate = async (
     itemId: number,
@@ -178,6 +195,20 @@ export default function ProjectBudget() {
     }
   }
 
+  const handleNextStep = async () => {
+    try {
+      await api.post(``)
+      setSubmitting(true)
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message ?? error.message)
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
+  console.log(budgetStatus)
+
   if (!projectId) return null
   if (loading) return <Spinner className="size-20" />
   return (
@@ -185,6 +216,14 @@ export default function ProjectBudget() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Budget Allocations</h2>
         <div className="flex justify-center gap-2">
+          <FlowButton
+            step={budgetStatus?.current_step ?? "employee start"}
+            onAction={handleNextStep}
+          />
+          <StatusBadge
+            status={budgetStatus?.current_status}
+            final={budgetStatus?.is_final ?? null}
+          />
           <BudgetPlan budgetHeads={budgetHeads} projectId={projectId} />
           <AddBudgetHead
             loadBudgetHeads={fetchBudgetHeads}
@@ -204,11 +243,7 @@ export default function ProjectBudget() {
           />
           <ConfirmDialog
             trigger={
-              <HoverButton
-                icon={Upload}
-                description="Upload budget file"
-                onClick={uploadBudget}
-              />
+              <HoverButton icon={Upload} description="Upload budget file" />
             }
             title="Upload File"
             description="Before uploading make sure you have downloaded the template. Have you downloaded the template file?"

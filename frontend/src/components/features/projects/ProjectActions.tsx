@@ -57,7 +57,7 @@ export default function ProjectActions({
   }
 
   return (
-    <>
+    <div className="flex flex-wrap gap-2">
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button
@@ -112,6 +112,6 @@ export default function ProjectActions({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   )
 }
