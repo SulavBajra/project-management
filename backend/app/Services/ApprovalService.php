@@ -8,6 +8,7 @@ use App\Exceptions\NoNextStepException;
 use App\Exceptions\WorkFlowDoesntExistException;
 use App\Models\Approvals\Approval;
 use App\Models\Approvals\ApprovalHistory;
+use App\Models\Approvals\ApprovalStatus;
 use App\Models\User;
 use App\Repositories\ApprovalRepository;
 use App\Repositories\ApprovalWorkflowRepository;
@@ -35,32 +36,29 @@ class ApprovalService
             }
 
             $modelId = $this->workflowRepo->getModelId($modelName, $projectId);
+            if (!$modelId) {
+                throw new \RuntimeException("No approvable model found.");
+            }
+
             if ($this->approvalRepo->hasApproval($modelName, $modelId[0])) {
                 throw new ApprovalExistsException();
             }
-            Approval::firstOrCreate(
-                [
-                    "approvable_type" => $modelName,
-                    "approvable_id" => $modelId[0],
-                ],
-                [
-                    "approval_workflow_version_id" => $workflow
-                        ->currentVersion()
-                        ->first()->id,
-                    "created_by" => $userId,
-                    "current_step_id" => $workflow->currentVersion()->first()
-                        ->firstStep->id,
-                    "current_status_id" => $workflow->currentVersion()->first()
-                        ->firstStep->approval_status_id,
-                ],
-            );
+            $version = $workflow->currentVersion()->first();
+            Approval::create([
+                "approvable_type" => $modelName,
+                "approvable_id" => $modelId[0],
+                "approval_workflow_version_id" => $version->id,
+                "created_by" => $userId,
+                "current_step_id" => $version->firstStep->id,
+                "current_status_id" => $version->firstStep->approval_status_id,
+            ]);
         });
     }
 
     public function advanceStep(
         int $projectId,
         User $user,
-        ?string $comment = "null",
+        ?string $comment = null,
     ) {
         $approval = $this->approvalRepo->findApproval($projectId);
         $nextStep = $this->workflowRepo->getNextStep($approval);
@@ -92,5 +90,43 @@ class ApprovalService
             ]);
             $approval->update($data);
         });
+    }
+
+    public function rejectRequest(
+        int $projectId,
+        int $userId,
+        ?string $comment = null,
+    ) {
+        $approval = $this->approvalRepo->findApproval($projectId);
+        $rejectStatus = ApprovalStatus::where("name", "Rejected")->first();
+
+        if (!$rejectStatus) {
+            throw new \RuntimeException("Rejected status not found");
+        }
+        DB::transaction(function () use (
+            $approval,
+            $userId,
+            $rejectStatus,
+            $comment,
+        ) {
+            $data = [
+                "approval_id" => $approval->id,
+                "approval_step_id" => $approval->current_step_id,
+                "approval_workflow_version_id" =>
+                    $approval->approval_workflow_version_id,
+                "acted_by" => $userId,
+                "from_state" => $approval->currentStatus->name,
+                "to_state" => $rejectStatus->name,
+                "comment" => $comment,
+            ];
+            $approval->histories()->create($data);
+            $approval->update(["current_status_id" => $rejectStatus->id]);
+        });
+    }
+
+    public function isFinal(int $projectId): bool
+    {
+        $approval = $this->approvalRepo->findApproval($projectId);
+        return $approval->currentStep->is_final;
     }
 }

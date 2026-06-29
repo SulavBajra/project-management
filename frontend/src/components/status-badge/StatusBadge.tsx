@@ -9,7 +9,17 @@ export default function StatusBadge({
 }) {
   return (
     <div className="flex items-center">
-      <Badge variant={final ? "default" : "secondary"}>{status}</Badge>
+      <Badge
+        variant={
+          final
+            ? "default"
+            : status === "Rejected"
+              ? "destructive"
+              : "secondary"
+        }
+      >
+        {status}
+      </Badge>
     </div>
   )
 }

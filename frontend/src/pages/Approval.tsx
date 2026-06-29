@@ -14,7 +14,7 @@ export default function Approval() {
   useEffect(() => {
     const fetchApprovalFlows = async () => {
       try {
-        const response = await api.get<ApprovalFlow[]>("/api/approvals")
+        const response = await api.get<ApprovalFlow[]>("/api/approval-flow")
         setApprovalFlows(response.data)
       } catch (error) {
         if (axios.isAxiosError(error)) {

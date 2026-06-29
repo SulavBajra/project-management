@@ -107,10 +107,6 @@ class BudgetPlanItemController extends Controller
             $project->id,
             $import->id,
             $plan->id,
-        );
-        $this->approvalService->beginApproval(
-            $project->id,
-            "budget",
             $request->user()->id,
         );
 

@@ -120,7 +120,8 @@ Route::middleware(["auth:sanctum"])->group(function () {
     });
 
     Route::controller(ApprovalController::class)->group(function () {
-        // Route::get()
+        Route::post("approvals/{id}", "store");
+        Route::post("approvals/{id}/reject", "reject");
     });
 });
 
@@ -135,4 +136,4 @@ Route::middleware(["auth:sanctum"])->group(function () {
 // ]);
 // Route::put("approvals/{id}", [ApprovalController::class, "store"]);
 // Route::get("approvals/{id}", [ApprovalFlowController::class, "show"]);
-Route::post("approvals/{id}", [ApprovalController::class, "store"]);
+// Route::post("approvals/{id}", [ApprovalController::class, "store"]);

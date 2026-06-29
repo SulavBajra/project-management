@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 class HasNoAccessException extends Exception
 {
     public function __construct(
-        string $message = "User doesn't has right.",
+        string $message = "You don't have the required role to accept the request.",
         int $code = 403,
         ?\Throwable $previous = null,
     ) {

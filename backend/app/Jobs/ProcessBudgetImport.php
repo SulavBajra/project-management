@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\ExpenseImport;
+use App\Services\ApprovalService;
 use App\Services\BudgetService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -20,6 +21,8 @@ class ProcessBudgetImport implements ShouldQueue
         private int $projectId,
         private int $importId,
         private int $planId,
+        private int $userId,
+        private ApprovalService $approvalService,
     ) {
         //
     }
@@ -44,5 +47,10 @@ class ProcessBudgetImport implements ShouldQueue
         } catch (\Exception $e) {
             $import->markFailed([["message" => $e->getMessage()]]);
         }
+        $this->approvalService->beginApproval(
+            $this->projectId,
+            "budget",
+            $this->userId,
+        );
     }
 }

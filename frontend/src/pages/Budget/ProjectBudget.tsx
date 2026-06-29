@@ -15,6 +15,7 @@ import api from "@/lib/axios"
 import type { BudgetHead } from "@/types/Budget/BudgetHead"
 import type { BudgetStatus } from "@/types/Budget/BudgetStatus"
 import type { BudgetPlanItem } from "@/types/Budget/Item"
+import ApprovalConirm from "@/components/features/approvals/ApprovalConfirm"
 
 export default function ProjectBudget() {
   const [budgetHeads, setBudgetHeads] = useState<BudgetHead[]>([])
@@ -197,9 +198,9 @@ export default function ProjectBudget() {
     }
   }
 
-  const handleNextStep = async () => {
+  const handleNextStep = async (comment: string | null) => {
     try {
-      await api.post(``)
+      await api.post(`/api/approvals/${projectId}`, comment)
       setSubmitting(true)
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -209,7 +210,19 @@ export default function ProjectBudget() {
       setSubmitting(false)
     }
   }
-  // console.log(budgetStatus)
+
+  const handleReject = async (comment: string | null) => {
+    try {
+      await api.post(`/api/approvals/${projectId}/reject`, comment)
+      setSubmitting(true)
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message ?? error.message)
+      }
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   if (!projectId) return null
   if (loading) return <Spinner className="size-20" />
@@ -218,16 +231,22 @@ export default function ProjectBudget() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Budget Allocations</h2>
         <div className="flex justify-center gap-2">
-          <FlowButton
-            step={budgetStatus?.current_step ?? "employee start"}
-            onAction={handleNextStep}
-          />
           {budgetStatus && (
             <StatusBadge
               status={budgetStatus.current_status}
               final={budgetStatus.is_final}
             />
           )}
+          {budgetStatus?.current_status === "Rejected" ? null : (
+            <ApprovalConirm
+              onAdvance={handleNextStep}
+              onReject={handleReject}
+            />
+          )}
+          {/*<FlowButton
+            step={budgetStatus?.current_step ?? "employee start"}
+            onAction={handleNextStep}
+          />*/}
           <BudgetPlan budgetHeads={budgetHeads} projectId={projectId} />
           <AddBudgetHead
             loadBudgetHeads={fetchBudgetHeads}
