@@ -108,15 +108,15 @@ Route::middleware(["auth:sanctum"])->group(function () {
             Route::get("{project}/budget-plan/items", "show");
             //this is to delete the allocated budget head
             Route::delete("budget-plan/{item}", "destroy");
-            Route::post("budget-plan/{plan}", "store");
+            Route::post("{project}/budget-plan/{plan}", "store");
             Route::get("{project}/budget-plan/{plan}/export", "export");
             Route::post("{project}/budget-plan/{plan}/import", "import");
         });
 
     Route::controller(ApprovalFlowController::class)->group(function () {
-        Route::get("approvals", "index");
-        // Route::post("approvals", "store");
-        // Route::get("approvals/{id}", "show");
+        Route::get("approval-flow", "index");
+        Route::post("approval-flow", "store");
+        Route::get("approval-flow/{id}", "show");
     });
 
     Route::controller(ApprovalController::class)->group(function () {
@@ -134,4 +134,5 @@ Route::middleware(["auth:sanctum"])->group(function () {
 //     "getBudgetVsExpense",
 // ]);
 // Route::put("approvals/{id}", [ApprovalController::class, "store"]);
-Route::get("approvals/{id}", [ApprovalFlowController::class, "show"]);
+// Route::get("approvals/{id}", [ApprovalFlowController::class, "show"]);
+Route::post("approvals/{id}", [ApprovalController::class, "store"]);

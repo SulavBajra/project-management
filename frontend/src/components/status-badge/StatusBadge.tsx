@@ -5,7 +5,7 @@ export default function StatusBadge({
   final,
 }: {
   status: string
-  final: boolean | null
+  final: boolean
 }) {
   return (
     <div className="flex items-center">

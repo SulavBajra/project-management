@@ -5,10 +5,10 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Http\JsonResponse;
 
-class WorkFlowDoesntExistException extends Exception
+class NoNextStepException extends Exception
 {
     public function __construct(
-        string $message = "Workflow doesn't exists.",
+        string $message = "There is no next step.",
         int $code = 409,
         ?\Throwable $previous = null,
     ) {

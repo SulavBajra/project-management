@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import ConfirmDialog from "@/components/ConfirmDialog"
+import FlowButton from "@/components/features/approvals/FlowButton"
 import AddBudgetHead from "@/components/features/budgets/AddBudgetHead"
 import { AllocationTable } from "@/components/features/budgets/AllocationTable"
 import BudgetPlan from "@/components/features/budgets/BudgetPlan"
@@ -14,7 +15,6 @@ import api from "@/lib/axios"
 import type { BudgetHead } from "@/types/Budget/BudgetHead"
 import type { BudgetStatus } from "@/types/Budget/BudgetStatus"
 import type { BudgetPlanItem } from "@/types/Budget/Item"
-import FlowButton from "@/components/features/approvals/FlowButton"
 
 export default function ProjectBudget() {
   const [budgetHeads, setBudgetHeads] = useState<BudgetHead[]>([])
@@ -28,7 +28,7 @@ export default function ProjectBudget() {
   const itemId = useMemo(() => plans?.[0]?.id, [plans])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploadConfirmed, setUploadConfirmed] = useState(false)
-  const [budgetStatus, setBudgetStatus] = useState<BudgetStatus>()
+  const [budgetStatus, setBudgetStatus] = useState<BudgetStatus | null>(null)
 
   useEffect(() => {
     async function fetchBudgetHeads() {
@@ -59,7 +59,9 @@ export default function ProjectBudget() {
 
   const fetchBudgetStatus = useCallback(async () => {
     try {
-      const response = await api.get(`api/approvals/${projectId}/?name=budget`)
+      const response = await api.get(
+        `api/approval-flow/${projectId}/?name=budget`
+      )
       setBudgetStatus(response.data.data)
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -207,7 +209,7 @@ export default function ProjectBudget() {
       setSubmitting(false)
     }
   }
-  console.log(budgetStatus)
+  // console.log(budgetStatus)
 
   if (!projectId) return null
   if (loading) return <Spinner className="size-20" />
@@ -220,10 +222,12 @@ export default function ProjectBudget() {
             step={budgetStatus?.current_step ?? "employee start"}
             onAction={handleNextStep}
           />
-          <StatusBadge
-            status={budgetStatus?.current_status}
-            final={budgetStatus?.is_final ?? null}
-          />
+          {budgetStatus && (
+            <StatusBadge
+              status={budgetStatus.current_status}
+              final={budgetStatus.is_final}
+            />
+          )}
           <BudgetPlan budgetHeads={budgetHeads} projectId={projectId} />
           <AddBudgetHead
             loadBudgetHeads={fetchBudgetHeads}

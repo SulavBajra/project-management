@@ -41,4 +41,9 @@ class ApprovalStep extends Model
     {
         return $query->where("is_final", true);
     }
+
+    public function approvalStatus(): BelongsTo
+    {
+        return $this->belongsTo(ApprovalStatus::class);
+    }
 }

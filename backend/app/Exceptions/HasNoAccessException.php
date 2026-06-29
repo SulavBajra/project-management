@@ -5,11 +5,11 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Http\JsonResponse;
 
-class WorkFlowDoesntExistException extends Exception
+class HasNoAccessException extends Exception
 {
     public function __construct(
-        string $message = "Workflow doesn't exists.",
-        int $code = 409,
+        string $message = "User doesn't has right.",
+        int $code = 403,
         ?\Throwable $previous = null,
     ) {
         parent::__construct($message, $code, $previous);

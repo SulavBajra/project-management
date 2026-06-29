@@ -33,10 +33,18 @@ class BudgetPlanItemController extends Controller
         //
     }
 
-    public function store(BudgetPlan $plan, BudgetAllocateStoreRequest $request)
-    {
+    public function store(
+        int $projectId,
+        BudgetPlan $plan,
+        BudgetAllocateStoreRequest $request,
+    ) {
         $validated = $request->validated();
         $this->allocationService->createItemWithAllocations($plan, $validated);
+        $this->approvalService->beginApproval(
+            $projectId,
+            "budget",
+            $request->user()->id,
+        );
 
         return response()->json([
             "message" => "Budget plan item created successfully",

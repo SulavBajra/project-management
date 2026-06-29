@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Approval;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Approval\ApprovalStepStoreRequest;
+use App\Models\User;
 use App\Services\ApprovalService;
-use Illuminate\Http\Request;
 
 class ApprovalController extends Controller
 {
@@ -13,26 +14,18 @@ class ApprovalController extends Controller
         //
     }
 
-    public function store(Request $request, int $projectId)
+    public function store(ApprovalStepStoreRequest $request, int $projectId)
     {
-        $user = $request->user();
-        if ($request->current_step_id == 1) {
-            $this->approvalService->beginApproval(
-                $projectId,
-                $request->toArray(),
-                1,
-            );
+        $validated = $request->validated();
+        $user = User::where("id", 1)->first();
+        $this->approvalService->advanceStep(
+            $projectId,
+            $user,
+            $validated["comment"] ?? null,
+        );
 
-            return response()->json(
-                [
-                    "message" => "Approval flow started",
-                ],
-                201,
-            );
-        }
-        $this->approvalService->nextStep();
         return response()->json(
-            ["message" => "Approval request has been sent"],
+            ["message" => "successfully started next step"],
             200,
         );
     }

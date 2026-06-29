@@ -50,7 +50,7 @@ class ApprovalFlowController extends Controller
                 "message" => "Data not found",
             ]);
         }
-        // return new ApprovalInfoResource($model);
-        return response()->json($model);
+        return new ApprovalInfoResource($model);
+        // return response()->json($model);
     }
 }

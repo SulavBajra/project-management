@@ -45,6 +45,19 @@ class StatusSeeder extends Seeder
                     $name => $version->statuses()->create(["name" => $name]),
                 ],
             );
+
+            $budgetStatuses = collect([
+                "Pending",
+                "Checked",
+                "Approved",
+                "Rejected",
+            ])->mapWithKeys(
+                fn($name) => [
+                    $name => $versionBudget
+                        ->statuses()
+                        ->create(["name" => $name]),
+                ],
+            );
             $empRole = Role::where("name", "employee")->firstOrFail();
             $pmRole = Role::where("name", "project_manager")->firstOrFail();
             $adminRole = Role::where("name", "admin")->firstOrFail();
@@ -76,21 +89,21 @@ class StatusSeeder extends Seeder
             $versionBudget->steps()->createMany([
                 [
                     "role_id" => $empRole->id,
-                    "approval_status_id" => $statuses["Pending"]->id,
+                    "approval_status_id" => $budgetStatuses["Pending"]->id,
                     "order_no" => 1,
                     "name" => "Employee Processing",
                     "is_final" => false,
                 ],
                 [
                     "role_id" => $pmRole->id,
-                    "approval_status_id" => $statuses["Checked"]->id,
+                    "approval_status_id" => $budgetStatuses["Checked"]->id,
                     "order_no" => 2,
                     "name" => "Project Manager Review",
                     "is_final" => false,
                 ],
                 [
                     "role_id" => $adminRole->id,
-                    "approval_status_id" => $statuses["Approved"]->id,
+                    "approval_status_id" => $budgetStatuses["Approved"]->id,
                     "order_no" => 3,
                     "name" => "Admin Approval",
                     "is_final" => true,

@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Approvals\Approval;
 use App\Models\Approvals\ApprovalWorkflow;
 use App\Models\BudgetPlan;
 use App\Models\Expense;
@@ -51,5 +52,16 @@ class ApprovalWorkflowRepository
                 break;
         }
         return $approvableId;
+    }
+
+    public function getNextStep(Approval $approval)
+    {
+        $nextStep = $approval->version
+            ->steps()
+            ->with(["approvalStatus", "role"])
+            ->where("order_no", ">", $approval->currentStep->order_no)
+            ->orderBy("order_no")
+            ->first();
+        return $nextStep;
     }
 }

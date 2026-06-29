@@ -11,12 +11,16 @@ class ApprovalRepository
         //
     }
 
-    public function findApproval(string $name, int $id)
+    public function findApproval(int $id)
     {
         $approval = $this->model
             ->query()
-            ->where("approvable_type", $name)
-            ->where("approvable_id", $id)
+            ->with([
+                "version",
+                "currentStep:id,role_id,order_no,is_final",
+                "currentStatus",
+            ])
+            ->where("id", $id)
             ->first();
         return $approval;
     }
@@ -28,5 +32,10 @@ class ApprovalRepository
             ->where("approvable_type", $name)
             ->where("approvable_id", $id)
             ->exists();
+    }
+
+    public function updateApproval(Approval $approval, array $approvalData)
+    {
+        return $approval->update($approvalData);
     }
 }
