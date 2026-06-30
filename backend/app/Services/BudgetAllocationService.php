@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
+use App\Exceptions\ApprovalExistsException;
 use App\Models\BudgetHeadAllocation;
 use App\Models\BudgetPlan;
 use App\Models\BudgetPlanItem;
 use App\Models\Project;
 use App\Models\TimelinePeriod;
+use App\Repositories\ApprovalRepository;
 use App\Repositories\BudgetHeadAllocationRepository;
 use App\Repositories\BudgetPlanItemRepository;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +18,7 @@ class BudgetAllocationService
     public function __construct(
         private BudgetPlanItemRepository $itemRepo,
         private BudgetHeadAllocationRepository $allocationRepo,
+        private ApprovalRepository $approvalRepo,
     ) {
         //
     }
@@ -79,7 +82,14 @@ class BudgetAllocationService
     public function createItemWithAllocations(
         BudgetPlan $plan,
         array $data,
+        int $projectId,
     ): void {
+        if ($this->approvalRepo->isFinal($projectId)) {
+            throw new ApprovalExistsException(
+                "Already approved cannot make changes now",
+            );
+        }
+
         DB::transaction(function () use ($plan, $data) {
             $item = $this->itemRepo->firstOrCreate(
                 $plan,

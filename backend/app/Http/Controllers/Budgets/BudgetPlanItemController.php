@@ -39,7 +39,11 @@ class BudgetPlanItemController extends Controller
         BudgetAllocateStoreRequest $request,
     ) {
         $validated = $request->validated();
-        $this->allocationService->createItemWithAllocations($plan, $validated);
+        $this->allocationService->createItemWithAllocations(
+            $plan,
+            $validated,
+            $projectId,
+        );
         $this->approvalService->beginApproval(
             $projectId,
             "budget",

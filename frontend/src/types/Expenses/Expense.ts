@@ -8,4 +8,5 @@ export type Expense = {
   transaction_date: string
   account_head_id: number
   account_head: string
+  status: string | null
 }

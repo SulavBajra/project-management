@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -51,6 +52,9 @@ export const AddRoleModal = ({
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Add Role</DialogTitle>
+          <DialogDescription>
+            Select a role to assign to the user.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-2 py-2">
           <Label htmlFor="role">Role</Label>
@@ -60,8 +64,8 @@ export const AddRoleModal = ({
             </SelectTrigger>
             <SelectContent>
               {roles.map((r) => (
-                <SelectItem key={r} value={r}>
-                  {r}
+                <SelectItem key={r.id} value={r.name}>
+                  {r.name}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -110,7 +110,10 @@ Route::middleware(["auth:sanctum"])->group(function () {
             Route::delete("budget-plan/{item}", "destroy");
             Route::post("{project}/budget-plan/{plan}", "store");
             Route::get("{project}/budget-plan/{plan}/export", "export");
-            Route::post("{project}/budget-plan/{plan}/import", "import");
+            Route::post(
+                "{project}/budget-plan/{plan}/import",
+                "import",
+            )->middleware("throttle:import");
         });
 
     Route::controller(ApprovalFlowController::class)->group(function () {
@@ -137,3 +140,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
 // Route::put("approvals/{id}", [ApprovalController::class, "store"]);
 // Route::get("approvals/{id}", [ApprovalFlowController::class, "show"]);
 // Route::post("approvals/{id}", [ApprovalController::class, "store"]);
+// Route::get("expenses/{project_id}", [
+//     ExpenseTransactionController::class,
+//     "getExpenses",
+// ]);

@@ -2,6 +2,7 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
+import ApprovalConfirm from "@/components/features/approvals/ApprovalConfirm"
 import ExpenseTable from "@/components/features/expenses/ExpenseTable"
 import { PaginationSimple } from "@/components/layouts/simple-paginaton"
 import api from "@/lib/axios"
@@ -33,11 +34,18 @@ export default function Expenses() {
         }
       }
     }
+
     fetchExpenses()
   }, [projectId, currentPage])
 
+  const handleNextStep = async () => {}
+  const handleReject = async () => {}
+
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex gap-2">
+        <ApprovalConfirm onAdvance={handleNextStep} onReject={handleReject} />
+      </div>
       <ExpenseTable expenses={expenses} />
       <PaginationSimple
         currentPage={meta?.current_page ?? 1}

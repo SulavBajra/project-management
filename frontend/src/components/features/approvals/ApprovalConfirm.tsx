@@ -44,7 +44,7 @@ export default function ApprovalConfirm({
       <DialogTrigger asChild>
         <Button variant="outline">Approve</Button>
       </DialogTrigger>
-      <DialogContent className="w-2/4">
+      <DialogContent className="w-2/6">
         <DialogHeader>
           <DialogTitle>Approval Request</DialogTitle>
           <DialogDescription>

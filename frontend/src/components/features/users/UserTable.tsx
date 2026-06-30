@@ -28,28 +28,36 @@ export const UserTable = ({ users }: { users: User[] }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {users.map((user, index) => (
-            <TableRow key={user.id}>
-              <TableCell>{index + 1}</TableCell>
-              <TableCell className="text-center">{user.name}</TableCell>
-              <TableCell className="text-center">{user.email}</TableCell>
-              <TableCell className="text-center">
-                <Badge variant="outline">{user.role ?? "N/A"}</Badge>
-              </TableCell>
-              <TableCell className="text-center">
-                {user.role === null ? (
-                  <Button
-                    variant="secondary"
-                    onClick={() => setSelectedUserId(user.id)}
-                  >
-                    Add Role
-                  </Button>
-                ) : (
-                  <Button variant="destructive">Delete Role</Button>
-                )}
+          {users.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center">
+                No users found.
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            users.map((user, index) => (
+              <TableRow key={user.id}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell className="text-center">{user.name}</TableCell>
+                <TableCell className="text-center">{user.email}</TableCell>
+                <TableCell className="text-center">
+                  <Badge variant="outline">{user.role ?? "N/A"}</Badge>
+                </TableCell>
+                <TableCell className="text-center">
+                  {user.role === null ? (
+                    <Button
+                      variant="secondary"
+                      onClick={() => setSelectedUserId(user.id)}
+                    >
+                      Add Role
+                    </Button>
+                  ) : (
+                    <Button variant="destructive">Delete Role</Button>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
 

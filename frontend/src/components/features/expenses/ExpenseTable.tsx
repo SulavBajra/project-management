@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { Expense } from "@/types/Expenses/Expense"
+import { Badge } from "@/components/ui/badge"
 
 type SortDir = "asc" | "desc" | null
 
@@ -49,6 +50,7 @@ export default function ExpenseTable({ expenses }: { expenses: Expense[] }) {
           <TableHead>Debit (R.S)</TableHead>
           <TableHead>Credit (R.S)</TableHead>
           <TableHead>Date</TableHead>
+          <TableHead>Status</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -67,6 +69,19 @@ export default function ExpenseTable({ expenses }: { expenses: Expense[] }) {
             <TableCell>{expense.credit}</TableCell>
             <TableCell>{expense.debit}</TableCell>
             <TableCell>{expense.transaction_date}</TableCell>
+            <TableCell>
+              <Badge
+                variant={
+                  expense.status === "Approved"
+                    ? "default"
+                    : expense.status === "Rejected"
+                      ? "destructive"
+                      : "secondary"
+                }
+              >
+                {expense.status ?? "Unchecked"}
+              </Badge>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>

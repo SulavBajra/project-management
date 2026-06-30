@@ -38,4 +38,10 @@ class ApprovalRepository
     {
         return $approval->update($approvalData);
     }
+
+    public function isFinal(int $projectId): bool
+    {
+        $approval = $this->findApproval($projectId);
+        return $approval->currentStep->is_final;
+    }
 }

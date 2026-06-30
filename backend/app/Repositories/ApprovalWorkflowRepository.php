@@ -44,6 +44,7 @@ class ApprovalWorkflowRepository
             case "expense":
                 $approvableId = $this->expense
                     ->query()
+                    ->doesntHave("approval")
                     ->where("project_id", $id)
                     ->pluck("id")
                     ->toArray();

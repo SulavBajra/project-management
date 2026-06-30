@@ -13,6 +13,7 @@ use App\Models\ExpenseTransaction;
 use App\Services\ApprovalService;
 use App\Services\ExpenseService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ExpenseTransactionController extends Controller
 {
@@ -62,12 +63,18 @@ class ExpenseTransactionController extends Controller
         $validated = $request->validated();
         $projectId = $request->route("project_id");
 
-        $expense = $this->expenseService->addExpenses(
-            $validated,
-            (int) $projectId,
-            $request->user()->id,
-        );
-        // $this->approvalService->beginApproval($expense, $request->user());
+        DB::transaction(function () use ($validated, $projectId, $request) {
+            $expense = $this->expenseService->addExpenses(
+                $validated,
+                (int) $projectId,
+                $request->user()->id,
+            );
+            $this->approvalService->beginApproval(
+                $projectId,
+                "expense",
+                $request->user()->id,
+            );
+        });
 
         return response()->json(
             ["message" => "Expense stored successfully."],
