@@ -48,7 +48,7 @@ class ProcessBudgetImport implements ShouldQueue
             $import->markFailed([["message" => $e->getMessage()]]);
         }
         $this->approvalService->beginApproval(
-            $this->projectId,
+            $this->planId,
             "budget",
             $this->userId,
         );

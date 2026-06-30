@@ -119,7 +119,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::controller(ApprovalFlowController::class)->group(function () {
         Route::get("approval-flow", "index");
         Route::post("approval-flow", "store");
-        Route::get("approval-flow/{id}", "show");
+        // Route::get("approval-flow/{id}", "show");
     });
 
     Route::controller(ApprovalController::class)->group(function () {
@@ -138,9 +138,9 @@ Route::middleware(["auth:sanctum"])->group(function () {
 //     "getBudgetVsExpense",
 // ]);
 // Route::put("approvals/{id}", [ApprovalController::class, "store"]);
-// Route::get("approvals/{id}", [ApprovalFlowController::class, "show"]);
+Route::get("approval-flow/{id}", [ApprovalFlowController::class, "show"]);
 // Route::post("approvals/{id}", [ApprovalController::class, "store"]);
-// Route::get("expenses/{project_id}", [
-//     ExpenseTransactionController::class,
-//     "getExpenses",
-// ]);
+Route::get("expenses/{project_id}", [
+    ExpenseTransactionController::class,
+    "getExpenses",
+]);

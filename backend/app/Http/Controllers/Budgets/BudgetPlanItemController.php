@@ -45,7 +45,7 @@ class BudgetPlanItemController extends Controller
             $projectId,
         );
         $this->approvalService->beginApproval(
-            $projectId,
+            $plan->id,
             "budget",
             $request->user()->id,
         );
@@ -112,6 +112,7 @@ class BudgetPlanItemController extends Controller
             $import->id,
             $plan->id,
             $request->user()->id,
+            $this->approvalService,
         );
 
         return response()->json(

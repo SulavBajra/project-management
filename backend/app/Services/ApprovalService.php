@@ -24,29 +24,24 @@ class ApprovalService
     }
 
     public function beginApproval(
-        int $projectId,
+        int $modelId,
         string $modelName,
         int $userId,
     ): void {
-        DB::transaction(function () use ($projectId, $modelName, $userId) {
+        DB::transaction(function () use ($modelId, $modelName, $userId) {
             //this is to check if a workflow exists for the given model or not
             $workflow = $this->workflowRepo->findWorkFlowAndVersion($modelName);
             if (!$workflow) {
                 throw new WorkFlowDoesntExistException();
             }
 
-            $modelId = $this->workflowRepo->getModelId($modelName, $projectId);
-            if (!$modelId) {
-                throw new \RuntimeException("No approvable model found.");
-            }
-
-            if ($this->approvalRepo->hasApproval($modelName, $modelId[0])) {
+            if ($this->approvalRepo->hasApproval($modelName, $modelId)) {
                 throw new ApprovalExistsException();
             }
             $version = $workflow->currentVersion()->first();
             Approval::create([
                 "approvable_type" => $modelName,
-                "approvable_id" => $modelId[0],
+                "approvable_id" => $modelId,
                 "approval_workflow_version_id" => $version->id,
                 "created_by" => $userId,
                 "current_step_id" => $version->firstStep->id,
@@ -55,12 +50,20 @@ class ApprovalService
         });
     }
 
+    public function test(int $projectId, User $user)
+    {
+        $approval = $this->approvalRepo->findApproval($projectId);
+        $nextStep = $this->workflowRepo->getNextStep($approval);
+        return !$user->hasRole($nextStep->role);
+        //
+    }
+
     public function advanceStep(
-        int $projectId,
+        int $approvalId,
         User $user,
         ?string $comment = null,
     ) {
-        $approval = $this->approvalRepo->findApproval($projectId);
+        $approval = $this->approvalRepo->findApproval($approvalId);
         $nextStep = $this->workflowRepo->getNextStep($approval);
         if (!$nextStep) {
             throw new NoNextStepException();
@@ -93,11 +96,11 @@ class ApprovalService
     }
 
     public function rejectRequest(
-        int $projectId,
+        int $approvalId,
         int $userId,
         ?string $comment = null,
     ) {
-        $approval = $this->approvalRepo->findApproval($projectId);
+        $approval = $this->approvalRepo->findApproval($approvalId);
         $rejectStatus = ApprovalStatus::where("name", "Rejected")->first();
 
         if (!$rejectStatus) {
@@ -122,11 +125,5 @@ class ApprovalService
             $approval->histories()->create($data);
             $approval->update(["current_status_id" => $rejectStatus->id]);
         });
-    }
-
-    public function isFinal(int $projectId): bool
-    {
-        $approval = $this->approvalRepo->findApproval($projectId);
-        return $approval->currentStep->is_final;
     }
 }

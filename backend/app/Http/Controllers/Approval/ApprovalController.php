@@ -15,11 +15,11 @@ class ApprovalController extends Controller
         //
     }
 
-    public function store(ApprovalStepStoreRequest $request, int $projectId)
+    public function store(ApprovalStepStoreRequest $request, int $approvalId)
     {
         $validated = $request->validated();
         $this->approvalService->advanceStep(
-            $projectId,
+            $approvalId,
             $request->user(),
             $validated["comment"] ?? null,
         );
@@ -30,7 +30,7 @@ class ApprovalController extends Controller
         );
     }
 
-    public function reject(Request $request, int $projectId)
+    public function reject(Request $request, int $approvalId)
     {
         $validated = $request->validate([
             "comment" => "nullable|string|max:250",
@@ -42,7 +42,7 @@ class ApprovalController extends Controller
             );
         }
         $this->approvalService->rejectRequest(
-            $projectId,
+            $approvalId,
             $user->id,
             $validated["comment"] ?? null,
         );

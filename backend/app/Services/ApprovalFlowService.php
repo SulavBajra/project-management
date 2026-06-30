@@ -85,7 +85,6 @@ class ApprovalFlowService
 
     public function checkFlowInfo(int $id, string $name)
     {
-        $approvableId = $this->flowRepo->getModelId($name, $id);
         $model = Approval::query()
             ->select([
                 "id",
@@ -101,7 +100,7 @@ class ApprovalFlowService
                 "version:id",
             ])
             ->where("approvable_type", $name)
-            ->whereIn("approvable_id", $approvableId)
+            ->where("approvable_id", $id)
             ->first();
         return $model;
     }

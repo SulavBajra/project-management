@@ -70,7 +70,7 @@ class ExpenseTransactionController extends Controller
                 $request->user()->id,
             );
             $this->approvalService->beginApproval(
-                $projectId,
+                $expense->id,
                 "expense",
                 $request->user()->id,
             );
@@ -86,7 +86,10 @@ class ExpenseTransactionController extends Controller
     {
         $projectId = $request->route("project_id");
 
-        $transactions = ExpenseTransaction::with(["accountHead", "expense"])
+        $transactions = ExpenseTransaction::with([
+            "accountHead",
+            "expense.approval.currentStatus",
+        ])
             ->whereRelation("expense", "project_id", $projectId)
             ->latest()
             ->paginate(10);
