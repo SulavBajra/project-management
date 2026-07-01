@@ -9,4 +9,5 @@ export type Expense = {
   account_head_id: number
   account_head: string
   status: string | null
+  is_final: boolean
 }

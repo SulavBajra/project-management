@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import ConfirmDialog from "@/components/ConfirmDialog"
-import FlowButton from "@/components/features/approvals/FlowButton"
 import AddBudgetHead from "@/components/features/budgets/AddBudgetHead"
 import { AllocationTable } from "@/components/features/budgets/AllocationTable"
 import BudgetPlan from "@/components/features/budgets/BudgetPlan"
@@ -59,22 +58,24 @@ export default function ProjectBudget() {
   }, [projectId])
 
   const fetchBudgetStatus = useCallback(async () => {
+    if (!planId) return
     try {
-      const response = await api.get(
-        `api/approval-flow/${projectId}/?name=budget`
-      )
+      const response = await api.get(`api/approval-flow/${planId}/?name=budget`)
       setBudgetStatus(response.data.data)
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message ?? error.message)
       }
     }
-  }, [projectId])
+  }, [planId])
 
   useEffect(() => {
     fetchItems()
+  }, [fetchItems])
+
+  useEffect(() => {
     fetchBudgetStatus()
-  }, [fetchItems, fetchBudgetStatus])
+  }, [fetchBudgetStatus])
 
   const handleUpdate = async (
     itemId: number,
@@ -198,10 +199,13 @@ export default function ProjectBudget() {
     }
   }
 
-  const handleNextStep = async (comment: string | null) => {
+  const handleNextStep = async (comment: string | null, approvalId: number) => {
     try {
-      await api.post(`/api/approvals/${projectId}`, comment)
+      const response = await api.post(`/api/approvals/${approvalId}`, comment)
       setSubmitting(true)
+      fetchItems()
+      fetchBudgetStatus()
+      toast.success(response.data.message)
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message ?? error.message)
@@ -211,10 +215,16 @@ export default function ProjectBudget() {
     }
   }
 
-  const handleReject = async (comment: string | null) => {
+  const handleReject = async (comment: string | null, approvalId: number) => {
     try {
-      await api.post(`/api/approvals/${projectId}/reject`, comment)
+      const response = await api.post(
+        `/api/approvals/${approvalId}/reject`,
+        comment
+      )
       setSubmitting(true)
+      fetchItems()
+      fetchBudgetStatus()
+      toast.success(response.data.message)
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message ?? error.message)
@@ -230,7 +240,7 @@ export default function ProjectBudget() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Budget Allocations</h2>
-        <div className="flex justify-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           {budgetStatus && (
             <StatusBadge
               status={budgetStatus.current_status}
@@ -239,14 +249,12 @@ export default function ProjectBudget() {
           )}
           {budgetStatus?.current_status === "Rejected" ? null : (
             <ApprovalConirm
+              approvalId={budgetStatus?.id ?? null}
               onAdvance={handleNextStep}
               onReject={handleReject}
             />
           )}
-          {/*<FlowButton
-            step={budgetStatus?.current_step ?? "employee start"}
-            onAction={handleNextStep}
-          />*/}
+
           <BudgetPlan budgetHeads={budgetHeads} projectId={projectId} />
           <AddBudgetHead
             loadBudgetHeads={fetchBudgetHeads}

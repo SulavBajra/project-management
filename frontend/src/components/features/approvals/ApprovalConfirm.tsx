@@ -1,4 +1,4 @@
-import { Check, X } from "lucide-react"
+import { Check, CheckCircle, X } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,12 +14,14 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 
 interface ApprovalConfirmProps {
-  onAdvance: (comment: string | null) => void
-  onReject: (comment: string | null) => void
+  approvalId: number | null
+  onAdvance: (comment: string | null, approvalId: number) => void
+  onReject: (comment: string | null, approvalId: number) => void
   stepLabel?: string
 }
 
 export default function ApprovalConfirm({
+  approvalId,
   onAdvance,
   onReject,
   stepLabel = "Accept",
@@ -28,13 +30,15 @@ export default function ApprovalConfirm({
   const [open, setOpen] = useState(false)
 
   const handleAdvance = () => {
-    onAdvance(comment.trim() || null)
+    if (approvalId === null) return
+    onAdvance(comment.trim() || null, approvalId)
     setOpen(false)
     setComment("")
   }
 
   const handleReject = () => {
-    onReject(comment.trim() || null)
+    if (approvalId === null) return
+    onReject(comment.trim() || null, approvalId)
     setOpen(false)
     setComment("")
   }
@@ -42,7 +46,9 @@ export default function ApprovalConfirm({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">Approve</Button>
+        <Button variant="outline">
+          <CheckCircle /> Approve
+        </Button>
       </DialogTrigger>
       <DialogContent className="w-2/6">
         <DialogHeader>

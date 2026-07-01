@@ -12,6 +12,7 @@ use App\Http\Controllers\Approval\ApprovalFlowController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Budgets\BudgetPlanController;
 use App\Http\Controllers\Budgets\BudgetPlanItemController;
+use App\Http\Controllers\Expense\ExpenseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -75,10 +76,12 @@ Route::middleware(["auth:sanctum"])->group(function () {
             "importStatus",
         )->middleware("permission:import_expense");
 
+        Route::get("expenses/{project_id}", "index");
         // Manual Addition of expenses
-        Route::post("projects/{project_id}/expenses", "storeExpenses");
-        Route::get("expenses/{project_id}", "getExpenses");
+        Route::post("projects/{project_id}/expenses", "store");
     });
+
+    Route::get("expenses/{id}/approval", [ExpenseController::class, "index"]);
 
     Route::prefix("budget-heads")
         ->name("budget-heads.")
@@ -119,7 +122,7 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::controller(ApprovalFlowController::class)->group(function () {
         Route::get("approval-flow", "index");
         Route::post("approval-flow", "store");
-        // Route::get("approval-flow/{id}", "show");
+        Route::get("approval-flow/{id}", "show");
     });
 
     Route::controller(ApprovalController::class)->group(function () {
@@ -138,9 +141,9 @@ Route::middleware(["auth:sanctum"])->group(function () {
 //     "getBudgetVsExpense",
 // ]);
 // Route::put("approvals/{id}", [ApprovalController::class, "store"]);
-Route::get("approval-flow/{id}", [ApprovalFlowController::class, "show"]);
+// Route::get("approval-flow/{id}", [ApprovalFlowController::class, "show"]);
 // Route::post("approvals/{id}", [ApprovalController::class, "store"]);
-Route::get("expenses/{project_id}", [
-    ExpenseTransactionController::class,
-    "getExpenses",
-]);
+// Route::get("expenses/{project_id}", [
+//     ExpenseTransactionController::class,
+//     "getExpenses",
+// ]);

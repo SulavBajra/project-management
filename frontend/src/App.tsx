@@ -26,6 +26,7 @@ import ProjectIndex from "./pages/Project/ProjectIndex.tsx"
 import Approval from "./pages/Approval.tsx"
 import ProjectBudget from "./pages/Budget/ProjectBudget.tsx"
 import NotFound from "./pages/NotFound.tsx"
+import ExpenseApproval from "./pages/Expense/ExpenseApproval.tsx"
 
 function ProtectedRoute() {
   const { user } = useAuth()
@@ -67,6 +68,10 @@ export default function App() {
                 <Route path="overview" element={<Overview />} />
                 <Route path="timeline" element={<ProjectTimeline />} />
                 <Route path="expenses" element={<Expenses />} />
+                <Route
+                  path="expenses/approvals"
+                  element={<ExpenseApproval />}
+                />
                 <Route path="expense" element={<Expense />} />
                 <Route path="budget" element={<ProjectBudget />} />
               </Route>

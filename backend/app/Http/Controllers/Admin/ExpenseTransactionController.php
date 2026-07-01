@@ -58,7 +58,7 @@ class ExpenseTransactionController extends Controller
         ]);
     }
 
-    public function storeExpenses(ExpenseStoreRequest $request)
+    public function store(ExpenseStoreRequest $request)
     {
         $validated = $request->validated();
         $projectId = $request->route("project_id");
@@ -82,7 +82,7 @@ class ExpenseTransactionController extends Controller
         );
     }
 
-    public function getExpenses(Request $request)
+    public function index(Request $request)
     {
         $projectId = $request->route("project_id");
 
