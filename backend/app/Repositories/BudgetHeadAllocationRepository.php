@@ -37,4 +37,9 @@ class BudgetHeadAllocationRepository
             ->where("budget_plan_id", $planId)
             ->get();
     }
+
+    public function insert(array $allocations): void
+    {
+        BudgetHeadAllocation::insert($allocations);
+    }
 }

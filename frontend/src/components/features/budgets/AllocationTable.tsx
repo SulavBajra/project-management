@@ -33,6 +33,7 @@ export function AllocationTable({
       </div>
     )
   }
+
   return (
     <div className="overflow-x-auto rounded-md border">
       <Table>

@@ -18,7 +18,6 @@ use App\Repositories\BudgetPlanRepository;
 use App\Services\ApprovalService;
 use App\Services\BudgetAllocationService;
 use App\Services\BudgetService;
-use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 
 class BudgetPlanItemController extends Controller
@@ -112,7 +111,6 @@ class BudgetPlanItemController extends Controller
             $import->id,
             $plan->id,
             $request->user()->id,
-            $this->approvalService,
         );
 
         return response()->json(

@@ -8,8 +8,8 @@ use App\Models\AccountHead;
 use App\Models\Expense;
 use App\Models\ExpenseTransaction;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -19,16 +19,19 @@ class ExpenseService
         UploadedFile|string $file,
         int $userId,
         int $projectId,
-    ): void {
+    ): Collection {
         $import = new ExpenseTransactionsImport();
 
-        DB::transaction(function () use ($import, $file, $userId, $projectId) {
+        return DB::transaction(function () use (
+            $import,
+            $file,
+            $userId,
+            $projectId,
+        ) {
             Excel::import($import, $file);
             $rows = $import->rows;
             $groupedRows = $rows->groupBy("expense_code");
-            Log::info("Imported rows count: " . $rows->count());
-            Log::info("Sample row: ", $rows->first() ?? []);
-
+            $expenses = collect();
             foreach ($groupedRows as $expenseCode => $items) {
                 $debit = $items->sum("debit");
                 $credit = $items->sum("credit");
@@ -80,7 +83,9 @@ class ExpenseService
                     ["expense_id", "account_head_id", "transaction_date"],
                     ["debit", "credit", "updated_at"],
                 );
+                $expenses->push($expense);
             }
+            return $expenses;
         });
     }
 

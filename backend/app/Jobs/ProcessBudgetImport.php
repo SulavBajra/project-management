@@ -22,7 +22,6 @@ class ProcessBudgetImport implements ShouldQueue
         private int $importId,
         private int $planId,
         private int $userId,
-        private ApprovalService $approvalService,
     ) {
         //
     }
@@ -30,8 +29,10 @@ class ProcessBudgetImport implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(BudgetService $service): void
-    {
+    public function handle(
+        BudgetService $service,
+        ApprovalService $approvalService,
+    ): void {
         $import = ExpenseImport::findOrFail($this->importId);
         if ($import->isTerminal()) {
             return;
@@ -47,10 +48,6 @@ class ProcessBudgetImport implements ShouldQueue
         } catch (\Exception $e) {
             $import->markFailed([["message" => $e->getMessage()]]);
         }
-        $this->approvalService->beginApproval(
-            $this->planId,
-            "budget",
-            $this->userId,
-        );
+        $approvalService->beginApproval($this->planId, "budget", $this->userId);
     }
 }
