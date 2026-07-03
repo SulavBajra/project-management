@@ -43,11 +43,11 @@ class BudgetPlanItemController extends Controller
             $validated,
             $projectId,
         );
-        $this->approvalService->beginApproval(
-            $plan->id,
-            "budget",
-            $request->user()->id,
-        );
+        // $this->approvalService->beginApproval(
+        //     $plan->id,
+        //     "budget",
+        //     $request->user()->id,
+        // );
 
         return response()->json([
             "message" => "Budget plan item created successfully",

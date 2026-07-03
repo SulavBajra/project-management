@@ -38,6 +38,7 @@ class StatusSeeder extends Seeder
             $statuses = collect([
                 "Pending",
                 "Checked",
+                "Reviewed",
                 "Approved",
                 "Rejected",
             ])->mapWithKeys(
@@ -49,6 +50,7 @@ class StatusSeeder extends Seeder
             $budgetStatuses = collect([
                 "Pending",
                 "Checked",
+                "Reviewed",
                 "Approved",
                 "Rejected",
             ])->mapWithKeys(
@@ -65,14 +67,14 @@ class StatusSeeder extends Seeder
             $version->steps()->createMany([
                 [
                     "role_id" => $empRole->id,
-                    "approval_status_id" => $statuses["Pending"]->id,
+                    "approval_status_id" => $statuses["Checked"]->id,
                     "order_no" => 1,
                     "name" => "Employee Processing",
                     "is_final" => false,
                 ],
                 [
                     "role_id" => $pmRole->id,
-                    "approval_status_id" => $statuses["Checked"]->id,
+                    "approval_status_id" => $statuses["Reviewed"]->id,
                     "order_no" => 2,
                     "name" => "Project_Manager Review",
                     "is_final" => false,
@@ -89,14 +91,14 @@ class StatusSeeder extends Seeder
             $versionBudget->steps()->createMany([
                 [
                     "role_id" => $empRole->id,
-                    "approval_status_id" => $budgetStatuses["Pending"]->id,
+                    "approval_status_id" => $budgetStatuses["Checked"]->id,
                     "order_no" => 1,
                     "name" => "Employee Processing",
                     "is_final" => false,
                 ],
                 [
                     "role_id" => $pmRole->id,
-                    "approval_status_id" => $budgetStatuses["Checked"]->id,
+                    "approval_status_id" => $budgetStatuses["Reviewed"]->id,
                     "order_no" => 2,
                     "name" => "Project Manager Review",
                     "is_final" => false,

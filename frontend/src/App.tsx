@@ -27,6 +27,7 @@ import Approval from "./pages/Approval.tsx"
 import ProjectBudget from "./pages/Budget/ProjectBudget.tsx"
 import NotFound from "./pages/NotFound.tsx"
 import ExpenseApproval from "./pages/Expense/ExpenseApproval.tsx"
+import AdminApproval from "./pages/Approval/AdminApproval.tsx"
 
 function ProtectedRoute() {
   const { user } = useAuth()
@@ -85,7 +86,7 @@ export default function App() {
 
               <Route path="/budget" element={<Budget />} />
               <Route path="/timeline" element={<TimeLine />} />
-              <Route path="/approval" element={<Approval />} />
+              <Route path="/approval" element={<AdminApproval />} />
             </Route>
           </Route>
           <Route path="/*" element={<NotFound />} />

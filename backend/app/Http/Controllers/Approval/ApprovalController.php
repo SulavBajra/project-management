@@ -5,14 +5,26 @@ namespace App\Http\Controllers\Approval;
 use App\Exceptions\HasNoAccessException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Approval\ApprovalStepStoreRequest;
+use App\Http\Resources\Approval\ApprovalListResource;
+use App\Repositories\ApprovalRepository;
 use App\Services\ApprovalService;
 use Illuminate\Http\Request;
 
 class ApprovalController extends Controller
 {
-    public function __construct(protected ApprovalService $approvalService)
-    {
+    public function __construct(
+        protected ApprovalService $approvalService,
+        private ApprovalRepository $approvalRepo,
+    ) {
         //
+    }
+
+    //This is to show the approval request according to the role
+    public function show(int $roleId)
+    {
+        $approvals = $this->approvalRepo->findApprovalFromRole($roleId);
+        return ApprovalListResource::collection($approvals);
+        // return $approvals;
     }
 
     public function store(ApprovalStepStoreRequest $request, int $approvalId)

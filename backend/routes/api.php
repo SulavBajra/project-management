@@ -81,7 +81,10 @@ Route::middleware(["auth:sanctum"])->group(function () {
         Route::post("projects/{project_id}/expenses", "store");
     });
 
-    Route::get("expenses/{id}/approval", [ExpenseController::class, "index"]);
+    Route::controller(ExpenseController::class)->group(function () {
+        Route::get("expenses/{id}/approval", "index");
+        Route::get("expenses/{id}/history", "history");
+    });
 
     Route::prefix("budget-heads")
         ->name("budget-heads.")
@@ -128,9 +131,11 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::controller(ApprovalController::class)->group(function () {
         Route::post("approvals/{id}", "store");
         Route::post("approvals/{id}/reject", "reject");
+        // Route::get("approvals/{id}", "show");
     });
 });
 
+Route::get("approvals/{id}", [ApprovalController::class, "show"]);
 //test field
 // Route::get("projects/budget-plan/{plan}/export", [
 //     BudgetPlanItemController::class,

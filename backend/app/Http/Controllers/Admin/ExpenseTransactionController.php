@@ -7,7 +7,6 @@ use App\Http\Requests\Expense\ExpenseExtractRequest;
 use App\Http\Requests\Expense\ExpenseStoreRequest;
 use App\Http\Resources\Expenses\ExpenseTransactionsResource;
 use App\Jobs\ProcessExcelImport;
-use App\Models\Expense;
 use App\Models\ExpenseImport;
 use App\Models\ExpenseTransaction;
 use App\Services\ApprovalService;
@@ -92,7 +91,7 @@ class ExpenseTransactionController extends Controller
         ])
             ->whereRelation("expense", "project_id", $projectId)
             ->latest()
-            ->paginate(10);
+            ->paginate(12);
 
         return ExpenseTransactionsResource::collection($transactions);
     }

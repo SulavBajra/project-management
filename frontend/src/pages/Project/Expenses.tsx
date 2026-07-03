@@ -1,9 +1,11 @@
 import axios from "axios"
+import { Clock } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
 import ExpenseTable from "@/components/features/expenses/ExpenseTable"
 import { PaginationSimple } from "@/components/layouts/simple-paginaton"
+import { Button } from "@/components/ui/button"
 import api from "@/lib/axios"
 import type { Expense } from "@/types/Expenses/Expense"
 import type { ExpenseStatus } from "@/types/Expenses/ExpenseStatus"
@@ -21,6 +23,7 @@ export default function Expenses() {
   const [expenseStatus, setExpenseStatus] = useState<ExpenseStatus[]>([])
   const [meta, setMeta] = useState<Meta>()
   const [currentPage, setCurrentPage] = useState(1)
+  const navigate = useNavigate()
 
   const fetchExpenseStatus = useCallback(async () => {
     try {
@@ -83,6 +86,9 @@ export default function Expenses() {
           onAdvance={handleNextStep}
           onReject={handleReject}
         />
+        <Button onClick={() => navigate("/")}>
+          <Clock /> History
+        </Button>
       </div>
       <ExpenseTable expenses={expenses} />
       <PaginationSimple

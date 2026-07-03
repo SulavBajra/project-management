@@ -17,7 +17,9 @@ class ApprovalRepository
             ->query()
             ->with([
                 "version",
-                "currentStep:id,role_id,order_no,is_final",
+                "currentStep:id,role_id,order_no,is_final,approval_status_id",
+                "currentStep.approvalStatus:id,name",
+                "currentStep.role",
                 "currentStatus",
             ])
             ->where("id", $id)
@@ -43,5 +45,27 @@ class ApprovalRepository
     {
         $approval = $this->findApproval($projectId);
         return $approval->currentStep->is_final;
+    }
+
+    public function findApprovalFromRole(int $roleId)
+    {
+        return $this->model
+            ->query()
+            ->select(
+                "id",
+                "approvable_id",
+                "approvable_type",
+                "created_by",
+                "current_step_id",
+            )
+            ->with([
+                "approvable:id,project_id",
+                "approvable.project:id,name",
+                "createdBy:id,name",
+                "currentStep:id,role_id,order_no,is_final,approval_status_id",
+                "currentStep.approvalStatus:id,name",
+            ])
+            ->whereRelation("currentStep", "role_id", "=", $roleId)
+            ->get();
     }
 }

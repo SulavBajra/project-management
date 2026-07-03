@@ -9,6 +9,7 @@ use App\Http\Resources\BudgetPlan\BudgetPlanResource;
 use App\Models\BudgetPlanItem;
 use App\Models\Project;
 use App\Repositories\BudgetPlanRepository;
+use App\Services\ApprovalService;
 use App\Services\BudgetAllocationService;
 use Illuminate\Support\Facades\DB;
 
@@ -17,6 +18,7 @@ class BudgetPlanController extends Controller
     public function __construct(
         private BudgetPlanRepository $budgetPlanRepository,
         private BudgetAllocationService $budgetAllocationService,
+        private ApprovalService $approvalService,
     ) {
         //
     }
@@ -25,7 +27,7 @@ class BudgetPlanController extends Controller
     {
         $validated = $request->validated();
 
-        DB::transaction(function () use ($validated, $project) {
+        DB::transaction(function () use ($validated, $project, $request) {
             $plan = $this->budgetPlanRepository->create(
                 $project->id,
                 $validated["name"],
@@ -35,6 +37,11 @@ class BudgetPlanController extends Controller
             $this->budgetAllocationService->createAllocationModel(
                 $plan->items->pluck("id")->toArray(),
                 $project->id,
+            );
+            $this->approvalService->beginApproval(
+                $plan->id,
+                "budget",
+                $request->user()->id,
             );
         });
 

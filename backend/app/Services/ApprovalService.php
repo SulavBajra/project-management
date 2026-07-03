@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Exceptions\ApprovalExistsException;
 use App\Exceptions\HasNoAccessException;
-use App\Exceptions\NoNextStepException;
 use App\Exceptions\WorkFlowDoesntExistException;
 use App\Models\Approvals\Approval;
 use App\Models\Approvals\ApprovalHistory;
@@ -38,24 +37,49 @@ class ApprovalService
             if ($this->approvalRepo->hasApproval($modelName, $modelId)) {
                 throw new ApprovalExistsException();
             }
-            $version = $workflow->currentVersion()->first();
-            Approval::create([
-                "approvable_type" => $modelName,
-                "approvable_id" => $modelId,
-                "approval_workflow_version_id" => $version->id,
-                "created_by" => $userId,
-                "current_step_id" => $version->firstStep->id,
-                "current_status_id" => $version->firstStep->approval_status_id,
-            ]);
+            DB::transaction(function () use (
+                $workflow,
+                $modelName,
+                $modelId,
+                $userId,
+            ) {
+                $version = $workflow->currentVersion()->first();
+                $firstStatus = $version->statuses()->first();
+
+                $approval = Approval::create([
+                    "approvable_type" => $modelName,
+                    "approvable_id" => $modelId,
+                    "approval_workflow_version_id" => $version->id,
+                    "created_by" => $userId,
+                    "current_step_id" => $version->firstStep->id,
+                    "current_status_id" => $firstStatus->id,
+                ]);
+                ApprovalHistory::create([
+                    "approval_id" => $approval->id,
+                    "approval_step_id" => $approval->current_step_id,
+                    "approval_workflow_version_id" =>
+                        $approval->approval_workflow_version_id,
+                    "acted_by" => $userId,
+                    "from_state" => null,
+                    "to_state" => $approval->currentStatus->name,
+                    "comment" => "Started Approval",
+                ]);
+            });
         });
     }
 
-    public function test(int $projectId, User $user)
+    public function test(int $approvalId, User $user)
     {
-        $approval = $this->approvalRepo->findApproval($projectId);
+        $approval = $this->approvalRepo->findApproval($approvalId);
         $nextStep = $this->workflowRepo->getNextStep($approval);
-        return !$user->hasRole($nextStep->role);
-        //
+        return $approval;
+    }
+
+    public function test2(int $approvalId, User $user)
+    {
+        $approval = $this->approvalRepo->findApproval($approvalId);
+        $nextStep = $this->workflowRepo->getNextStep($approval);
+        return $nextStep;
     }
 
     public function advanceStep(
@@ -65,23 +89,22 @@ class ApprovalService
     ) {
         $approval = $this->approvalRepo->findApproval($approvalId);
         $nextStep = $this->workflowRepo->getNextStep($approval);
-        if (!$nextStep) {
-            throw new NoNextStepException();
-        }
-        if (!$user->hasRole($nextStep->role)) {
+        $currentStep = $approval->currentStep;
+        if (!$user->hasRole($currentStep->role)) {
             throw new HasNoAccessException();
+        }
+        if ($currentStep->is_final) {
+            $this->finalStep($approval, $user, $comment);
+            return;
         }
         DB::transaction(function () use (
             $approval,
             $comment,
+            $currentStep,
             $nextStep,
             $user,
         ) {
-            $data = [
-                "current_step_id" => $nextStep->id,
-                "current_status_id" => $nextStep->approval_status_id,
-            ];
-            ApprovalHistory::create([
+            $historyData = [
                 "approval_id" => $approval->id,
                 "approval_step_id" => $approval->current_step_id,
                 "approval_workflow_version_id" =>
@@ -90,8 +113,37 @@ class ApprovalService
                 "from_state" => $approval->currentStatus->name,
                 "to_state" => $nextStep->approvalStatus->name,
                 "comment" => $comment,
+            ];
+            $approval->update([
+                "current_step_id" => $nextStep->id,
+                "current_status_id" => $currentStep->approval_status_id,
             ]);
-            $approval->update($data);
+            $approval->histories()->create($historyData);
+        });
+    }
+
+    public function finalStep(
+        Approval $approval,
+        User $user,
+        ?string $comment = null,
+    ) {
+        DB::transaction(function () use ($approval, $comment, $user) {
+            $historyData = [
+                "approval_id" => $approval->id,
+                "approval_step_id" => $approval->current_step_id,
+                "approval_workflow_version_id" =>
+                    $approval->approval_workflow_version_id,
+                "acted_by" => $user->id,
+                "from_state" => $approval->currentStatus->name,
+                "to_state" => $approval->currentStep->approvalStatus->name,
+                "comment" => $comment,
+            ];
+            $approval->update([
+                "current_step_id" => $approval->currentStep->id,
+                "current_status_id" =>
+                    $approval->currentStep->approval_status_id,
+            ]);
+            $approval->histories()->create($historyData);
         });
     }
 
@@ -126,4 +178,8 @@ class ApprovalService
             $approval->update(["current_status_id" => $rejectStatus->id]);
         });
     }
+
+    // public function getHistory(int $projectId){
+
+    // }
 }

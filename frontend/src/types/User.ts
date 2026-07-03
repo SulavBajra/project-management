@@ -3,6 +3,7 @@ export interface User {
   name: string
   email: string
   role: string | null
+  role_id: number
   permissions: string[]
 }
 
@@ -13,6 +14,7 @@ export type LoginResponse = {
     name: string
     email: string
     role: string
+    role_id: number
     permissions: string[]
   }
 }

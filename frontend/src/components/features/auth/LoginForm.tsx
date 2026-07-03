@@ -39,6 +39,7 @@ function mapAuthUser(response: LoginResponse): User {
     name: response.user.name,
     email: response.user.email,
     role: response.user.role,
+    role_id: response.user.role_id,
     permissions: response.user.permissions,
   }
 }

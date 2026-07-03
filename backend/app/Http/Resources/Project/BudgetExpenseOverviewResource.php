@@ -15,6 +15,13 @@ class BudgetExpenseOverviewResource extends JsonResource
     public function toArray(Request $request): array
     {
         $budgetPlan = $this["allocation"]->first();
+
+        if (!$budgetPlan) {
+            return [
+                "budget_plan_id" => null,
+                "periods" => [],
+            ];
+        }
         $expenses = $this["expenses"];
 
         $periods = $budgetPlan->items
