@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Spatie\Permission\Models\Role;
 
 #[
@@ -16,6 +17,7 @@ use Spatie\Permission\Models\Role;
         "order_no",
         "name",
         "is_final",
+        "is_auto_approve",
     ]),
 ]
 class ApprovalStep extends Model
@@ -24,6 +26,7 @@ class ApprovalStep extends Model
     {
         return [
             "is_final" => "boolean",
+            "is_auto_approve" => "boolean",
         ];
     }
 

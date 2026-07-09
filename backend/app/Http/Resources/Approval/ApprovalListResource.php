@@ -24,7 +24,7 @@ class ApprovalListResource extends JsonResource
             "current_step_id" => $this->current_step_id,
             "order_no" => $this->currentStep->order_no,
             "is_final" => $this->currentStep->is_final,
-            "current_status" => $this->currentStep->approvalStatus->name,
+            "current_status" => $this->currentStatus->name,
         ];
     }
 }

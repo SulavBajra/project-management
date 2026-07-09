@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\TimelineController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Approval\ApprovalController;
 use App\Http\Controllers\Approval\ApprovalFlowController;
+use App\Http\Controllers\Approval\ApprovalHistoryController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Budgets\BudgetPlanController;
 use App\Http\Controllers\Budgets\BudgetPlanItemController;
@@ -131,11 +132,12 @@ Route::middleware(["auth:sanctum"])->group(function () {
     Route::controller(ApprovalController::class)->group(function () {
         Route::post("approvals/{id}", "store");
         Route::post("approvals/{id}/reject", "reject");
-        // Route::get("approvals/{id}", "show");
+        Route::get("approvals/{id}", "show");
     });
 });
 
-Route::get("approvals/{id}", [ApprovalController::class, "show"]);
+Route::get("approvals/history", [ApprovalHistoryController::class, "index"]);
+// Route::get("approvals/{id}", [ApprovalController::class, "show"]);
 //test field
 // Route::get("projects/budget-plan/{plan}/export", [
 //     BudgetPlanItemController::class,

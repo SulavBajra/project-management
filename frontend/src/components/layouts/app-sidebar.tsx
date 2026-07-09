@@ -6,6 +6,7 @@ import {
   ListChecks,
   LogOut,
   LogOutIcon,
+  Settings,
   ShieldCheck,
   Smile,
   Timeline,
@@ -199,6 +200,14 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )}
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Settings">
+                    <Link to="/settings">
+                      <Settings className="h-4 w-4" />
+                      <span>Settings</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

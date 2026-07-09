@@ -10,6 +10,8 @@ import api from "@/lib/axios"
 import type { Expense } from "@/types/Expenses/Expense"
 import type { ExpenseStatus } from "@/types/Expenses/ExpenseStatus"
 import ExpenseApproval from "../Expense/ExpenseApproval"
+import { DataTable } from "@/types/Expenses/data-table"
+import { columns } from "@/types/Expenses/columns"
 
 type Meta = {
   current_page: number
@@ -90,7 +92,7 @@ export default function Expenses() {
           <Clock /> History
         </Button>
       </div>
-      <ExpenseTable expenses={expenses} />
+      <DataTable columns={columns} data={expenses} />
       <PaginationSimple
         currentPage={meta?.current_page ?? 1}
         totalPages={meta?.last_page ?? 1}

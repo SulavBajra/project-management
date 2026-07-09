@@ -23,11 +23,11 @@ import Expenses from "./pages/Project/Expenses.tsx"
 import { Toaster } from "@/components/ui/sonner"
 import UsersData from "./pages/User/UserData.tsx"
 import ProjectIndex from "./pages/Project/ProjectIndex.tsx"
-import Approval from "./pages/Approval.tsx"
 import ProjectBudget from "./pages/Budget/ProjectBudget.tsx"
 import NotFound from "./pages/NotFound.tsx"
 import ExpenseApproval from "./pages/Expense/ExpenseApproval.tsx"
 import AdminApproval from "./pages/Approval/AdminApproval.tsx"
+import Settings from "./pages/Setting.tsx"
 
 function ProtectedRoute() {
   const { user } = useAuth()
@@ -63,6 +63,7 @@ export default function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/project" element={<ProjectIndex />} />
+              <Route path="/settings" element={<Settings />} />
 
               <Route path="/projects/:projectId" element={<ProjectLayout />}>
                 <Route index element={<Navigate to="overview" replace />} />

@@ -21,7 +21,6 @@ export default function AdminApproval() {
   const [loading, setLoading] = useState(true)
   const [approvals, setApprovals] = useState<ApprovalList[]>([])
   const roleId = Number(user?.role_id)
-  console.log(user)
 
   const fetchApprovals = useCallback(async () => {
     if (!roleId) return

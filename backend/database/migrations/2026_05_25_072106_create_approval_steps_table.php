@@ -27,6 +27,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('order_no');
             $table->string('name');
             $table->boolean('is_final')->default(false);
+            $table->boolean('is_auto_approve')->default(false);
             $table->timestamps();
 
             $table->unique(['approval_workflow_version_id', 'order_no']);

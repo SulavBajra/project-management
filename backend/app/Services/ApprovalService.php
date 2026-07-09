@@ -68,20 +68,6 @@ class ApprovalService
         });
     }
 
-    public function test(int $approvalId, User $user)
-    {
-        $approval = $this->approvalRepo->findApproval($approvalId);
-        $nextStep = $this->workflowRepo->getNextStep($approval);
-        return $approval;
-    }
-
-    public function test2(int $approvalId, User $user)
-    {
-        $approval = $this->approvalRepo->findApproval($approvalId);
-        $nextStep = $this->workflowRepo->getNextStep($approval);
-        return $nextStep;
-    }
-
     public function advanceStep(
         int $approvalId,
         User $user,
