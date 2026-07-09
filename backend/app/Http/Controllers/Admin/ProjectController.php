@@ -24,9 +24,9 @@ class ProjectController extends Controller
     public function listActiveProjects(Request $request)
     {
         $user = $request->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json([
-                "error" => "User instance not found",
+                'error' => 'User instance not found',
             ]);
         }
 
@@ -34,7 +34,7 @@ class ProjectController extends Controller
             ->user()
             ->projects()
             ->active()
-            ->select("id", "code", "name")
+            ->select('id', 'code', 'name')
             ->get();
 
         return response()->json($activeProjects);
@@ -47,8 +47,8 @@ class ProjectController extends Controller
 
         return response()->json(
             [
-                "message" => "Project created successfully",
-                "project" => $project,
+                'message' => 'Project created successfully',
+                'project' => $project,
             ],
             201,
         );
@@ -56,7 +56,7 @@ class ProjectController extends Controller
 
     public function getStatOfProject(Request $request)
     {
-        $projectId = $request->route("id");
+        $projectId = $request->route('id');
         $stats = $this->projectService->getStatOfProject($projectId);
 
         return response()->json($stats);
@@ -64,14 +64,15 @@ class ProjectController extends Controller
 
     public function getBudgetVsExpense(Request $request)
     {
-        $projectId = $request->route("id");
+        $projectId = $request->route('id');
         $compare = $this->projectService->getBudgetExpenseOverview($projectId);
+
         return new BudgetExpenseOverviewResource($compare);
     }
 
     public function getProjectTimeline(Request $request)
     {
-        $projectId = $request->route("id");
+        $projectId = $request->route('id');
         $timeline = $this->projectService->getTimeline($projectId);
 
         return response()->json(TimelineResource::collection($timeline));
@@ -79,15 +80,15 @@ class ProjectController extends Controller
 
     public function extendProjectTimeline(Request $request)
     {
-        $projectId = $request->route("id");
+        $projectId = $request->route('id');
         $data = [
-            "project_id" => $projectId,
-            "start_date" => $request->input("start_date"),
+            'project_id' => $projectId,
+            'start_date' => $request->input('start_date'),
         ];
         $this->timelineService->extendTimeline($data);
 
         return response()->json([
-            "message" => "Timeline extended successfully",
+            'message' => 'Timeline extended successfully',
         ]);
     }
 
@@ -97,19 +98,19 @@ class ProjectController extends Controller
         //     abort(403, "You are not authorized to end a project");
         // }
 
-        $projectId = $request->route("id");
+        $projectId = $request->route('id');
         $project = Project::findOrFail($projectId);
         $project->is_active = false;
         $project->save();
 
         return response()->json([
-            "message" => "Project ended successfully",
+            'message' => 'Project ended successfully',
         ]);
     }
 
     public function getUsers(Request $request)
     {
-        $projectId = $request->route("id");
+        $projectId = $request->route('id');
         $users = $this->projectService->getUsersNotInProject($projectId);
 
         return response()->json($users);
@@ -118,22 +119,22 @@ class ProjectController extends Controller
     public function addUsers(Request $request)
     {
         $validated = $request->validate([
-            "user_ids" => "required|array",
-            "user_ids.*" => "integer|exists:users,id",
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'integer|exists:users,id',
         ]);
 
-        $projectId = $request->route("id");
+        $projectId = $request->route('id');
 
         Project::findOrFail($projectId)
             ->users()
-            ->syncWithoutDetaching($validated["user_ids"]);
+            ->syncWithoutDetaching($validated['user_ids']);
 
-        return response()->json(["message" => "Users added successfully."]);
+        return response()->json(['message' => 'Users added successfully.']);
     }
 
     public function getAllProjects()
     {
-        $projects = Project::withCount("users")->paginate(10);
+        $projects = Project::withCount('users')->paginate(10);
 
         return ProjectResource::collection($projects);
     }
@@ -144,7 +145,7 @@ class ProjectController extends Controller
         $project->delete();
 
         return response()->json([
-            "message" => "Project deleted successfully.",
+            'message' => 'Project deleted successfully.',
         ]);
     }
 }

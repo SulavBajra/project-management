@@ -11,18 +11,19 @@ class ApprovalHistoryController extends Controller
     {
         $history = ApprovalHistory::query()
             ->select(
-                "id",
-                "approval_id",
-                "approval_step_id",
-                "acted_by",
-                "from_state",
-                "to_state",
+                'id',
+                'approval_id',
+                'approval_step_id',
+                'acted_by',
+                'from_state',
+                'to_state',
             )
             ->with([
-                "actor:id,name",
-                "approval:id,approvable_type,approvable_id",
+                'actor:id,name',
+                'approval:id,approvable_type,approvable_id',
             ])
             ->paginate(10);
+
         return response()->json($history);
     }
 }

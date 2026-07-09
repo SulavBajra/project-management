@@ -15,10 +15,10 @@ class ApprovalHistoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "history_id" => $this->id,
-            "from_state" => $this->from_state,
-            "to_state" => $this->to_state,
-            "acted_by" => $this->actor->name,
+            'history_id' => $this->id,
+            'from_state' => $this->from_state,
+            'to_state' => $this->to_state,
+            'acted_by' => $this->actor->name,
         ];
     }
 }

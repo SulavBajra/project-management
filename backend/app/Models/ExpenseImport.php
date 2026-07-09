@@ -4,18 +4,18 @@ namespace App\Models;
 
 use App\Enums\ImportStatus;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
-#[Fillable(["user_id", "project_id", "status", "errors"])]
+#[Fillable(['user_id', 'project_id', 'status', 'errors'])]
 class ExpenseImport extends Model
 {
     protected function casts(): array
     {
         return [
-            "status" => ImportStatus::class,
-            "errors" => "json",
+            'status' => ImportStatus::class,
+            'errors' => 'json',
         ];
     }
 
@@ -31,24 +31,24 @@ class ExpenseImport extends Model
 
     protected function statusLabel(): Attribute
     {
-        return Attribute::get(fn() => $this->status->label());
+        return Attribute::get(fn () => $this->status->label());
     }
 
     public function markProcessing(): void
     {
-        $this->update(["status" => ImportStatus::PROCESSING]);
+        $this->update(['status' => ImportStatus::PROCESSING]);
     }
 
     public function markCompleted(): void
     {
-        $this->update(["status" => ImportStatus::COMPLETED]);
+        $this->update(['status' => ImportStatus::COMPLETED]);
     }
 
     public function markFailed(array $errors): void
     {
         $this->update([
-            "status" => ImportStatus::FAILED,
-            "errors" => $errors,
+            'status' => ImportStatus::FAILED,
+            'errors' => $errors,
         ]);
     }
 

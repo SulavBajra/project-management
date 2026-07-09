@@ -18,10 +18,10 @@ class BudgetPlanItemRepository implements BudgetPlanItemRepositoryInterface
     {
         return $this->model
             ->query()
-            ->where("budget_plan_id", $budgetPlanId)
+            ->where('budget_plan_id', $budgetPlanId)
             ->with([
-                "budgetHead:id,name,code",
-                "allocations.timelinePeriod:id,name,start_date,end_date",
+                'budgetHead:id,name,code',
+                'allocations.timelinePeriod:id,name,start_date,end_date',
             ])
             ->get();
     }
@@ -39,7 +39,7 @@ class BudgetPlanItemRepository implements BudgetPlanItemRepositoryInterface
         int $budgetHeadId,
     ): BudgetPlanItem {
         return $plan->items()->firstOrCreate([
-            "budget_head_id" => $budgetHeadId,
+            'budget_head_id' => $budgetHeadId,
         ]);
     }
 
@@ -52,8 +52,8 @@ class BudgetPlanItemRepository implements BudgetPlanItemRepositoryInterface
     {
         return $this->model
             ->query()
-            ->where("budget_plan_id", $planId)
-            ->with(["budgetHead:id,name,code"])
+            ->where('budget_plan_id', $planId)
+            ->with(['budgetHead:id,name,code'])
             ->get();
     }
 }

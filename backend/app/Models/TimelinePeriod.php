@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(["timeline_id", "name", "start_date", "end_date"])]
+#[Fillable(['timeline_id', 'name', 'start_date', 'end_date'])]
 class TimelinePeriod extends Model
 {
     protected function casts(): array
     {
         return [
-            "start_date" => "date",
-            "end_date" => "date",
+            'start_date' => 'date',
+            'end_date' => 'date',
         ];
     }
 

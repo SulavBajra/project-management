@@ -26,24 +26,25 @@ class ExpenseTransactionController extends Controller
     public function import(ExpenseExtractRequest $request)
     {
         $validated = $request->validated();
-        $path = $validated["file"]->store("imports/expneses", "local");
+        $path = $validated['file']->store('imports/expneses', 'local');
         $import = ExpenseImport::create([
-            "user_id" => $request->user()->id,
-            "project_id" => $validated["project_id"],
-            "status" => "pending",
+            'user_id' => $request->user()->id,
+            'project_id' => $validated['project_id'],
+            'status' => 'pending',
         ]);
 
         ProcessExcelImport::dispatch(
             $path,
             $request->user()->id,
-            $validated["project_id"],
+            $validated['project_id'],
             $import->id,
         );
+
         // $this->approvalService->beginApproval();
         return response()->json(
             [
-                "message" => "Import started. Check back for results.",
-                "import_id" => $import->id,
+                'message' => 'Import started. Check back for results.',
+                'import_id' => $import->id,
             ],
             202,
         );
@@ -52,15 +53,15 @@ class ExpenseTransactionController extends Controller
     public function importStatus(ExpenseImport $import)
     {
         return response()->json([
-            "status" => $import->status,
-            "errors" => $import->errors,
+            'status' => $import->status,
+            'errors' => $import->errors,
         ]);
     }
 
     public function store(ExpenseStoreRequest $request)
     {
         $validated = $request->validated();
-        $projectId = $request->route("project_id");
+        $projectId = $request->route('project_id');
 
         DB::transaction(function () use ($validated, $projectId, $request) {
             $expense = $this->expenseService->addExpenses(
@@ -70,26 +71,26 @@ class ExpenseTransactionController extends Controller
             );
             $this->approvalService->beginApproval(
                 $expense->id,
-                "expense",
+                'expense',
                 $request->user()->id,
             );
         });
 
         return response()->json(
-            ["message" => "Expense stored successfully."],
+            ['message' => 'Expense stored successfully.'],
             201,
         );
     }
 
     public function index(Request $request)
     {
-        $projectId = $request->route("project_id");
+        $projectId = $request->route('project_id');
 
         $transactions = ExpenseTransaction::with([
-            "accountHead",
-            "expense.approval.currentStatus",
+            'accountHead',
+            'expense.approval.currentStatus',
         ])
-            ->whereRelation("expense", "project_id", $projectId)
+            ->whereRelation('expense', 'project_id', $projectId)
             ->latest()
             ->paginate(12);
 

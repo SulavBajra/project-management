@@ -23,16 +23,16 @@ class BudgetPlanUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "allocations" => ["required", "array"],
-            "allocations.*.period_id" => [
-                "required",
-                "integer",
-                "exists:timeline_periods,id",
+            'allocations' => ['required', 'array'],
+            'allocations.*.period_id' => [
+                'required',
+                'integer',
+                'exists:timeline_periods,id',
             ],
-            "allocations.*.allocated_amount" => [
-                "required",
-                "numeric",
-                "min:0",
+            'allocations.*.allocated_amount' => [
+                'required',
+                'numeric',
+                'min:0',
             ],
         ];
     }

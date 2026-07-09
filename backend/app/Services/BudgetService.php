@@ -27,49 +27,50 @@ class BudgetService
         int $planId,
         int $projectId,
     ): void {
-        $import = new BudgetPlanImport();
+        $import = new BudgetPlanImport;
         Excel::import($import, $file);
 
         $periodIds = Timeline::whereHas(
-            "projects",
-            fn($q) => $q->where("project_id", $projectId),
+            'projects',
+            fn ($q) => $q->where('project_id', $projectId),
         )
             ->first()
             ->periods()
-            ->pluck("id");
+            ->pluck('id');
 
-        $planItems = BudgetPlanItem::with("budgetHead")
-            ->where("budget_plan_id", $planId)
+        $planItems = BudgetPlanItem::with('budgetHead')
+            ->where('budget_plan_id', $planId)
             ->get()
-            ->keyBy(fn($item) => $item->budgetHead->code);
+            ->keyBy(fn ($item) => $item->budgetHead->code);
 
-        $periodMap = TimelinePeriod::whereIn("id", $periodIds)
+        $periodMap = TimelinePeriod::whereIn('id', $periodIds)
             ->get()
             ->keyBy(function ($period) {
-                $start = Carbon::parse($period->start_date)->format("M");
-                $end = Carbon::parse($period->end_date)->format("M");
+                $start = Carbon::parse($period->start_date)->format('M');
+                $end = Carbon::parse($period->end_date)->format('M');
+
                 return "{$start}-{$end}({$period->name})";
             });
 
         DB::transaction(function () use ($import, $planItems, $periodMap) {
             foreach ($import->data as $item) {
-                $planItem = $planItems->get($item["budget_head_code"]);
+                $planItem = $planItems->get($item['budget_head_code']);
 
-                if (!$planItem) {
+                if (! $planItem) {
                     continue;
                 }
 
-                foreach ($item["allocations"] as $periodName => $amount) {
+                foreach ($item['allocations'] as $periodName => $amount) {
                     $periodId = $periodMap->get($periodName)?->id;
 
-                    if (!$periodId) {
+                    if (! $periodId) {
                         continue;
                     }
 
                     $planItem
                         ->allocations()
-                        ->where("timeline_period_id", $periodId)
-                        ->update(["allocated_amount" => $amount]);
+                        ->where('timeline_period_id', $periodId)
+                        ->update(['allocated_amount' => $amount]);
                 }
             }
         });
@@ -83,11 +84,12 @@ class BudgetService
         $data = [];
         foreach ($allocations as $item) {
             $data[] = [
-                "budget_head_code" => $item["budget_head"]["code"],
-                "budget_head" => $item["budget_head"]["name"],
-                "amount" => null,
+                'budget_head_code' => $item['budget_head']['code'],
+                'budget_head' => $item['budget_head']['name'],
+                'amount' => null,
             ];
         }
+
         return $data;
     }
 }

@@ -21,47 +21,48 @@ class BudgetPlanRepository implements BudgetPlanRepositoryInterface
     ): BudgetPlan {
         if ($this->exists($projectId)) {
             throw new BudgetPlanAlreadyExistsException(
-                "Budget plan already exists for project",
+                'Budget plan already exists for project',
             );
         }
+
         return DB::transaction(function () use (
             $projectId,
             $name,
             $budgetHeadIds,
         ) {
             $plan = $this->model->create([
-                "project_id" => $projectId,
-                "name" => $name,
+                'project_id' => $projectId,
+                'name' => $name,
             ]);
 
             $plan
                 ->items()
                 ->createMany(
                     array_map(
-                        fn($id) => ["budget_head_id" => $id],
+                        fn ($id) => ['budget_head_id' => $id],
                         $budgetHeadIds,
                     ),
                 );
 
-            return $plan->load("items.budgetHead");
+            return $plan->load('items.budgetHead');
         });
     }
 
     public function exists(int $projectId): bool
     {
-        return $this->model->where("project_id", $projectId)->exists();
+        return $this->model->where('project_id', $projectId)->exists();
     }
 
     public function find(int $projectId)
     {
         return $this->model
-            ->with("items.budgetHead")
-            ->where("project_id", $projectId)
+            ->with('items.budgetHead')
+            ->where('project_id', $projectId)
             ->first();
     }
 
     public function getId(int $projectId): ?int
     {
-        return $this->model->where("project_id", $projectId)->value("id");
+        return $this->model->where('project_id', $projectId)->value('id');
     }
 }

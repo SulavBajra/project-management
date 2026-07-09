@@ -15,10 +15,10 @@ class BudgetPlanResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "id" => $this->id,
-            "project_id" => $this->project_id,
-            "name" => $this->name,
-            "items" => BudgetPlanItemResource::collection($this->items),
+            'id' => $this->id,
+            'project_id' => $this->project_id,
+            'name' => $this->name,
+            'items' => BudgetPlanItemResource::collection($this->items),
         ];
     }
 }

@@ -3,17 +3,20 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import AutoApproveConfirm from "@/components/features/approvals/AutoApproveConfirm"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { ApprovalFlow } from "@/types/ApprovalFlow"
+import { useAuth } from "@/hooks/useAuth"
 import api from "@/lib/axios"
+import type { ApprovalStep } from "@/types/Approval/ApprovalStep"
 
 export default function Settings() {
-  const [workflows, setWorkflows] = useState<ApprovalFlow[]>([])
+  const {user} = useAuth()
+  const [workflows, setWorkflows] = useState<ApprovalStep[]>([])
+  const roleId = Number(user?.role_id)
 
   useEffect(() => {
     const fetchWorkflows = async () => {
       try {
-        const response = await api.get("/api/approval-flow")
-        setWorkflows(response.data)
+        const response = await api.get(`/api/approvals/steps/${roleId}`)
+        setWorkflows(response.data.data)
       } catch (error) {
         if (axios.isAxiosError(error)) {
           toast.error(
@@ -24,7 +27,7 @@ export default function Settings() {
     }
 
     fetchWorkflows()
-  }, [])
+  }, [roleId])
 
   return (
     <div>
@@ -33,7 +36,19 @@ export default function Settings() {
           <CardTitle>Settings</CardTitle>
         </CardHeader>
         <CardContent>
-          <AutoApproveConfirm workflows={workflows} />
+          <AutoApproveConfirm
+            workflows={workflows}
+            onUpdated={(stepId, auto) =>
+              setWorkflows((prev) =>
+                prev.map((w) => ({
+                  ...w,
+                  steps: w.steps.map((s) =>
+                    s.step_id === stepId ? { ...s, auto } : s
+                  ),
+                }))
+              )
+            }
+          />
         </CardContent>
       </Card>
     </div>

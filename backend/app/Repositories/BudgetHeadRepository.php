@@ -22,13 +22,13 @@ class BudgetHeadRepository implements BudgetHeadRepositoryInterface
     public function getBudgetHeadsNotInPlan(int $planId): array
     {
         return $this->model
-            ->whereNotIn("id", function ($query) use ($planId) {
+            ->whereNotIn('id', function ($query) use ($planId) {
                 $query
-                    ->select("budget_head_id")
-                    ->from("budget_plan_items")
-                    ->where("budget_plan_id", $planId);
+                    ->select('budget_head_id')
+                    ->from('budget_plan_items')
+                    ->where('budget_plan_id', $planId);
             })
-            ->select("id", "name", "code")
+            ->select('id', 'name', 'code')
             ->get()
             ->toArray();
     }

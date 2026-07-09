@@ -19,10 +19,11 @@ class ApprovalController extends Controller
         //
     }
 
-    //This is to show the approval request according to the role
+    // This is to show the approval request according to the role
     public function show(int $roleId)
     {
         $approvals = $this->approvalRepo->findApprovalFromRole($roleId);
+
         return ApprovalListResource::collection($approvals);
         // return $approvals;
     }
@@ -33,11 +34,11 @@ class ApprovalController extends Controller
         $this->approvalService->advanceStep(
             $approvalId,
             $request->user(),
-            $validated["comment"] ?? null,
+            $validated['comment'] ?? null,
         );
 
         return response()->json(
-            ["message" => "Successfully started next step"],
+            ['message' => 'Successfully started next step'],
             200,
         );
     }
@@ -45,19 +46,20 @@ class ApprovalController extends Controller
     public function reject(Request $request, int $approvalId)
     {
         $validated = $request->validate([
-            "comment" => "nullable|string|max:250",
+            'comment' => 'nullable|string|max:250',
         ]);
         $user = $request->user();
-        if (!$user->hasPermissionTo("reject_budget")) {
+        if (! $user->hasPermissionTo('reject_budget')) {
             throw new HasNoAccessException(
-                "You donot have the role to reject the request",
+                'You donot have the role to reject the request',
             );
         }
         $this->approvalService->rejectRequest(
             $approvalId,
             $user->id,
-            $validated["comment"] ?? null,
+            $validated['comment'] ?? null,
         );
-        return response()->json(["message" => "Approval request rejected."]);
+
+        return response()->json(['message' => 'Approval request rejected.']);
     }
 }

@@ -20,7 +20,7 @@ class ExpenseService
         int $userId,
         int $projectId,
     ): Collection {
-        $import = new ExpenseTransactionsImport();
+        $import = new ExpenseTransactionsImport;
 
         return DB::transaction(function () use (
             $import,
@@ -30,16 +30,16 @@ class ExpenseService
         ) {
             Excel::import($import, $file);
             $rows = $import->rows;
-            $groupedRows = $rows->groupBy("expense_code");
+            $groupedRows = $rows->groupBy('expense_code');
             $expenses = collect();
             foreach ($groupedRows as $expenseCode => $items) {
-                $debit = $items->sum("debit");
-                $credit = $items->sum("credit");
+                $debit = $items->sum('debit');
+                $credit = $items->sum('credit');
                 $existingTotal =
                     Expense::where([
-                        "code" => $expenseCode,
-                        "project_id" => $projectId,
-                    ])->value("total") ?? 0;
+                        'code' => $expenseCode,
+                        'project_id' => $projectId,
+                    ])->value('total') ?? 0;
 
                 $total = bcadd((string) $existingTotal, (string) $debit, 2);
 
@@ -51,40 +51,41 @@ class ExpenseService
 
                 $expense = Expense::updateOrCreate(
                     [
-                        "code" => $expenseCode,
-                        "project_id" => $projectId,
+                        'code' => $expenseCode,
+                        'project_id' => $projectId,
                     ],
                     [
-                        "user_id" => $userId,
-                        "total" => $total,
-                        "description" => "Imported expense",
-                        "transaction_date" => $items->first()[
-                            "transaction_date"
+                        'user_id' => $userId,
+                        'total' => $total,
+                        'description' => 'Imported expense',
+                        'transaction_date' => $items->first()[
+                            'transaction_date'
                         ],
                     ],
                 );
 
                 $transactions = $items
                     ->map(
-                        fn($item) => [
-                            "expense_id" => $expense->id,
-                            "account_head_id" => $item["account_head_id"],
-                            "transaction_date" => $item["transaction_date"],
-                            "debit" => $item["debit"] ?? 0,
-                            "credit" => $item["credit"] ?? 0,
-                            "created_at" => now(),
-                            "updated_at" => now(),
+                        fn ($item) => [
+                            'expense_id' => $expense->id,
+                            'account_head_id' => $item['account_head_id'],
+                            'transaction_date' => $item['transaction_date'],
+                            'debit' => $item['debit'] ?? 0,
+                            'credit' => $item['credit'] ?? 0,
+                            'created_at' => now(),
+                            'updated_at' => now(),
                         ],
                     )
                     ->toArray();
 
                 ExpenseTransaction::upsert(
                     $transactions,
-                    ["expense_id", "account_head_id", "transaction_date"],
-                    ["debit", "credit", "updated_at"],
+                    ['expense_id', 'account_head_id', 'transaction_date'],
+                    ['debit', 'credit', 'updated_at'],
                 );
                 $expenses->push($expense);
             }
+
             return $expenses;
         });
     }
@@ -95,40 +96,39 @@ class ExpenseService
         int $userId,
     ): Expense {
         return DB::transaction(function () use ($data, $projectId, $userId) {
-            $total = collect($data["transactions"])->sum("debit");
+            $total = collect($data['transactions'])->sum('debit');
 
             $expense = Expense::create([
-                "user_id" => $userId,
-                "project_id" => $projectId,
-                "code" => $data["code"],
-                "description" => $data["description"] ?? null,
-                "total" => $total,
-                "transaction_date" => $data["transaction_date"],
+                'user_id' => $userId,
+                'project_id' => $projectId,
+                'code' => $data['code'],
+                'description' => $data['description'] ?? null,
+                'total' => $total,
+                'transaction_date' => $data['transaction_date'],
             ]);
 
-            $accountHeads = collect($data["transactions"])
-                ->pluck("account_head_name")
+            $accountHeads = collect($data['transactions'])
+                ->pluck('account_head_name')
                 ->unique()
                 ->mapWithKeys(function ($name) {
                     $model = AccountHead::firstOrCreate(
-                        ["name" => $name],
-                        ["code" => Str::slug($name)],
+                        ['name' => $name],
+                        ['code' => Str::slug($name)],
                     );
 
                     return [$name => $model->id];
                 });
 
-            $transactions = collect($data["transactions"])
+            $transactions = collect($data['transactions'])
                 ->map(function ($item) use ($expense, $accountHeads) {
                     return [
-                        "expense_id" => $expense->id,
-                        "account_head_id" =>
-                            $accountHeads[$item["account_head_name"]],
-                        "debit" => $item["debit"],
-                        "credit" => $item["credit"],
-                        "transaction_date" => $item["transaction_date"],
-                        "created_at" => now(),
-                        "updated_at" => now(),
+                        'expense_id' => $expense->id,
+                        'account_head_id' => $accountHeads[$item['account_head_name']],
+                        'debit' => $item['debit'],
+                        'credit' => $item['credit'],
+                        'transaction_date' => $item['transaction_date'],
+                        'created_at' => now(),
+                        'updated_at' => now(),
                     ];
                 })
                 ->toArray();

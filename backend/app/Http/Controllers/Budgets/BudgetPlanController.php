@@ -30,23 +30,23 @@ class BudgetPlanController extends Controller
         DB::transaction(function () use ($validated, $project, $request) {
             $plan = $this->budgetPlanRepository->create(
                 $project->id,
-                $validated["name"],
-                $validated["budget_head_ids"],
+                $validated['name'],
+                $validated['budget_head_ids'],
             );
 
             $this->budgetAllocationService->createAllocationModel(
-                $plan->items->pluck("id")->toArray(),
+                $plan->items->pluck('id')->toArray(),
                 $project->id,
             );
             $this->approvalService->beginApproval(
                 $plan->id,
-                "budget",
+                'budget',
                 $request->user()->id,
             );
         });
 
         return response()->json(
-            ["message" => "Budget plan created successfully"],
+            ['message' => 'Budget plan created successfully'],
             201,
         );
     }
@@ -54,9 +54,10 @@ class BudgetPlanController extends Controller
     public function show(Project $project)
     {
         $plan = $this->budgetPlanRepository->find($project->id);
-        if (!$plan) {
+        if (! $plan) {
             return response()->json(200);
         }
+
         return response()->json(new BudgetPlanResource($plan));
     }
 
@@ -66,19 +67,20 @@ class BudgetPlanController extends Controller
     ) {
         $this->budgetAllocationService->updateAllocations(
             $item,
-            $request->validated()["allocations"],
+            $request->validated()['allocations'],
         );
 
         return response()->json([
-            "message" => "Allocations updated successfully",
+            'message' => 'Allocations updated successfully',
         ]);
     }
 
     public function destroy(BudgetPlanItem $item)
     {
         $this->budgetAllocationService->removeAllocations($item);
+
         return response()->json([
-            "message" => "Item removed successfully",
+            'message' => 'Item removed successfully',
         ]);
     }
 }

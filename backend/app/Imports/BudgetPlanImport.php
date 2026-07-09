@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 class BudgetPlanImport implements ToCollection
 {
     public Collection $data;
+
     private array $periods = [];
 
     public function collection(Collection $rows): void
@@ -17,6 +18,7 @@ class BudgetPlanImport implements ToCollection
         foreach ($rows as $index => $row) {
             if ($index === 0) {
                 $this->periods = $row->slice(2)->values()->toArray();
+
                 continue;
             }
 
@@ -29,9 +31,9 @@ class BudgetPlanImport implements ToCollection
             }
 
             $this->data->push([
-                "budget_head_code" => $row[0],
-                "budget_head" => $row[1],
-                "allocations" => $allocations,
+                'budget_head_code' => $row[0],
+                'budget_head' => $row[1],
+                'allocations' => $allocations,
             ]);
         }
     }

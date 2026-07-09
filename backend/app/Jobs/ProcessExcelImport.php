@@ -42,7 +42,7 @@ class ProcessExcelImport implements ShouldQueue
         $import->markProcessing();
 
         try {
-            $absolutePath = Storage::disk("local")->path($this->filePath);
+            $absolutePath = Storage::disk('local')->path($this->filePath);
 
             DB::transaction(function () use (
                 $expenseService,
@@ -57,7 +57,7 @@ class ProcessExcelImport implements ShouldQueue
                 foreach ($expenses as $expense) {
                     $approvalService->beginApproval(
                         $expense->id,
-                        "expense",
+                        'expense',
                         $this->userId,
                     );
                 }
@@ -66,19 +66,19 @@ class ProcessExcelImport implements ShouldQueue
         } catch (ValidationException $e) {
             $import->markFailed($e->failures());
         } catch (ExpenseNotBalanceException $e) {
-            $import->markFailed([["message" => $e->getMessage()]]);
+            $import->markFailed([['message' => $e->getMessage()]]);
         } catch (\Exception $e) {
-            $import->markFailed([["message" => $e->getMessage()]]);
+            $import->markFailed([['message' => $e->getMessage()]]);
         } finally {
-            Storage::disk("local")->delete($this->filePath);
+            Storage::disk('local')->delete($this->filePath);
         }
     }
 
     public function failed(\Throwable $e): void
     {
-        ExpenseImport::where("id", $this->importId)->update([
-            "status" => "failed",
-            "errors" => [["message" => $e->getMessage()]],
+        ExpenseImport::where('id', $this->importId)->update([
+            'status' => 'failed',
+            'errors' => [['message' => $e->getMessage()]],
         ]);
     }
 }

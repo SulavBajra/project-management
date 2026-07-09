@@ -14,11 +14,12 @@ class HasNoAccessException extends Exception
     ) {
         parent::__construct($message, $code, $previous);
     }
+
     public function render(): JsonResponse
     {
         return response()->json(
             [
-                "message" => $this->getMessage(),
+                'message' => $this->getMessage(),
             ],
             $this->getCode(),
         );

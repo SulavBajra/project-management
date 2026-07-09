@@ -7,7 +7,7 @@ use Exception;
 class ApprovalExistsException extends Exception
 {
     public function __construct(
-        string $message = "Approval already exists.",
+        string $message = 'Approval already exists.',
         int $code = 409,
         ?\Throwable $previous = null,
     ) {

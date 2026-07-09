@@ -4,27 +4,28 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create("approval_histories", function (Blueprint $table) {
+        Schema::create('approval_histories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId("approval_id")->constrained("approvals");
+            $table->foreignId('approval_id')->constrained('approvals');
             $table
-                ->foreignId("approval_step_id")
+                ->foreignId('approval_step_id')
                 ->nullOnDelete()
-                ->constrained("approval_steps");
+                ->constrained('approval_steps');
             $table
-                ->foreignId("approval_workflow_version_id")
+                ->foreignId('approval_workflow_version_id')
                 ->nullOnDelete()
-                ->constrained("approval_workflow_versions");
-            $table->foreignId("acted_by")->constrained("users");
-            $table->string("from_state")->nullable();
-            $table->string("to_state");
-            $table->text("comment")->nullable();
+                ->constrained('approval_workflow_versions');
+            $table->foreignId('acted_by')->constrained('users');
+            $table->string('from_state')->nullable();
+            $table->string('to_state');
+            $table->text('comment')->nullable();
             $table->timestamps();
         });
     }
@@ -34,6 +35,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists("approval_histories");
+        Schema::dropIfExists('approval_histories');
     }
 };

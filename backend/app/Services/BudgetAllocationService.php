@@ -29,30 +29,30 @@ class BudgetAllocationService
     ): void {
         $timeline = Project::findOrFail($projectId)
             ->timelines()
-            ->where("end_date", ">", now())
+            ->where('end_date', '>', now())
             ->first();
 
-        if (!$timeline) {
-            throw new \Exception("No active timeline found for this project.");
+        if (! $timeline) {
+            throw new \Exception('No active timeline found for this project.');
         }
 
-        $periods = TimelinePeriod::where("timeline_id", $timeline->id)
-            ->orderBy("name")
-            ->pluck("id");
+        $periods = TimelinePeriod::where('timeline_id', $timeline->id)
+            ->orderBy('name')
+            ->pluck('id');
 
         if ($periods->isEmpty()) {
-            throw new \Exception("No timeline periods found for this project.");
+            throw new \Exception('No timeline periods found for this project.');
         }
 
         $allocations = [];
         foreach ($budgetPlanItemIds as $itemId) {
             foreach ($periods as $periodId) {
                 $allocations[] = [
-                    "budget_plan_item_id" => $itemId,
-                    "timeline_period_id" => $periodId,
-                    "allocated_amount" => null,
-                    "created_at" => now(),
-                    "updated_at" => now(),
+                    'budget_plan_item_id' => $itemId,
+                    'timeline_period_id' => $periodId,
+                    'allocated_amount' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ];
             }
         }
@@ -67,16 +67,16 @@ class BudgetAllocationService
         foreach ($allocations as $allocation) {
             $item
                 ->allocations()
-                ->where("timeline_period_id", $allocation["period_id"])
+                ->where('timeline_period_id', $allocation['period_id'])
                 ->update([
-                    "allocated_amount" => $allocation["allocated_amount"],
+                    'allocated_amount' => $allocation['allocated_amount'],
                 ]);
         }
     }
 
     public function removeAllocations(BudgetPlanItem $item): void
     {
-        $item->allocations()->update(["allocated_amount" => null]);
+        $item->allocations()->update(['allocated_amount' => null]);
     }
 
     public function createItemWithAllocations(
@@ -86,21 +86,21 @@ class BudgetAllocationService
     ): void {
         if ($this->approvalRepo->isFinal($projectId)) {
             throw new ApprovalExistsException(
-                "Already approved cannot make changes now",
+                'Already approved cannot make changes now',
             );
         }
 
         DB::transaction(function () use ($plan, $data) {
             $item = $this->itemRepo->firstOrCreate(
                 $plan,
-                $data["budget_head_id"],
+                $data['budget_head_id'],
             );
 
-            foreach ($data["allocations"] as $allocation) {
+            foreach ($data['allocations'] as $allocation) {
                 $this->allocationRepo->updateForPeriod(
                     $item,
-                    $allocation["period_id"],
-                    $allocation["allocated_amount"],
+                    $allocation['period_id'],
+                    $allocation['allocated_amount'],
                 );
             }
         });

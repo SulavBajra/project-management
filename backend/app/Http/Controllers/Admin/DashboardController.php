@@ -15,9 +15,9 @@ class DashboardController extends Controller
         $totalUser = User::count();
 
         return response()->json([
-            "total_project" => $totalProject,
-            "project_count" => $projectCount,
-            "total_users" => $totalUser,
+            'total_project' => $totalProject,
+            'project_count' => $projectCount,
+            'total_users' => $totalUser,
         ]);
     }
 }

@@ -23,7 +23,7 @@ class BudgetAllocateImportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "file" => "required|file|mimes:xlsx,csv,xls",
+            'file' => 'required|file|mimes:xlsx,csv,xls',
         ];
     }
 }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Budget\BudgetHeadRequest;
 use App\Models\BudgetHead;
-use App\Models\BudgetPlan;
 use App\Models\BudgetPlanItem;
 use App\Repositories\BudgetHeadRepository;
 
@@ -18,8 +17,8 @@ class BudgetHeadController extends Controller
 
     public function index()
     {
-        $budgetHeads = BudgetHead::select("id", "name", "code")
-            ->orderBy("name")
+        $budgetHeads = BudgetHead::select('id', 'name', 'code')
+            ->orderBy('name')
             ->get();
 
         return response()->json($budgetHeads);
@@ -29,7 +28,7 @@ class BudgetHeadController extends Controller
     {
         $count = BudgetHead::count();
 
-        return response()->json(["count" => $count]);
+        return response()->json(['count' => $count]);
     }
 
     public function store(BudgetHeadRequest $request)
@@ -46,6 +45,7 @@ class BudgetHeadController extends Controller
         $heads = $this->budgetHeadRepo->getBudgetHeadsNotInPlan(
             $item->budget_plan_id,
         );
+
         return response()->json($heads);
     }
 }

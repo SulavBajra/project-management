@@ -39,14 +39,14 @@ class ProcessBudgetImport implements ShouldQueue
         }
         $import->markProcessing();
         try {
-            $absolutePath = Storage::disk("local")->path($this->filePath);
+            $absolutePath = Storage::disk('local')->path($this->filePath);
             $service->extractBudgetData(
                 $absolutePath,
                 $this->planId,
                 $this->projectId,
             );
         } catch (\Exception $e) {
-            $import->markFailed([["message" => $e->getMessage()]]);
+            $import->markFailed([['message' => $e->getMessage()]]);
         }
         // $approvalService->beginApproval($this->planId, "budget", $this->userId);
     }

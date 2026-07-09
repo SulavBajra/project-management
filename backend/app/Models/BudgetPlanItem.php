@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(["budget_plan_id", "budget_head_id"])]
+#[Fillable(['budget_plan_id', 'budget_head_id'])]
 class BudgetPlanItem extends Model
 {
     public function budgetPlan(): BelongsTo

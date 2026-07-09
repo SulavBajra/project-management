@@ -15,14 +15,14 @@ class BudgetAllocationResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "id" => $this->id,
-            "period_id" => $this->timeline_period_id,
-            "period_name" => $this->timelinePeriod->name,
-            "period_start" => $this->timelinePeriod->start_date->format(
-                "Y-m-d",
+            'id' => $this->id,
+            'period_id' => $this->timeline_period_id,
+            'period_name' => $this->timelinePeriod->name,
+            'period_start' => $this->timelinePeriod->start_date->format(
+                'Y-m-d',
             ),
-            "period_end" => $this->timelinePeriod->end_date->format("Y-m-d"),
-            "allocated_amount" => $this->allocated_amount,
+            'period_end' => $this->timelinePeriod->end_date->format('Y-m-d'),
+            'allocated_amount' => $this->allocated_amount,
         ];
     }
 }

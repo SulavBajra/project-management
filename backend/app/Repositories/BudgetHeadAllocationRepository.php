@@ -24,8 +24,8 @@ class BudgetHeadAllocationRepository
     ): void {
         $item->allocations()->createMany([
             [
-                "timeline_period_id" => $periodId,
-                "allocated_amount" => $amount,
+                'timeline_period_id' => $periodId,
+                'allocated_amount' => $amount,
             ],
         ]);
     }
@@ -33,8 +33,8 @@ class BudgetHeadAllocationRepository
     public function getAllocations(int $planId)
     {
         return $this->allocation
-            ->with(["planItem.budgetHead", "timelinePeriod"])
-            ->where("budget_plan_id", $planId)
+            ->with(['planItem.budgetHead', 'timelinePeriod'])
+            ->where('budget_plan_id', $planId)
             ->get();
     }
 

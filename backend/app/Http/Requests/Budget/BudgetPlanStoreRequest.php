@@ -23,12 +23,12 @@ class BudgetPlanStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => ["required", "string", "max:20", "unique:budget_plans"],
-            "budget_head_ids" => ["required", "array"],
-            "budget_head_ids.*" => [
-                "required",
-                "integer",
-                "exists:budget_heads,id",
+            'name' => ['required', 'string', 'max:20', 'unique:budget_plans'],
+            'budget_head_ids' => ['required', 'array'],
+            'budget_head_ids.*' => [
+                'required',
+                'integer',
+                'exists:budget_heads,id',
             ],
         ];
     }

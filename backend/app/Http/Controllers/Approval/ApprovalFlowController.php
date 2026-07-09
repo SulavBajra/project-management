@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Approval;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Approval\ApprovalFlowStoreRequest;
 use App\Http\Resources\Approval\ApprovalInfoResource;
+use App\Http\Resources\Approval\ApprovalResource;
+use App\Models\Approvals\ApprovalStep;
 use App\Models\Approvals\ApprovalWorkflow;
 use App\Services\ApprovalFlowService;
 use Illuminate\Http\Request;
@@ -19,12 +21,12 @@ class ApprovalFlowController extends Controller
     public function index()
     {
         $flows = ApprovalWorkflow::with(
-            "currentVersion.statuses",
-            "currentVersion.steps",
+            'currentVersion.statuses',
+            'currentVersion.steps',
         )->get();
 
-        // return response()->json(ApprovalResource::collection($flows));
-        return response()->json($flows);
+        return response()->json(ApprovalResource::collection($flows));
+        // return response()->json($flows);
     }
 
     public function store(ApprovalFlowStoreRequest $request)
@@ -33,7 +35,7 @@ class ApprovalFlowController extends Controller
 
         return response()->json(
             [
-                "message" => "Flow created successfully",
+                'message' => 'Flow created successfully',
             ],
             201,
         );
@@ -43,14 +45,20 @@ class ApprovalFlowController extends Controller
     {
         $model = $this->flowService->checkflowinfo(
             $id,
-            $request->input("name", "default"),
+            $request->input('name', 'default'),
         );
-        if (!$model) {
+        if (! $model) {
             return response()->json([
-                "message" => "Data not found",
+                'message' => 'Data not found',
             ]);
         }
+
         return new ApprovalInfoResource($model);
         // return response()->json($model);
+    }
+
+    public function autoApprove(Request $request, int $roleId)
+    {
+        ApprovalStep::where('role_id', $roleId)->update('is_auto_approve', $request->active);
     }
 }

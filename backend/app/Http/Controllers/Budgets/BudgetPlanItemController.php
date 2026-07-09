@@ -50,7 +50,7 @@ class BudgetPlanItemController extends Controller
         // );
 
         return response()->json([
-            "message" => "Budget plan item created successfully",
+            'message' => 'Budget plan item created successfully',
         ]);
     }
 
@@ -58,15 +58,15 @@ class BudgetPlanItemController extends Controller
     {
         $planId = $this->planRepository->getId($project->id);
 
-        if (!$planId) {
-            return response()->json(["data" => []]);
+        if (! $planId) {
+            return response()->json(['data' => []]);
         }
 
         $items = $this->itemRepo->findAllocationsByBudgetPlanId($planId);
 
         return response()->json([
-            "budget_plan_id" => $planId,
-            "data" => BudgetItemResource::collection($items),
+            'budget_plan_id' => $planId,
+            'data' => BudgetItemResource::collection($items),
         ]);
     }
 
@@ -75,20 +75,21 @@ class BudgetPlanItemController extends Controller
         $this->itemRepo->deleteItemWithAllocations($item);
 
         return response()->json([
-            "message" => "Budget plan item deleted successfully",
+            'message' => 'Budget plan item deleted successfully',
         ]);
     }
 
     public function export(Project $project, BudgetPlan $plan)
     {
-        $periods = TimelinePeriod::select("start_date", "end_date", "name")
-            ->where("timeline_id", $project->timelines()->pluck("id"))
+        $periods = TimelinePeriod::select('start_date', 'end_date', 'name')
+            ->where('timeline_id', $project->timelines()->pluck('id'))
             ->get()
             ->toArray();
         $data = $this->budgetService->createExcelSkeleton($plan->id);
+
         return Excel::download(
             new BudgetPlanExport($data, $periods),
-            "budget-plan-" . $plan->id . ".xlsx",
+            'budget-plan-'.$plan->id.'.xlsx',
         );
     }
 
@@ -98,11 +99,11 @@ class BudgetPlanItemController extends Controller
         BudgetAllocateImportRequest $request,
     ) {
         $validated = $request->validated();
-        $path = $validated["file"]->store("imports/budget", "local");
+        $path = $validated['file']->store('imports/budget', 'local');
         $import = ExpenseImport::create([
-            "user_id" => $request->user()->id,
-            "project_id" => $project->id,
-            "status" => "pending",
+            'user_id' => $request->user()->id,
+            'project_id' => $project->id,
+            'status' => 'pending',
         ]);
 
         ProcessBudgetImport::dispatch(
@@ -115,8 +116,8 @@ class BudgetPlanItemController extends Controller
 
         return response()->json(
             [
-                "message" => "Import started. Check back for results.",
-                "import_id" => $import->id,
+                'message' => 'Import started. Check back for results.',
+                'import_id' => $import->id,
             ],
             202,
         );

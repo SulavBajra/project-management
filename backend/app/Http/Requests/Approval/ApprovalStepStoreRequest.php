@@ -23,7 +23,7 @@ class ApprovalStepStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "comment" => "nullable|string|max:250",
+            'comment' => 'nullable|string|max:250',
         ];
     }
 }

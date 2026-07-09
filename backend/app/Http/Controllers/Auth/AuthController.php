@@ -18,23 +18,23 @@ class AuthController extends Controller
         $remember = $request->remember ?? false;
 
         if (
-            !Auth::attempt(
+            ! Auth::attempt(
                 [
-                    "email" => $request->email,
-                    "password" => $request->password,
+                    'email' => $request->email,
+                    'password' => $request->password,
                 ],
                 $remember,
             )
         ) {
             return response()->json(
-                ["message" => "The provided credentials are incorrect."],
+                ['message' => 'The provided credentials are incorrect.'],
                 422,
             );
         }
 
         $request->session()->regenerate();
         $role = $request->user()->roles()->first();
-        $permissions = $request->user()->getAllPermissions()->pluck("name");
+        $permissions = $request->user()->getAllPermissions()->pluck('name');
 
         if (is_null($role)) {
             Auth::logout();
@@ -42,21 +42,21 @@ class AuthController extends Controller
             $request->session()->regenerateToken();
 
             return response()->json(
-                ["message" => "Account not yet activated."],
+                ['message' => 'Account not yet activated.'],
                 403,
             );
         }
 
         return response()->json(
             [
-                "message" => "Login Successful",
-                "user" => [
-                    "id" => $request->user()->id,
-                    "name" => $request->user()->name,
-                    "email" => $request->user()->email,
-                    "role" => $role->name,
-                    "role_id" => $role->id,
-                    "permissions" => $permissions,
+                'message' => 'Login Successful',
+                'user' => [
+                    'id' => $request->user()->id,
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
+                    'role' => $role->name,
+                    'role_id' => $role->id,
+                    'permissions' => $permissions,
                 ],
             ],
             200,
@@ -70,7 +70,7 @@ class AuthController extends Controller
         User::create($credentials);
 
         return response()->json([
-            "message" => "Registration successful",
+            'message' => 'Registration successful',
         ]);
     }
 
@@ -79,10 +79,10 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        Log::info("User logged out");
+        Log::info('User logged out');
 
         return response()->json([
-            "message" => "Logout successful",
+            'message' => 'Logout successful',
         ]);
     }
 }

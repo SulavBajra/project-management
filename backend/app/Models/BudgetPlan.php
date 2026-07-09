@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
-#[Fillable(["project_id", "name"])]
+#[Fillable(['project_id', 'name'])]
 class BudgetPlan extends Model
 {
     public function items(): HasMany
@@ -24,6 +24,6 @@ class BudgetPlan extends Model
 
     public function approval(): MorphOne
     {
-        return $this->morphOne(Approval::class, "approvable");
+        return $this->morphOne(Approval::class, 'approvable');
     }
 }

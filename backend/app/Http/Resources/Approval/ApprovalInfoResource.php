@@ -15,12 +15,12 @@ class ApprovalInfoResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            "id" => $this->id,
-            "approvable_type" => $this->approvable_type,
-            "current_step" => $this->currentstep->name,
-            "current_status" => $this->currentStatus->name,
-            "role" => $this->currentStep->role->name,
-            "is_final" => $this->currentStep->is_final,
+            'id' => $this->id,
+            'approvable_type' => $this->approvable_type,
+            'current_step' => $this->currentstep->name,
+            'current_status' => $this->currentStatus->name,
+            'role' => $this->currentStep->role->name,
+            'is_final' => $this->currentStep->is_final,
         ];
     }
 }

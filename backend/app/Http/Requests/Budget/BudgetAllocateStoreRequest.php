@@ -23,23 +23,23 @@ class BudgetAllocateStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "budget_head_id" => [
-                "required",
-                "integer",
-                "exists:budget_heads,id",
+            'budget_head_id' => [
+                'required',
+                'integer',
+                'exists:budget_heads,id',
             ],
-            "allocations" => ["required", "array", "min:1"],
-            "allocations.*.period_id" => [
-                "required",
-                "integer",
-                "exists:timeline_periods,id",
+            'allocations' => ['required', 'array', 'min:1'],
+            'allocations.*.period_id' => [
+                'required',
+                'integer',
+                'exists:timeline_periods,id',
             ],
-            "allocations.*.allocated_amount" => [
-                "required",
-                "numeric",
-                "min:0",
-                "max:999999999.99",
-                "decimal:0,2",
+            'allocations.*.allocated_amount' => [
+                'required',
+                'numeric',
+                'min:0',
+                'max:999999999.99',
+                'decimal:0,2',
             ],
         ];
     }
