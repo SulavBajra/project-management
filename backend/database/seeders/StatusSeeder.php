@@ -53,7 +53,6 @@ class StatusSeeder extends Seeder
 
             $budgetStatuses = collect([
                 'Pending',
-                'Checked',
                 'Reviewed',
                 'Approved',
                 'Rejected',
@@ -94,23 +93,16 @@ class StatusSeeder extends Seeder
 
             $versionBudget->steps()->createMany([
                 [
-                    'role_id' => $empRole->id,
-                    'approval_status_id' => $budgetStatuses['Checked']->id,
-                    'order_no' => 1,
-                    'name' => 'Employee Processing',
-                    'is_final' => false,
-                ],
-                [
                     'role_id' => $pmRole->id,
                     'approval_status_id' => $budgetStatuses['Reviewed']->id,
-                    'order_no' => 2,
+                    'order_no' => 1,
                     'name' => 'Project Manager Review',
                     'is_final' => false,
                 ],
                 [
                     'role_id' => $adminRole->id,
                     'approval_status_id' => $budgetStatuses['Approved']->id,
-                    'order_no' => 3,
+                    'order_no' => 2,
                     'name' => 'Admin Approval',
                     'is_final' => true,
                 ],

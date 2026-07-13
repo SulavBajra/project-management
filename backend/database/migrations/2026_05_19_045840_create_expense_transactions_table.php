@@ -18,6 +18,7 @@ return new class extends Migration
                 ->constrained('expenses')
                 ->cascadeOnDelete();
             $table->foreignId('account_head_id')->constrained('account_heads');
+            $table->foreignId('budget_head_id')->nullable()->constrained();
             $table->decimal('debit', 10, 2);
             $table->decimal('credit', 10, 2);
             $table->date('transaction_date');
