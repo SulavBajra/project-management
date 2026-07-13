@@ -1,3 +1,4 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 import { Sprout } from "lucide-react"
 import { useState } from "react"
@@ -26,7 +27,7 @@ export default function BudgetPlan({
   const [name, setName] = useState("")
   const [selectedHeads, setSelectedHeads] = useState<number[]>([])
   const [open, setOpen] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const queryClient = useQueryClient()
 
   const toggleHead = (id: number) => {
     setSelectedHeads((prev) =>
@@ -34,28 +35,31 @@ export default function BudgetPlan({
     )
   }
 
-  const handleSubmit = async () => {
-    if (!name || selectedHeads.length === 0) return
-    const parsedProjectId = Number(projectId)
-    try {
-      setLoading(true)
+  const createBudgetPlan = useMutation({
+    mutationFn: async () => {
+      const parsedProjectId = Number(projectId)
       await api.post(`/api/projects/${parsedProjectId}/budget-plan`, {
         name,
         budget_head_ids: selectedHeads,
       })
+    },
+    onSuccess: () => {
       toast.success("Budget plan created successfully")
       setOpen(false)
-      setLoading(false)
-    } catch (error) {
+      setName("")
+      setSelectedHeads([])
+      queryClient.invalidateQueries({
+        queryKey: ["project", Number(projectId), "budget-plans"],
+      })
+    },
+    onError: (error) => {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message || error.message)
       } else {
         toast.error("An unexpected error occurred")
       }
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+  })
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -113,10 +117,12 @@ export default function BudgetPlan({
             </div>
           </Field>
           <Button
-            onClick={handleSubmit}
-            disabled={!name || selectedHeads.length === 0 || loading}
+            onClick={() => createBudgetPlan.mutate()}
+            disabled={
+              !name || selectedHeads.length === 0 || createBudgetPlan.isPending
+            }
           >
-            {loading ? "Creating..." : "Create Plan"}
+            {createBudgetPlan.isPending ? "Creating..." : "Create Plan"}
           </Button>
         </FieldSet>
       </DialogContent>

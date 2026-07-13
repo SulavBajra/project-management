@@ -6,6 +6,7 @@ use App\Models\Approvals\ApprovalWorkflow;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
+use App\Models\BudgetHead;
 
 class StatusSeeder extends Seeder
 {
@@ -15,6 +16,9 @@ class StatusSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function () {
+            BudgetHead::create(["name" => "Salary","code" => "bh-001"]);
+            BudgetHead::create(["name" => "Transport","code" => "bh-002"]);
+
             $workflow = ApprovalWorkflow::create([
                 'name' => 'Expense Approval',
                 'approvable_type' => 'expense',

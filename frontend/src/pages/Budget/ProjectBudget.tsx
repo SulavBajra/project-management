@@ -1,6 +1,7 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 import { Download, FileWarning, Upload } from "lucide-react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import ConfirmDialog from "@/components/ConfirmDialog"
@@ -16,138 +17,208 @@ import type { BudgetStatus } from "@/types/Budget/BudgetStatus"
 import type { BudgetPlanItem } from "@/types/Budget/Item"
 import ApprovalConirm from "@/components/features/approvals/ApprovalConfirm"
 
+function getErrorMessage(error: unknown, fallback = "Something went wrong") {
+  if (axios.isAxiosError(error)) {
+    return error.response?.data?.message ?? error.message
+  }
+  return fallback
+}
+
 export default function ProjectBudget() {
-  const [budgetHeads, setBudgetHeads] = useState<BudgetHead[]>([])
-  const [heads, setHeads] = useState<BudgetHead[]>([])
   const { projectId } = useParams<{ projectId: string }>()
-  const [plans, setPlans] = useState<BudgetPlanItem[] | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const periods = useMemo(() => plans?.[0]?.allocations ?? [], [plans])
-  const [planId, setPlanId] = useState<number | null>(null)
-  const itemId = useMemo(() => plans?.[0]?.id, [plans])
+  const queryClient = useQueryClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploadConfirmed, setUploadConfirmed] = useState(false)
-  const [budgetStatus, setBudgetStatus] = useState<BudgetStatus | null>(null)
 
-  useEffect(() => {
-    async function fetchBudgetHeads() {
-      try {
-        const response = await api.get(`api/budget-heads/`)
-        setBudgetHeads(response.data)
-      } catch (error) {
-        if (axios.isAxiosError(error)) toast.error(error.message)
-      }
-    }
-    fetchBudgetHeads()
-  }, [])
+  const itemsKey = ["project", projectId, "budget-plan-items"]
+  const budgetHeadsKey = ["budget-heads"]
 
-  const fetchItems = useCallback(async () => {
-    try {
+  // --- Queries ---
+
+  const { data: budgetHeads = [] } = useQuery({
+    queryKey: budgetHeadsKey,
+    queryFn: async () => {
+      const response = await api.get(`api/budget-heads/`)
+      return response.data as BudgetHead[]
+    },
+  })
+
+  const { data: itemsData, isLoading: loading } = useQuery({
+    queryKey: itemsKey,
+    queryFn: async () => {
       const response = await api.get(
         `api/projects/${projectId}/budget-plan/items`
       )
-      setPlans(response.data.data)
-      setPlanId(response.data.budget_plan_id)
-    } catch (error) {
-      if (axios.isAxiosError(error))
-        toast.error(error.response?.data?.message ?? error.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [projectId])
-
-  const fetchBudgetStatus = useCallback(async () => {
-    if (!planId) return
-    try {
-      const response = await api.get(`api/approval-flow/${planId}/?name=budget`)
-      setBudgetStatus(response.data.data)
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message ?? error.message)
+      return {
+        plans: response.data.data as BudgetPlanItem[],
+        planId: response.data.budget_plan_id as number | null,
       }
-    }
-  }, [planId])
+    },
+    enabled: !!projectId,
+  })
 
-  useEffect(() => {
-    fetchItems()
-  }, [fetchItems])
+  const plans = itemsData?.plans ?? null
+  const planId = itemsData?.planId ?? null
+  const periods = useMemo(() => plans?.[0]?.allocations ?? [], [plans])
+  const itemId = useMemo(() => plans?.[0]?.id, [plans])
 
-  useEffect(() => {
-    fetchBudgetStatus()
-  }, [fetchBudgetStatus])
+  const budgetStatusKey = ["approval-flow", planId, "budget"]
+  const { data: budgetStatus } = useQuery({
+    queryKey: budgetStatusKey,
+    queryFn: async () => {
+      const response = await api.get(`api/approval-flow/${planId}/?name=budget`)
+      return response.data.data as BudgetStatus
+    },
+    enabled: !!planId,
+  })
 
-  const handleUpdate = async (
-    itemId: number,
-    amounts: Record<number, string>
-  ) => {
-    try {
+  // "heads" - loaded on demand by AddBudgetHead (e.g. when its dialog opens)
+  const {
+    data: heads = [],
+    refetch: loadBudgetHeads,
+  } = useQuery({
+    queryKey: ["budget-heads", itemId],
+    queryFn: async () => {
+      const response = await api.get(`api/budget-heads/${itemId}`)
+      return response.data as BudgetHead[]
+    },
+    enabled: false, // only fetch when explicitly triggered
+  })
+
+  // --- Mutations ---
+
+  const invalidateItems = () =>
+    queryClient.invalidateQueries({ queryKey: itemsKey })
+  const invalidateApproval = () =>
+    queryClient.invalidateQueries({ queryKey: budgetStatusKey })
+
+  const updateMutation = useMutation({
+    mutationFn: async ({
+      itemId,
+      amounts,
+    }: {
+      itemId: number
+      amounts: Record<number, string>
+    }) => {
       await api.patch(`api/projects/budget-plan/items/${itemId}/allocations`, {
         allocations: Object.entries(amounts).map(([periodId, amount]) => ({
           period_id: Number(periodId),
           allocated_amount: amount,
         })),
       })
-      fetchItems()
+    },
+    onSuccess: () => {
       toast.success("Allocations saved")
-    } catch (error) {
-      if (axios.isAxiosError(error))
-        toast.error(error.response?.data?.message ?? error.message)
-    }
-  }
+      invalidateItems()
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  })
 
-  const handleClear = async (itemId: number) => {
-    try {
+  const clearMutation = useMutation({
+    mutationFn: async (itemId: number) => {
       await api.delete(`api/projects/budget-plan/items/${itemId}`)
+    },
+    onSuccess: () => {
       toast.success("Allocation removed")
-    } catch (error) {
-      if (axios.isAxiosError(error))
-        toast.error(error.response?.data?.message ?? error.message)
-    }
-    await fetchItems()
-  }
+      invalidateItems()
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  })
 
-  const handleRemove = async (itemId: number) => {
-    try {
+  const removeMutation = useMutation({
+    mutationFn: async (itemId: number) => {
       await api.delete(`api/projects/budget-plan/${itemId}`)
-      fetchItems()
+    },
+    onSuccess: () => {
       toast.success("Allocation removed")
-    } catch (error) {
-      if (axios.isAxiosError(error))
-        toast.error(error.response?.data?.message ?? error.message)
-    }
-    await fetchItems()
-  }
+      invalidateItems()
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  })
 
-  const fetchBudgetHeads = async () => {
-    try {
-      const response = await api.get(`api/budget-heads/${itemId}`)
-      setHeads(response.data)
-    } catch (error) {
-      if (axios.isAxiosError(error))
-        toast.error(error.response?.data?.message ?? error.message)
-    }
-  }
-
-  const handleSubmit = async (
-    budget_head_id: number,
-    amounts: Record<number, string>
-  ) => {
-    try {
+  const submitHeadMutation = useMutation({
+    mutationFn: async ({
+      budget_head_id,
+      amounts,
+    }: {
+      budget_head_id: number
+      amounts: Record<number, string>
+    }) => {
       await api.post(`api/projects/budget-plan/${planId}`, {
-        budget_head_id: budget_head_id,
+        budget_head_id,
         allocations: Object.entries(amounts).map(([periodId, amount]) => ({
           period_id: Number(periodId),
           allocated_amount: amount,
         })),
       })
-      fetchItems()
+    },
+    onSuccess: () => {
       toast.success("Budget head added")
-    } catch (error) {
-      if (axios.isAxiosError(error))
-        toast.error(error.response?.data?.message ?? error.message)
-    }
-  }
+      invalidateItems()
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  })
+
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData()
+      formData.append("file", file)
+      await api.post(
+        `api/projects/${projectId}/budget-plan/${planId}/import`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      )
+    },
+    onSuccess: () => {
+      toast.success("Budget uploaded successfully")
+      invalidateItems()
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+    onSettled: () => setUploadConfirmed(false),
+  })
+
+  const advanceMutation = useMutation({
+    mutationFn: async ({
+      comment,
+      approvalId,
+    }: {
+      comment: string | null
+      approvalId: number
+    }) => {
+      const response = await api.post(`/api/approvals/${approvalId}`, comment)
+      return response.data.message as string
+    },
+    onSuccess: (message) => {
+      toast.success(message)
+      invalidateItems()
+      invalidateApproval()
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  })
+
+  const rejectMutation = useMutation({
+    mutationFn: async ({
+      comment,
+      approvalId,
+    }: {
+      comment: string | null
+      approvalId: number
+    }) => {
+      const response = await api.post(
+        `/api/approvals/${approvalId}/reject`,
+        comment
+      )
+      return response.data.message as string
+    },
+    onSuccess: (message) => {
+      toast.success(message)
+      invalidateItems()
+      invalidateApproval()
+    },
+    onError: (error) => toast.error(getErrorMessage(error)),
+  })
+
+  // --- Non-mutation side effects ---
 
   const handleDownload = async () => {
     try {
@@ -163,11 +234,10 @@ export default function ProjectBudget() {
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
+      toast.success("Template downloaded")
     } catch (error) {
-      if (axios.isAxiosError(error))
-        toast.error(error.response?.data?.message ?? error.message)
+      toast.error(getErrorMessage(error))
     }
-    toast.success("Template downloaded")
   }
 
   const handleUploadConfirm = () => {
@@ -175,67 +245,19 @@ export default function ProjectBudget() {
     fileInputRef.current?.click()
   }
 
-  const uploadBudget = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const uploadBudget = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-
-    const formData = new FormData()
-    formData.append("file", file)
-
-    try {
-      await api.post(
-        `api/projects/${projectId}/budget-plan/${planId}/import`,
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      )
-      fetchItems()
-      toast.success("Budget uploaded successfully")
-    } catch (error) {
-      if (axios.isAxiosError(error))
-        toast.error(error.response?.data?.message ?? error.message)
-    } finally {
-      e.target.value = ""
-      setUploadConfirmed(false)
-    }
-  }
-
-  const handleNextStep = async (comment: string | null, approvalId: number) => {
-    try {
-      const response = await api.post(`/api/approvals/${approvalId}`, comment)
-      setSubmitting(true)
-      fetchItems()
-      fetchBudgetStatus()
-      toast.success(response.data.message)
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message ?? error.message)
-      }
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  const handleReject = async (comment: string | null, approvalId: number) => {
-    try {
-      const response = await api.post(
-        `/api/approvals/${approvalId}/reject`,
-        comment
-      )
-      setSubmitting(true)
-      fetchItems()
-      fetchBudgetStatus()
-      toast.success(response.data.message)
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message ?? error.message)
-      }
-    } finally {
-      setSubmitting(false)
-    }
+    uploadMutation.mutate(file, {
+      onSettled: () => {
+        e.target.value = ""
+      },
+    })
   }
 
   if (!projectId) return null
   if (loading) return <Spinner className="size-20" />
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -250,17 +272,23 @@ export default function ProjectBudget() {
           {budgetStatus?.current_status === "Rejected" ? null : (
             <ApprovalConirm
               approvalId={budgetStatus?.id ?? null}
-              onAdvance={handleNextStep}
-              onReject={handleReject}
+              onAdvance={(comment, approvalId) =>
+                advanceMutation.mutate({ comment, approvalId })
+              }
+              onReject={(comment, approvalId) =>
+                rejectMutation.mutate({ comment, approvalId })
+              }
             />
           )}
 
           <BudgetPlan budgetHeads={budgetHeads} projectId={projectId} />
           <AddBudgetHead
-            loadBudgetHeads={fetchBudgetHeads}
+            loadBudgetHeads={loadBudgetHeads}
             heads={heads}
             periods={periods}
-            onSubmit={handleSubmit}
+            onSubmit={(budget_head_id, amounts) =>
+              submitHeadMutation.mutate({ budget_head_id, amounts })
+            }
           />
           <ConfirmDialog
             trigger={
@@ -288,9 +316,11 @@ export default function ProjectBudget() {
 
       <AllocationTable
         plans={plans}
-        onUpdate={handleUpdate}
-        onRemove={handleRemove}
-        onClear={handleClear}
+        onUpdate={(itemId, amounts) =>
+          updateMutation.mutate({ itemId, amounts })
+        }
+        onRemove={(itemId) => removeMutation.mutate(itemId)}
+        onClear={(itemId) => clearMutation.mutate(itemId)}
       />
       <input
         ref={fileInputRef}

@@ -17,6 +17,8 @@ import api from "@/lib/axios"
 import type { Employee } from "@/types/User"
 import TimelinePopOver from "../timelines/TimelinePopOver"
 import AddUserModal from "../users/AddUserModal"
+import { useNavigate } from "react-router-dom"
+import BudgetPlan from "../budgets/BudgetPlan"
 
 export default function CreateProjectForm({
   onSubmit,
@@ -30,6 +32,7 @@ export default function CreateProjectForm({
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([])
   const [employees, setEmployees] = useState<Employee[]>([])
   const [submitting, setSubmitting] = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     async function fetchEmployees() {
@@ -112,6 +115,7 @@ export default function CreateProjectForm({
             onChange={setSelectedEmployees}
           />
         </Field>
+        <BudgetPlan/>
         <Button type="submit" disabled={submitting}>
           {submitting ? "Creating..." : "Create Project"}
         </Button>

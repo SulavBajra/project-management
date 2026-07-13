@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import ApprovalConfirm from "@/components/features/approvals/ApprovalConfirm"
 import StatusBadge from "@/components/status-badge/StatusBadge"
+import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import {
   Table,
@@ -110,11 +111,12 @@ export default function AdminApproval() {
                   />
                 </TableCell>
                 <TableCell>
-                  <ApprovalConfirm
-                    approvalId={approval.approvable_id}
-                    onAdvance={handleNext}
-                    onReject={handleReject}
-                  />
+                  {approval.current_status === "Approved" ? <Button disabled={true} variant="ghost">Approval</Button> :
+                    <ApprovalConfirm
+                      approvalId={approval.approvable_id}
+                      onAdvance={handleNext}
+                      onReject={handleReject}
+                    />}
                 </TableCell>
               </TableRow>
             ))

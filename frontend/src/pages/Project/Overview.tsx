@@ -1,6 +1,7 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
 import { Banknote, UserPlus } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { toast } from "sonner"
 import OverviewChart from "@/components/charts/OverviewChart"
@@ -25,83 +26,70 @@ import type { Employee } from "@/types/User"
 
 export default function Overview() {
   const { projectId } = useParams<{ projectId: string }>()
-  const [stat, setStat] = useState<ProjectStats | null>(null)
-  const [employees, setEmployees] = useState<Employee[]>([])
+  const parsedProjectId = Number(projectId)
+  const queryClient = useQueryClient()
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([])
-  const [loading, setLoading] = useState(true)
-  const [compare, setCompare] = useState<CompareData | null>(null)
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const parsedProjectId = Number(projectId)
+  const { data: stat, isLoading: loading } = useQuery({
+    queryKey: ["project", parsedProjectId, "stat"],
+    queryFn: async () => {
+      const response = await api.get<ProjectStats>(
+        `/api/projects/${parsedProjectId}/stat`
+      )
+      return response.data
+    },
+    enabled: !!projectId,
+  })
 
-        const response = await api.get<ProjectStats>(
-          `/api/projects/${parsedProjectId}/stat`
-        )
-        setStat(response.data)
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          toast.error(error.message)
-        }
-      } finally {
-        setLoading(false)
-      }
-    }
+  const { data: employees = [] } = useQuery({
+    queryKey: ["project", parsedProjectId, "users"],
+    queryFn: async () => {
+      const response = await api.get<Employee[]>(
+        `/api/projects/${parsedProjectId}/users`
+      )
+      return response.data
+    },
+    enabled: !!projectId,
+  })
 
-    async function fetchEmployees() {
-      try {
-        const parsedProjectId = Number(projectId)
+  const { data: compare } = useQuery({
+    queryKey: ["project", parsedProjectId, "stat", "compare"],
+    queryFn: async () => {
+      const response = await api.get(
+        `/api/projects/${parsedProjectId}/stat/compare`
+      )
+      return response.data.data as CompareData
+    },
+    enabled: !!projectId,
+  })
 
-        const response = await api.get<Employee[]>(
-          `/api/projects/${parsedProjectId}/users`
-        )
-        setEmployees(response.data)
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          toast.error(
-            error.response?.data?.message ?? "Failed to load employees"
-          )
-        }
-      }
-    }
-
-    async function fetchCompareStats() {
-      try {
-        const parsedProjectId = Number(projectId)
-        const response = await api.get(
-          `/api/projects/${parsedProjectId}/stat/compare`
-        )
-        setCompare(response.data.data)
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          toast.error(error.response?.data?.message ?? "Failed to load stats")
-        }
-      }
-    }
-
-    fetchCompareStats()
-    fetchData()
-    fetchEmployees()
-  }, [projectId])
-
-  const addEmployee = async () => {
-    try {
+  const addEmployeeMutation = useMutation({
+    mutationFn: async (employeeIds: number[]) => {
       await api.patch(`/api/projects/${projectId}/users`, {
-        user_ids: selectedEmployees.map((e) => e.id),
+        user_ids: employeeIds,
       })
+    },
+    onSuccess: () => {
       toast.success("Employees added successfully")
       setSelectedEmployees([])
-    } catch (error) {
+      queryClient.invalidateQueries({
+        queryKey: ["project", parsedProjectId, "users"],
+      })
+    },
+    onError: (error) => {
       if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data.message)
+        toast.error(error.response?.data?.message ?? "Failed to add employees")
       }
-    }
+    },
+  })
+
+  const addEmployee = () => {
+    addEmployeeMutation.mutate(selectedEmployees.map((e) => e.id))
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <OverviewHeader stat={stat} loading={loading} />
+      <OverviewHeader stat={stat ?? null} loading={loading} />
       <div className="flex flex-wrap gap-2">
         <Button asChild>
           <Link to={`/projects/${projectId}/expense`}>
@@ -134,14 +122,18 @@ export default function Overview() {
               <DialogClose asChild>
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
-              <Button type="button" onClick={addEmployee}>
+              <Button
+                type="button"
+                onClick={addEmployee}
+                disabled={addEmployeeMutation.isPending}
+              >
                 Save
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
-      <OverviewChart data={compare} />
+      <OverviewChart data={compare ?? null} />
     </div>
   )
 }

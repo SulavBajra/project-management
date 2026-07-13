@@ -3,5 +3,5 @@ export type ExpenseStatus = {
   code: string
   approval_id: number
   approval_status: string
-  approal_step: boolean
+  approval_step: boolean
 }

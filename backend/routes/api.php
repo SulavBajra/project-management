@@ -86,6 +86,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::controller(ExpenseController::class)->group(function () {
         Route::get('expenses/{id}/approval', 'index');
         Route::get('expenses/{id}/history', 'history');
+        Route::delete('expenses/{id}', 'destroy');
     });
 
     Route::prefix('budget-heads')
@@ -140,6 +141,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::get('approvals/history', [ApprovalHistoryController::class, 'index']);
 Route::get('approvals/steps/{role_id}', [ApprovalStepController::class, 'show']);
 Route::patch('/approvals/steps/{step}', [ApprovalStepController::class, 'update']);
+Route::get('projects/{id}/expenses', [ExpenseController::class, 'show']);
+// Route::delete('projects/expenses/{id}', [ExpenseController::class, 'destroy']);
 // Route::get("approvals/{id}", [ApprovalController::class, "show"]);
 // test field
 // Route::get("projects/budget-plan/{plan}/export", [

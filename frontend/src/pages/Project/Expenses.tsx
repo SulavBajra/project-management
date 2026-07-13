@@ -3,11 +3,9 @@ import { Clock } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
-import ExpenseTable from "@/components/features/expenses/ExpenseTable"
-import { PaginationSimple } from "@/components/layouts/simple-paginaton"
 import { Button } from "@/components/ui/button"
 import api from "@/lib/axios"
-import type { Expense } from "@/types/Expenses/Expense"
+import type {  ExpenseData } from "@/types/Expenses/Expense"
 import type { ExpenseStatus } from "@/types/Expenses/ExpenseStatus"
 import ExpenseApproval from "../Expense/ExpenseApproval"
 import { DataTable } from "@/types/Expenses/data-table"
@@ -21,7 +19,7 @@ type Meta = {
 
 export default function Expenses() {
   const { projectId } = useParams<{ projectId: string }>()
-  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [expenses, setExpenses] = useState<ExpenseData[]>([])
   const [expenseStatus, setExpenseStatus] = useState<ExpenseStatus[]>([])
   const [meta, setMeta] = useState<Meta>()
   const [currentPage, setCurrentPage] = useState(1)
@@ -42,7 +40,7 @@ export default function Expenses() {
     async function fetchExpenses() {
       try {
         const response = await api.get(
-          `/api/expenses/${projectId}?page=${currentPage}`
+          `/api/projects/${projectId}/expenses/?page=${currentPage}`
         )
         setExpenses(response.data.data)
         setMeta(response.data.meta)
@@ -92,12 +90,15 @@ export default function Expenses() {
           <Clock /> History
         </Button>
       </div>
-      <DataTable columns={columns} data={expenses} />
-      <PaginationSimple
-        currentPage={meta?.current_page ?? 1}
-        totalPages={meta?.last_page ?? 1}
+      <DataTable
+        columns={columns}
+        data={expenses}
+        searchPlaceholder="Search by expense code..."
+        pageCount={meta?.last_page ?? 1}
+        currentPage={currentPage}
         onPageChange={setCurrentPage}
       />
+
     </div>
   )
 }

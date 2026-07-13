@@ -28,6 +28,7 @@ import NotFound from "./pages/NotFound.tsx"
 import ExpenseApproval from "./pages/Expense/ExpenseApproval.tsx"
 import AdminApproval from "./pages/Approval/AdminApproval.tsx"
 import Settings from "./pages/Setting.tsx"
+import ExpenseView from "./pages/Expense/ExpenseView.tsx"
 
 function ProtectedRoute() {
   const { user } = useAuth()
@@ -70,6 +71,7 @@ export default function App() {
                 <Route path="overview" element={<Overview />} />
                 <Route path="timeline" element={<ProjectTimeline />} />
                 <Route path="expenses" element={<Expenses />} />
+                <Route path="expenses/:expenseCode" element={<ExpenseView/>}/>
                 <Route
                   path="expenses/approvals"
                   element={<ExpenseApproval />}

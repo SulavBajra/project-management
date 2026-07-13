@@ -7,7 +7,9 @@ use App\Http\Requests\Expense\ExpenseExtractRequest;
 use App\Http\Requests\Expense\ExpenseStoreRequest;
 use App\Http\Resources\Expenses\ExpenseTransactionsResource;
 use App\Jobs\ProcessExcelImport;
+use App\Models\Expense;
 use App\Models\ExpenseImport;
+use App\Models\BudgetPlan;
 use App\Models\ExpenseTransaction;
 use App\Services\ApprovalService;
 use App\Services\ExpenseService;
@@ -63,6 +65,14 @@ class ExpenseTransactionController extends Controller
         $validated = $request->validated();
         $projectId = $request->route('project_id');
 
+        $planExists = BudgetPlan::where("project_id", $projectId)->exists();
+
+        if (! $planExists) {
+            return response()->json([
+                "message" => "Create budget plan first"
+            ], 400);
+        }
+
         DB::transaction(function () use ($validated, $projectId, $request) {
             $expense = $this->expenseService->addExpenses(
                 $validated,
@@ -96,4 +106,6 @@ class ExpenseTransactionController extends Controller
 
         return ExpenseTransactionsResource::collection($transactions);
     }
+
+
 }

@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import type { ExpenseStatus } from "@/types/Expenses/ExpenseStatus"
+import type { ExpenseData } from "@/types/Expenses/Expense"
 
 export default function ExpenseApproval({
   expenses,
@@ -47,7 +48,7 @@ export default function ExpenseApproval({
                   <h3 className="font-medium">{expense.code}</h3>
                   <StatusBadge
                     status={expense.approval_status ?? "Unchecked"}
-                    final={expense.approal_step}
+                    final={expense.approval_step}
                   ></StatusBadge>
                 </div>
                 <ApprovalConfirm

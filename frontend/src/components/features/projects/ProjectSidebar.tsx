@@ -1,6 +1,7 @@
 import {
   Calendar,
   ChevronRight,
+  Clock,
   FileText,
   Folder,
   Kanban,
@@ -29,6 +30,7 @@ const PROJECT_SUB_ITEMS = [
   { title: "Timeline", icon: Calendar, path: "timeline" },
   { title: "Expenses", icon: FileText, path: "expenses" },
   { title: "Budget", icon: Wallet, path: "budget" },
+  { title: "Approvals", icon: Clock, path: "approval" },
 ]
 
 export function ProjectSidebar({
