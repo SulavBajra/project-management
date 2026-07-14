@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     Fillable([
         'expense_id',
         'account_head_id',
+        'budget_head_id',
         'debit',
         'credit',
         'transaction_date',
@@ -34,5 +35,10 @@ class ExpenseTransaction extends Model
     public function accountHead(): BelongsTo
     {
         return $this->belongsTo(AccountHead::class);
+    }
+
+    public function budgetHead(): BelongsTo
+    {
+        return $this->belongsTo(BudgetHead::class);
     }
 }

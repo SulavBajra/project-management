@@ -1,7 +1,7 @@
-import axios from "axios"
 import { PlusIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import CreateProjectForm from "@/components/features/projects/CreateProjectForm"
 import ProjectTable from "@/components/features/projects/ProjectTable"
 import { PaginationSimple } from "@/components/layouts/simple-paginaton"
@@ -21,28 +21,38 @@ import type { Meta } from "@/types/Meta"
 import type { ProjectResponse } from "@/types/Project"
 
 export default function ProjectIndex() {
-  const [projects, setProjects] = useState<ProjectResponse[]>([])
-  const [loading, setLoading] = useState(true)
   const [open, setOpen] = useState(false)
-  const [meta, setMeta] = useState<Meta>()
   const [currentPage, setCurrentPage] = useState(1)
   const { user } = useAuth()
+  const queryClient = useQueryClient()
+
+  const { data, isPending, error } = useQuery({
+    queryKey: ["projects", currentPage],
+    queryFn: async () => {
+      const response = await api.get(`/api/projects/?page=${currentPage}`)
+      return {
+        projects: response.data.data as ProjectResponse[],
+        meta: response.data.meta as Meta,
+      }
+    },
+  })
+
+  const projects = data?.projects ?? []
+  const meta = data?.meta
+
+  const submit = () => {
+    queryClient.invalidateQueries({ queryKey: ["projects"] })
+    setOpen(false)
+  }
+
+  const onDelete = () => {
+     queryClient.invalidateQueries({ queryKey: ["projects"] })
+     setOpen(false)
+   }
 
   useEffect(() => {
-    async function fetchProjects() {
-      try {
-        const response = await api.get(`/api/projects/?page=${currentPage}`)
-        setLoading(false)
-        setProjects(response.data.data)
-        setMeta(response.data.meta)
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          toast.error(error.response?.data?.message || error.message)
-        }
-      }
-    }
-    fetchProjects()
-  }, [currentPage])
+    if (error) toast.error(error.message)
+  }, [error])
 
   return (
     <Card>
@@ -61,17 +71,17 @@ export default function ProjectIndex() {
               </Button>
             </DialogTrigger>
             <DialogContent className="w-5xl">
-              <CreateProjectForm onSubmit={() => setOpen(false)} />
+              <CreateProjectForm onSubmit={submit} />
             </DialogContent>
           </Dialog>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3.5">
-        {loading ? (
+        {isPending ? (
           <Spinner className="flex size-25 w-full items-center justify-center" />
         ) : (
           <>
-            <ProjectTable projects={projects} user={user} />
+            <ProjectTable projects={projects} user={user} onDelete={onDelete}/>
             <PaginationSimple
               currentPage={meta?.current_page ?? 1}
               totalPages={meta?.last_page ?? 1}

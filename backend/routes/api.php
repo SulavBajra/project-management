@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Budgets\BudgetPlanController;
 use App\Http\Controllers\Budgets\BudgetPlanItemController;
 use App\Http\Controllers\Expense\ExpenseController;
+use App\Http\Controllers\Report\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -143,7 +144,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::patch('/approvals/steps/{step}', 'update');
     });
 });
-
+Route::prefix('reports')
+    ->name('reports.')
+    ->controller(ReportController::class)
+    ->group(function () {
+        Route::get('budget-vs-actual', 'index');
+        Route::get('budget-vs-actual/{project_id}', 'show');
+    });
 Route::get('approvals/history', [ApprovalHistoryController::class, 'index']);
 // Route::get('projects/{id}/expenses', [ExpenseController::class, 'show']);
 // Route::delete('projects/expenses/{id}', [ExpenseController::class, 'destroy']);

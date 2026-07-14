@@ -19,4 +19,9 @@ class BudgetHead extends Model
     {
         return $this->hasManyThrough(BudgetPlan::class, BudgetPlanItem::class);
     }
+
+    public function expenseTransactions(): HasMany
+    {
+        return $this->hasMany(ExpenseTransaction::class);
+    }
 }

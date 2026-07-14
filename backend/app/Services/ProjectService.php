@@ -12,7 +12,7 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-class ProjectService
+final readonly class ProjectService
 {
     public function __construct(protected TimelineService $timelineService)
     {

@@ -69,6 +69,7 @@ class ExpenseService
                         fn ($item) => [
                             'expense_id' => $expense->id,
                             'account_head_id' => $item['account_head_id'],
+                            'budget_head_id' => $item['budget_head_id'] ?? null,
                             'transaction_date' => $item['transaction_date'],
                             'debit' => $item['debit'] ?? 0,
                             'credit' => $item['credit'] ?? 0,
@@ -81,7 +82,7 @@ class ExpenseService
                 ExpenseTransaction::upsert(
                     $transactions,
                     ['expense_id', 'account_head_id', 'transaction_date'],
-                    ['debit', 'credit', 'updated_at'],
+                    ['budget_head_id', 'debit', 'credit', 'updated_at'],
                 );
                 $expenses->push($expense);
             }
@@ -124,6 +125,7 @@ class ExpenseService
                     return [
                         'expense_id' => $expense->id,
                         'account_head_id' => $accountHeads[$item['account_head_name']],
+                        'budget_head_id' => $item['budget_head_id'],
                         'debit' => $item['debit'],
                         'credit' => $item['credit'],
                         'transaction_date' => $item['transaction_date'],

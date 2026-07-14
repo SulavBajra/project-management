@@ -15,25 +15,36 @@ import {
 import api from "@/lib/axios"
 import type { ProjectResponse } from "@/types/Project"
 import type { User } from "@/types/User"
+import { useMutation } from "@tanstack/react-query"
 
 export default function ProjectTable({
   projects,
   user,
+  onDelete,
 }: {
   projects: ProjectResponse[]
   user: User | null
+  onDelete: () => void
 }) {
-  const handleDelete = (id: number) => {
-    try {
-      api.delete(`api/projects/${id}`)
-      toast.success("Project deleted successfully")
-    } catch (error) {
+
+  const deleteMutate = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await api.delete(`api/projects/${id}`)
+      return response.data
+    },
+    onSuccess: (data) => {
+      toast.success(data.message)
+      onDelete()
+    },
+    onError: (error) => {
       if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || "Failed to delete project")
-      } else {
-        toast.error("An unexpected error occurred")
+        toast.error(error.response?.data.message)
       }
     }
+  })
+
+  const handleDelete = (id: number) => {
+    deleteMutate.mutate(id)
   }
 
   return (

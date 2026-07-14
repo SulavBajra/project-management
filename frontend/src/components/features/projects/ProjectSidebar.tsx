@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   Calendar,
   ChevronRight,
   Clock,
@@ -31,6 +32,7 @@ const PROJECT_SUB_ITEMS = [
   { title: "Expenses", icon: FileText, path: "expenses" },
   { title: "Budget", icon: Wallet, path: "budget" },
   { title: "Approvals", icon: Clock, path: "approval" },
+  { title: "Reports", icon: BarChart3, path: "reports/budget-vs-actual" },
 ]
 
 export function ProjectSidebar({

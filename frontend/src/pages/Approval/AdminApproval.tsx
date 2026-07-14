@@ -1,5 +1,6 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import axios from "axios"
-import { useCallback, useEffect, useState } from "react"
+import {  useEffect  } from "react"
 import { toast } from "sonner"
 import ApprovalConfirm from "@/components/features/approvals/ApprovalConfirm"
 import StatusBadge from "@/components/status-badge/StatusBadge"
@@ -19,54 +20,61 @@ import type { ApprovalList } from "@/types/Approval/ApprovalList"
 
 export default function AdminApproval() {
   const { user } = useAuth()
-  const [loading, setLoading] = useState(true)
-  const [approvals, setApprovals] = useState<ApprovalList[]>([])
   const roleId = Number(user?.role_id)
+  const queryClient = useQueryClient()
 
-  const fetchApprovals = useCallback(async () => {
-    if (!roleId) return
-    try {
+  const { data: approvals = [], isPending, error } = useQuery({
+    queryKey: ["approvals", roleId],
+    queryFn: async () => {
       const response = await api.get(`/api/approvals/${roleId}`)
-      setApprovals(response.data.data)
-      setLoading(true)
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message ?? "Failed to load approvals")
-      }
-    } finally {
-      setLoading(false)
-    }
-  }, [roleId])
+      return response.data.data as ApprovalList[]
+    },
+    enabled: !!roleId
+  })
 
-  useEffect(() => {
-    fetchApprovals()
-  }, [fetchApprovals])
-
-  const handleNext = async (comment: string | null, approvalId: number) => {
-    try {
-      const response = await api.post(`/api/approvals/${approvalId}`, {
-        comment,
-      })
-      toast.success(response.data.message)
-    } catch (error) {
+  const nextMutation = useMutation({
+    mutationFn: async ({ comment, approvalId }: { comment: string | null, approvalId: number }) => {
+      const response = await api.post(`/api/approvals/${approvalId}`, { comment })
+      return response.data
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({queryKey: ['approvals']})
+      toast.success(data.message)
+    },
+    onError: (error) => {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message ?? "Failed to advance")
       }
     }
+  })
+
+  const rejectMutation = useMutation({
+    mutationFn: async ({ comment, approvalId }: { comment: string | null, approvalId: number }) => {
+      const response = await api.post(`/api/approvals/${approvalId}/reject`, { comment })
+      return response.data
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["approvals"] })
+      toast.success(data.message)
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message ?? "Failed to reject")
+      }
+    }
+  })
+
+  const handleNext = (comment: string | null, approvalId: number) => {
+    nextMutation.mutate({ comment, approvalId })
   }
 
   const handleReject = async (comment: string | null, approvalId: number) => {
-    try {
-      const response = await api.post(`/api/approvals/${approvalId}/reject`, {
-        comment,
-      })
-      toast.success(response.data.message)
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message ?? "Failed to advance")
-      }
-    }
+    rejectMutation.mutate({comment, approvalId})
   }
+
+  useEffect(() => {
+    if(error) toast.error(error.message)
+  },[error])
 
   return (
     <div>
@@ -82,16 +90,16 @@ export default function AdminApproval() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {loading ? (
+          {isPending ? (
             <TableRow>
               <TableCell colSpan={6} className="text-center">
-                <Spinner className="size-6" />
+                <Spinner className="size-15" />
               </TableCell>
             </TableRow>
           ) : approvals.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={5}
+                colSpan={6}
                 className="text-center text-muted-foreground"
               >
                 No pending approvals
@@ -113,7 +121,7 @@ export default function AdminApproval() {
                 <TableCell>
                   {approval.current_status === "Approved" ? <Button disabled={true} variant="ghost">Approval</Button> :
                     <ApprovalConfirm
-                      approvalId={approval.approvable_id}
+                      approvalId={approval.id}
                       onAdvance={handleNext}
                       onReject={handleReject}
                     />}

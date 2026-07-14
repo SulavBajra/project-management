@@ -1,5 +1,6 @@
 import axios from "axios"
 import {
+  BarChart3,
   ChevronRight,
   FolderKanban,
   LayoutDashboard,
@@ -37,6 +38,8 @@ import { cn } from "@/lib/utils"
 import { authService } from "@/services/authService"
 import type { Project } from "@/types/Project"
 import ConfirmDialog from "../ConfirmDialog"
+import { useMutation } from "@tanstack/react-query"
+import { Spinner } from "../ui/spinner"
 
 export function AppSidebar() {
   const { state, isMobile } = useSidebar()
@@ -68,21 +71,22 @@ export function AppSidebar() {
     )
   }, [location.pathname, isCollapsed, isMobile])
 
-  const handleLogout = async () => {
-    try {
-      await authService.logout()
+  const logoutMutate = useMutation({
+    mutationFn: async () => {
+      const response = await authService.logout()
+      return response.data
+    },
+    onSuccess: (data) => {
       clearSession()
-      toast.success("Logged out successfully.", { duration: 3000 })
-      navigate("/login")
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(
-          error.response?.data?.message || "Logout failed. Please try again."
-        )
-      } else {
-        toast.error("Logout failed. Please try again.")
-      }
+      toast.success(data.message)
+    },
+    onError: (error) => {
+      if(axios.isAxiosError(error)) toast.error(error.message)
     }
+  })
+
+  const handleLogout = () => {
+    logoutMutate.mutate()
   }
 
   const isOnProjectsRoute = location.pathname.startsWith("/projects")
@@ -182,6 +186,15 @@ export function AppSidebar() {
                 </SidebarMenuItem>
 
                 <SidebarMenuItem>
+                  <SidebarMenuButton asChild tooltip="Reports">
+                    <Link to="/reports/budget-vs-actual">
+                      <BarChart3 className="h-4 w-4" />
+                      <span>Reports</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Timeline">
                     <Link to="/timeline">
                       <Timeline className="h-4 w-4" />
@@ -216,9 +229,8 @@ export function AppSidebar() {
         <SidebarFooter>
           <ConfirmDialog
             trigger={
-              <Button variant="destructive">
-                {" "}
-                <LogOut />
+              <Button variant="destructive" disabled={logoutMutate.isPending}>
+                {logoutMutate.isPending ? <Spinner/> :  <LogOut />}
                 {!isCollapsed && <span>Logout</span>}
               </Button>
             }
@@ -228,6 +240,7 @@ export function AppSidebar() {
             confirmLabel="Logout"
             cancelLabel="Cancel"
             icon={LogOutIcon}
+            isLoading={logoutMutate.isPending}
           />
         </SidebarFooter>
       </Sidebar>

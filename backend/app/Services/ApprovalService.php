@@ -63,7 +63,7 @@ class ApprovalService
                     'to_state' => $approval->currentStatus->name,
                     'comment' => 'Started Approval',
                 ]);
-                $this->autoApproval($approval->id, $userId, "Auto Approved");
+                $this->autoApproval($approval->id, $userId, 'Auto Approved');
             });
         });
     }
@@ -105,7 +105,7 @@ class ApprovalService
                 'current_status_id' => $currentStep->approval_status_id,
             ]);
             $approval->histories()->create($historyData);
-            $this->autoApproval($approval->id, $user->id, "Auto Approved");
+            $this->autoApproval($approval->id, $user->id, 'Auto Approved');
         });
     }
 

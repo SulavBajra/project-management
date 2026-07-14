@@ -25,7 +25,6 @@ class ApprovalController extends Controller
         $approvals = $this->approvalRepo->findApprovalFromRole($roleId);
 
         return ApprovalListResource::collection($approvals);
-        // return $approvals;
     }
 
     public function store(ApprovalStepStoreRequest $request, int $approvalId)

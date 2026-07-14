@@ -15,6 +15,7 @@ class ExpenseController extends Controller
     {
         //
     }
+
     public function index(int $projectId)
     {
         $expenses = Expense::query()
@@ -57,6 +58,7 @@ class ExpenseController extends Controller
     public function show(int $projectId)
     {
         $expenses = $this->expenseRepo->find($projectId);
+
         // return response()->json($expenses);
         return ExpenseResource::collection($expenses);
     }
@@ -64,6 +66,7 @@ class ExpenseController extends Controller
     public function destroy(int $expenseId)
     {
         Expense::destroy($expenseId);
-        return response()->json(["message" => "successfully deleted expense"]);
+
+        return response()->json(['message' => 'successfully deleted expense']);
     }
 }

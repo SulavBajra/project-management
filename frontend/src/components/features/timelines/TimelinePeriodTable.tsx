@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { Timeline } from "@/types/Timeline"
+import { Spinner } from "@/components/ui/spinner"
 
 const fmt = (date: string) => format(new Date(date), "MMM d, yyyy")
 
@@ -20,8 +21,10 @@ const monthRange = (start: string, end: string) => {
 
 export default function TimelinePeriodTable({
   timelines,
+  isLoading,
 }: {
-  timelines: Timeline[]
+    timelines: Timeline[]
+  isLoading: boolean
 }) {
   const periods = timelines.flatMap((t) => t.periods)
 
@@ -38,6 +41,9 @@ export default function TimelinePeriodTable({
         </TableRow>
       </TableHeader>
       <TableBody>
+        {
+        isLoading && <div className="flex justify-center items-center w-full"><Spinner className="size-18"/></div>
+        }
         {periods.length === 0 ? (
           <TableRow>
             <TableCell

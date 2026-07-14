@@ -11,6 +11,7 @@ import {
 import { Button } from "./ui/button"
 import { type LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Spinner } from "./ui/spinner"
 
 interface ConfirmDialogProps {
   trigger: React.ReactNode
@@ -22,6 +23,7 @@ interface ConfirmDialogProps {
   icon?: LucideIcon
   onConfirm?: () => void
   importance?: "high" | "low"
+  isLoading?: boolean
 }
 
 export default function ConfirmDialog({
@@ -34,6 +36,7 @@ export default function ConfirmDialog({
   icon: Icon,
   onConfirm,
   importance,
+  isLoading,
 }: ConfirmDialogProps) {
   const isHigh = importance === "high"
   return (
@@ -60,8 +63,9 @@ export default function ConfirmDialog({
         </DialogHeader>
         <DialogFooter>
           <DialogClose>{cancelLabel}</DialogClose>
-          <Button variant={confirmVariant} onClick={onConfirm}>
+          <Button variant={confirmVariant} onClick={onConfirm} disabled={isLoading}>
             {confirmLabel}
+            {isLoading && <Spinner />}
           </Button>
         </DialogFooter>
       </DialogContent>

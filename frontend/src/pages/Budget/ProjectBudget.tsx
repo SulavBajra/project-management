@@ -33,8 +33,6 @@ export default function ProjectBudget() {
   const itemsKey = ["project", projectId, "budget-plan-items"]
   const budgetHeadsKey = ["budget-heads"]
 
-  // --- Queries ---
-
   const { data: budgetHeads = [] } = useQuery({
     queryKey: budgetHeadsKey,
     queryFn: async () => {

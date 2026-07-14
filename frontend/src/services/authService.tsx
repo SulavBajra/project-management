@@ -18,7 +18,8 @@ export const authService = {
 
   logout: async () => {
     await getCsrfToken()
-    await api.post("/logout")
+    const response = await api.post("/logout")
+    return response.data
   },
 
   register: async (data: { email: string; password: string }) => {

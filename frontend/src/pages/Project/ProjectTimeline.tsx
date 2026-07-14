@@ -1,34 +1,29 @@
-import axios from "axios"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import TimelinePeriodTable from "@/components/features/timelines/TimelinePeriodTable"
 import api from "@/lib/axios"
 import type { Timeline } from "@/types/Timeline"
+import { useQuery } from "@tanstack/react-query"
 
 export default function ProjectTimeline() {
   const { projectId } = useParams<{ projectId: string }>()
-  const [timelines, setTimelines] = useState<Timeline[]>([])
+
+  const { data: timelines = [], isPending, error } = useQuery({
+    queryKey: ["timelines"],
+    queryFn: async () => {
+      const response = await api.get(`api/projects/${projectId}/timeline`)
+      return response.data as Timeline[]
+    }
+  })
 
   useEffect(() => {
-    async function fetchTimeline() {
-      try {
-        const response = await api.get<Timeline[]>(
-          `api/projects/${projectId}/timeline`
-        )
-        setTimelines(response.data)
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          toast.error(error.message)
-        }
-      }
-    }
-    fetchTimeline()
-  }, [projectId])
+    if(error) toast.error(error.message)
+  },[error])
 
   return (
     <div>
-      <TimelinePeriodTable timelines={timelines} />
+      <TimelinePeriodTable timelines={timelines} isLoading={isPending} />
     </div>
   )
 }

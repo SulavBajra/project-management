@@ -29,6 +29,7 @@ class ExpenseStoreRequest extends FormRequest
             'transaction_date' => 'required|date',
             'transactions' => 'required|array|min:1',
             'transactions.*.account_head_name' => 'required|string|max:255',
+            'transactions.*.budget_head_id' => 'required|integer|exists:budget_heads,id',
             'transactions.*.debit' => 'required|numeric|min:0',
             'transactions.*.credit' => 'required|numeric|min:0',
             'transactions.*.transaction_date' => 'required|date',

@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 import { Plus, Trash2 } from "lucide-react"
 import { useRef, useState } from "react"
@@ -7,12 +8,21 @@ import ExpenseDetails from "@/components/features/expenses/ExpenseDetails"
 import ImportExpense from "@/components/features/expenses/ImportExpense"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import api from "@/lib/axios"
+import type { BudgetPlanItem } from "@/types/Budget/Item"
 import type { TransactionRow } from "@/types/TransactionRow"
 
 const makeRow = (nextId: React.MutableRefObject<number>): TransactionRow => ({
   id: nextId.current++,
   accountHead: "",
+  budgetHeadId: 0,
   debit: "",
   credit: "",
   date: "",
@@ -29,6 +39,17 @@ export default function Expense() {
   const [rows, setRows] = useState<TransactionRow[]>(() => [makeRow(nextId)])
   const [submitting, setSubmitting] = useState(false)
 
+  const { data: budgetHeads = [] } = useQuery({
+    queryKey: ["project", projectId, "budget-plan-items"],
+    queryFn: async () => {
+      const response = await api.get(
+        `api/projects/${projectId}/budget-plan/items`
+      )
+      return (response.data.data as BudgetPlanItem[]) ?? []
+    },
+    enabled: !!projectId,
+  })
+
   const hasDetails = code.trim() !== "" && transactionDate !== ""
 
   const totalDebit = rows.reduce(
@@ -44,7 +65,7 @@ export default function Expense() {
   const updateRow = (
     id: number,
     field: keyof Omit<TransactionRow, "id">,
-    value: string
+    value: string | number
   ) => {
     setRows((prev) =>
       prev.map((row) => (row.id === id ? { ...row, [field]: value } : row))
@@ -72,6 +93,7 @@ export default function Expense() {
         transaction_date: transactionDate,
         transactions: rows.map((row) => ({
           account_head_name: row.accountHead,
+          budget_head_id: row.budgetHeadId,
           debit: parseFloat(row.debit),
           credit: parseFloat(row.credit),
           transaction_date: row.date,
@@ -81,6 +103,7 @@ export default function Expense() {
       setCode("")
       setDescription("")
       setTransactionDate("")
+      nextId.current = 1
       setRows([makeRow(nextId)])
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -96,6 +119,7 @@ export default function Expense() {
     setCode("")
     setDescription("")
     setTransactionDate("")
+    nextId.current = 1
     setRows([makeRow(nextId)])
   }
 
@@ -120,8 +144,9 @@ export default function Expense() {
       </div>
 
       <div className="rounded-md border">
-        <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-2 border-b bg-muted/50 px-3 py-2 text-sm font-medium text-muted-foreground">
+        <div className="grid grid-cols-[2fr_2fr_1fr_1fr_1fr_auto] gap-2 border-b bg-muted/50 px-3 py-2 text-sm font-medium text-muted-foreground">
           <span>Account Head</span>
+          <span>Budget Head</span>
           <span>Debit</span>
           <span>Credit</span>
           <span>Date</span>
@@ -132,7 +157,7 @@ export default function Expense() {
           {rows.map((row) => (
             <div
               key={row.id}
-              className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-center gap-2 px-3 py-2"
+              className="grid grid-cols-[2fr_2fr_1fr_1fr_1fr_auto] items-center gap-2 px-3 py-2"
             >
               <Input
                 placeholder="e.g. Office Supplies"
@@ -143,6 +168,26 @@ export default function Expense() {
                 className="h-8"
                 required
               />
+              <Select
+                value={row.budgetHeadId ? String(row.budgetHeadId) : ""}
+                onValueChange={(val) =>
+                  updateRow(row.id, "budgetHeadId", Number(val))
+                }
+              >
+                <SelectTrigger className="h-8">
+                  <SelectValue placeholder="Select head" />
+                </SelectTrigger>
+                <SelectContent>
+                  {budgetHeads.map((item) => (
+                    <SelectItem
+                      key={item.id}
+                      value={String(item.budget_head_id)}
+                    >
+                      {item.budget_head_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Input
                 type="number"
                 placeholder="0.00"
