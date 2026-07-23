@@ -1,6 +1,12 @@
+import { useMemo, useEffect } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  type ColumnDef,
+} from "@tanstack/react-table"
 import axios from "axios"
-import {  useEffect  } from "react"
 import { toast } from "sonner"
 import ApprovalConfirm from "@/components/features/approvals/ApprovalConfirm"
 import StatusBadge from "@/components/status-badge/StatusBadge"
@@ -76,58 +82,86 @@ export default function AdminApproval() {
     if(error) toast.error(error.message)
   },[error])
 
+  const columns: ColumnDef<ApprovalList>[] = useMemo(() => [
+    { header: "S.N", cell: ({ row }) => row.index + 1 },
+    { accessorKey: "approvable_type", header: "Approval Request" },
+    { accessorKey: "project_name", header: "Project Name" },
+    { accessorKey: "created_by", header: "Created By" },
+    {
+      accessorKey: "current_status",
+      header: "Status",
+      cell: ({ row }) => (
+        <StatusBadge
+          status={row.original.current_status}
+          final={row.original.is_final}
+        />
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        row.original.current_status === "Approved"
+          ? <Button disabled variant="ghost">Approval</Button>
+          : <ApprovalConfirm
+              approvalId={row.original.id}
+              onAdvance={handleNext}
+              onReject={handleReject}
+            />
+      ),
+    },
+  ], [handleNext, handleReject])
+
+  const table = useReactTable({
+    data: approvals,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
+
+  if (isPending) {
+    return (
+      <div className="flex justify-center py-8">
+        <Spinner className="size-15" />
+      </div>
+    )
+  }
+
   return (
     <div>
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>S.N</TableHead>
-            <TableHead>Approval Request</TableHead>
-            <TableHead>Project Name</TableHead>
-            <TableHead>Created By</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
         </TableHeader>
         <TableBody>
-          {isPending ? (
-            <TableRow>
-              <TableCell colSpan={6} className="text-center">
-                <Spinner className="size-15" />
-              </TableCell>
-            </TableRow>
-          ) : approvals.length === 0 ? (
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
             <TableRow>
               <TableCell
                 colSpan={6}
-                className="text-center text-muted-foreground"
+                className="h-24 text-center text-muted-foreground"
               >
                 No pending approvals
               </TableCell>
             </TableRow>
-          ) : (
-            approvals.map((approval, index) => (
-              <TableRow key={approval.id}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{approval.approvable_type}</TableCell>
-                <TableCell>{approval.project_name}</TableCell>
-                <TableCell>{approval.created_by}</TableCell>
-                <TableCell>
-                  <StatusBadge
-                    status={approval.current_status}
-                    final={approval.is_final}
-                  />
-                </TableCell>
-                <TableCell>
-                  {approval.current_status === "Approved" ? <Button disabled={true} variant="ghost">Approval</Button> :
-                    <ApprovalConfirm
-                      approvalId={approval.id}
-                      onAdvance={handleNext}
-                      onReject={handleReject}
-                    />}
-                </TableCell>
-              </TableRow>
-            ))
           )}
         </TableBody>
       </Table>

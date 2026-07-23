@@ -1,4 +1,11 @@
 "use client"
+import { useMemo } from "react"
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  type ColumnDef,
+} from "@tanstack/react-table"
 import {
   Dialog,
   DialogContent,
@@ -12,11 +19,12 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "../../components/ui/table"
-import type { ExpenseData } from "./Expense"
+import type { ExpenseData, Transaction } from "./Expense"
 import { Eye } from "lucide-react"
 
 
@@ -45,6 +53,36 @@ export function ExpenseDetailDialog({
     (sum, t) => sum + Number(t.credit || 0),
     0
   )
+
+  const columns: ColumnDef<Transaction>[] = useMemo(() => [
+    { accessorKey: "account_head", header: "Account Head" },
+    {
+      accessorKey: "debit",
+      header: "Debit",
+      cell: ({ row }) => Number(row.original.debit) ? row.original.debit : "—",
+    },
+    {
+      accessorKey: "credit",
+      header: "Credit",
+      cell: ({ row }) => Number(row.original.credit) ? row.original.credit : "—",
+    },
+    {
+      accessorKey: "transaction_date",
+      header: "Date",
+      cell: ({ row }) =>
+        new Date(row.original.transaction_date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }),
+    },
+  ], [])
+
+  const table = useReactTable({
+    data: transactions,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -94,41 +132,45 @@ export function ExpenseDetailDialog({
           <div className="rounded-md border">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Account Head</TableHead>
-                  <TableHead>Debit</TableHead>
-                  <TableHead>Credit</TableHead>
-                  <TableHead>Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.map((t) => (
-                  <TableRow key={t.transaction_id}>
-                    <TableCell>{t.account_head}</TableCell>
-                    <TableCell>
-                      {Number(t.debit) ? t.debit : "—"}
-                    </TableCell>
-                    <TableCell>
-                      {Number(t.credit) ? t.credit : "—"}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(t.transaction_date).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </TableCell>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    ))}
                   </TableRow>
                 ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                      No transactions.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
-              <tfoot>
+              <TableFooter>
                 <TableRow className="font-medium">
                   <TableCell>Total</TableCell>
                   <TableCell>{totalDebit}</TableCell>
                   <TableCell>{totalCredit}</TableCell>
                   <TableCell />
                 </TableRow>
-              </tfoot>
+              </TableFooter>
             </Table>
           </div>
         </div>

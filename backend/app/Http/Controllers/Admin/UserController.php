@@ -71,10 +71,12 @@ class UserController extends Controller
         //
     }
 
-    public function getUsersByRole(string $role)
+    public function getUsersByRole(int $role)
     {
-        $users = User::role($role)->latest()->get();
-
+        if ($role !== 1) {
+            $users = User::role($role)->latest()->get();
+        }
+        $users = User::withoutRole($role)->latest()->get();
         return response()->json($users);
     }
 }

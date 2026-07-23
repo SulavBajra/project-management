@@ -7,6 +7,7 @@ import {
   ListChecks,
   LogOut,
   LogOutIcon,
+  PanelsTopLeft,
   Settings,
   ShieldCheck,
   Smile,
@@ -101,7 +102,7 @@ export function AppSidebar() {
                 Project Management
               </span>
             ) : (
-              <Smile className="h-5 w-5 shrink-0" />
+              <PanelsTopLeft className="h-5 w-5 shrink-0" />
             )}
           </Link>
         </SidebarHeader>

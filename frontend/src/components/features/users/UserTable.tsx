@@ -1,4 +1,10 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  type ColumnDef,
+} from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -15,48 +21,86 @@ import { AddRoleModal } from "./AddRoleModal.tsx"
 export const UserTable = ({ users }: { users: User[] }) => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
 
+  const columns: ColumnDef<User>[] = useMemo(() => [
+    { header: "S.N", cell: ({ row }) => row.index + 1 },
+    {
+      accessorKey: "name",
+      header: () => <div className="text-center">Name</div>,
+      cell: ({ row }) => <div className="text-center">{row.original.name}</div>,
+    },
+    {
+      accessorKey: "email",
+      header: () => <div className="text-center">Email</div>,
+      cell: ({ row }) => <div className="text-center">{row.original.email}</div>,
+    },
+    {
+      accessorKey: "role",
+      header: () => <div className="text-center">Role</div>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          <Badge variant="outline">{row.original.role ?? "N/A"}</Badge>
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      header: () => <div className="text-center">Actions</div>,
+      cell: ({ row }) => (
+        <div className="text-center">
+          {row.original.role === null ? (
+            <Button
+              variant="secondary"
+              onClick={() => setSelectedUserId(String(row.original.id))}
+            >
+              Add Role
+            </Button>
+          ) : (
+            <Button variant="destructive">Delete Role</Button>
+          )}
+        </div>
+      ),
+    },
+  ], [setSelectedUserId])
+
+  const table = useReactTable({
+    data: users,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
+
   return (
     <>
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>S.N</TableHead>
-            <TableHead className="text-center">Name</TableHead>
-            <TableHead className="text-center">Email</TableHead>
-            <TableHead className="text-center">Role</TableHead>
-            <TableHead className="text-center">Actions</TableHead>
-          </TableRow>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
         </TableHeader>
         <TableBody>
-          {users.length === 0 ? (
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
             <TableRow>
-              <TableCell colSpan={5} className="text-center">
+              <TableCell colSpan={5} className="h-24 text-center">
                 No users found.
               </TableCell>
             </TableRow>
-          ) : (
-            users.map((user, index) => (
-              <TableRow key={user.id}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell className="text-center">{user.name}</TableCell>
-                <TableCell className="text-center">{user.email}</TableCell>
-                <TableCell className="text-center">
-                  <Badge variant="outline">{user.role ?? "N/A"}</Badge>
-                </TableCell>
-                <TableCell className="text-center">
-                  {user.role === null ? (
-                    <Button
-                      variant="secondary"
-                      onClick={() => setSelectedUserId(user.id)}
-                    >
-                      Add Role
-                    </Button>
-                  ) : (
-                    <Button variant="destructive">Delete Role</Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))
           )}
         </TableBody>
       </Table>

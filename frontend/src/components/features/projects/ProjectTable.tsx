@@ -1,6 +1,13 @@
+import { useMemo } from "react"
 import axios from "axios"
 import { EyeIcon } from "lucide-react"
 import { toast } from "sonner"
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  type ColumnDef,
+} from "@tanstack/react-table"
 import DeleteDialog from "@/components/DeleteDialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -47,51 +54,76 @@ export default function ProjectTable({
     deleteMutate.mutate(id)
   }
 
+  const columns: ColumnDef<ProjectResponse>[] = useMemo(() => [
+    { header: "S.N", cell: ({ row }) => row.index + 1 },
+    { accessorKey: "code", header: "Code" },
+    { accessorKey: "name", header: "Name" },
+    {
+      accessorKey: "is_active",
+      header: "Status",
+      cell: ({ row }) => (
+        <Badge>{row.original.is_active ? "Active" : "Inactive"}</Badge>
+      ),
+    },
+    { accessorKey: "description", header: "Description" },
+    { accessorKey: "created_by", header: "Created By" },
+    { accessorKey: "users_count", header: "Users" },
+    { accessorKey: "created_at", header: "Created At" },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1">
+          <Button variant="ghost">
+            <EyeIcon className="h-4 w-4" />
+          </Button>
+          {user?.permissions?.includes("delete_project") && (
+            <DeleteDialog itemId={row.original.id} onRemove={handleDelete} />
+          )}
+        </div>
+      ),
+    },
+  ], [user, handleDelete])
+
+  const table = useReactTable({
+    data: projects,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
+
   return (
     <Table>
       <TableHeader>
-        <TableRow>
-          <TableHead>S.N</TableHead>
-          <TableHead>Code</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Description</TableHead>
-          <TableHead>Created By</TableHead>
-          <TableHead>Users</TableHead>
-          <TableHead>Created At</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id}>
+            {headerGroup.headers.map((header) => (
+              <TableHead key={header.id}>
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(header.column.columnDef.header, header.getContext())}
+              </TableHead>
+            ))}
+          </TableRow>
+        ))}
       </TableHeader>
       <TableBody>
-        {projects.length === 0 && (
+        {table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row) => (
+            <TableRow key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))
+        ) : (
           <TableRow>
-            <TableCell colSpan={9} className="text-center">
-              <p>No projects available.</p>
+            <TableCell colSpan={9} className="h-24 text-center">
+              No projects available.
             </TableCell>
           </TableRow>
         )}
-        {projects.map((project, index) => (
-          <TableRow key={project.id}>
-            <TableCell>{index + 1}</TableCell>
-            <TableCell>{project.code}</TableCell>
-            <TableCell>{project.name}</TableCell>
-            <TableCell>
-              <Badge>{project.is_active ? "Active" : "Inactive"}</Badge>
-            </TableCell>
-            <TableCell>{project.description}</TableCell>
-            <TableCell>{project.created_by}</TableCell>
-            <TableCell>{project.users_count}</TableCell>
-            <TableCell>{project.created_at}</TableCell>
-            <TableCell>
-              <Button variant="ghost">
-                <EyeIcon className="h-4 w-4" />
-              </Button>
-              {user?.permissions?.includes("delete_project") && (
-                <DeleteDialog itemId={project.id} onRemove={handleDelete} />
-              )}
-            </TableCell>
-          </TableRow>
-        ))}
       </TableBody>
     </Table>
   )

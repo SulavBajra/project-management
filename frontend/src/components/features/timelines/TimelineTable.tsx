@@ -1,6 +1,13 @@
+import { useMemo, useCallback } from "react"
 import axios from "axios"
 import { format } from "date-fns"
 import { Trash2 } from "lucide-react"
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  type ColumnDef,
+} from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -40,25 +47,94 @@ export default function TimelineTable({
   timelines: Timeline[]
   onDeleted?: (id: string) => void
 }) {
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     await deleteTimeline(id)
     onDeleted?.(id)
-  }
+  }, [onDeleted])
+
+  const columns: ColumnDef<Timeline>[] = useMemo(() => [
+    { header: "S.N", cell: ({ row }) => row.index + 1 },
+    {
+      accessorKey: "start_date",
+      header: "Start Date",
+      cell: ({ row }) => fmt(row.original.start_date),
+    },
+    {
+      accessorKey: "end_date",
+      header: "End Date",
+      cell: ({ row }) => fmt(row.original.end_date),
+    },
+    {
+      id: "periods",
+      header: "Periods",
+      cell: ({ row }) => (
+        <div className="flex flex-wrap gap-1">
+          {row.original.periods?.map((period) => (
+            <Tooltip key={period.id}>
+              <TooltipTrigger asChild>
+                <Badge variant="secondary" className="cursor-default">
+                  {period.name}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                {fmt(period.start_date)} – {fmt(period.end_date)}
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:text-destructive"
+          onClick={() => handleDelete(row.original.id)}
+        >
+          <Trash2 className="h-4 w-4" />
+          <span className="sr-only">Delete timeline</span>
+        </Button>
+      ),
+    },
+  ], [handleDelete])
+
+  const table = useReactTable({
+    data: timelines,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
 
   return (
     <TooltipProvider>
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>S.N</TableHead>
-            <TableHead>Start Date</TableHead>
-            <TableHead>End Date</TableHead>
-            <TableHead>Periods</TableHead>
-            <TableHead className="w-15">Actions</TableHead>
-          </TableRow>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
         </TableHeader>
         <TableBody>
-          {timelines.length === 0 && (
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
             <TableRow>
               <TableCell
                 colSpan={5}
@@ -68,44 +144,6 @@ export default function TimelineTable({
               </TableCell>
             </TableRow>
           )}
-          {timelines.map((timeline, index) => (
-            <TableRow key={timeline.id}>
-              <TableCell className="font-medium">{index + 1}</TableCell>
-
-              <TableCell>{fmt(timeline.start_date)}</TableCell>
-
-              <TableCell>{fmt(timeline.end_date)}</TableCell>
-
-              <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  {timeline.periods?.map((period) => (
-                    <Tooltip key={period.id}>
-                      <TooltipTrigger asChild>
-                        <Badge variant="secondary" className="cursor-default">
-                          {period.name}
-                        </Badge>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {fmt(period.start_date)} – {fmt(period.end_date)}
-                      </TooltipContent>
-                    </Tooltip>
-                  ))}
-                </div>
-              </TableCell>
-
-              <TableCell>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground hover:text-destructive"
-                  onClick={() => handleDelete(timeline.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Delete timeline</span>
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
         </TableBody>
       </Table>
     </TooltipProvider>

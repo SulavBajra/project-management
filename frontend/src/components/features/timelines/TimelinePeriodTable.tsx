@@ -1,4 +1,11 @@
+import { useMemo } from "react"
 import { format } from "date-fns"
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  type ColumnDef,
+} from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import {
   Table,
@@ -8,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { Timeline } from "@/types/Timeline"
+import type { Timeline, TimelinePeriod } from "@/types/Timeline"
 import { Spinner } from "@/components/ui/spinner"
 
 const fmt = (date: string) => format(new Date(date), "MMM d, yyyy")
@@ -28,45 +35,80 @@ export default function TimelinePeriodTable({
 }) {
   const periods = timelines.flatMap((t) => t.periods)
 
+  const columns: ColumnDef<TimelinePeriod>[] = useMemo(() => [
+    { header: "S.N", cell: ({ row }) => row.index + 1 },
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => <Badge variant="secondary">{row.original.name}</Badge>,
+    },
+    {
+      accessorKey: "start_date",
+      header: "Start Date",
+      cell: ({ row }) => fmt(row.original.start_date),
+    },
+    {
+      accessorKey: "end_date",
+      header: "End Date",
+      cell: ({ row }) => fmt(row.original.end_date),
+    },
+    {
+      id: "month_range",
+      header: "Month Range",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {monthRange(row.original.start_date, row.original.end_date)}
+        </span>
+      ),
+    },
+  ], [])
+
+  const table = useReactTable({
+    data: periods,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center w-full py-8">
+        <Spinner className="size-18" />
+      </div>
+    )
+  }
+
   return (
     <Table>
       <TableHeader>
-        <TableRow>
-          <TableHead>S.N</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Start Date</TableHead>
-          <TableHead>End Date</TableHead>
-          <TableHead>Month Range</TableHead>
-          <TableHead />
-        </TableRow>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id}>
+            {headerGroup.headers.map((header) => (
+              <TableHead key={header.id}>
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(header.column.columnDef.header, header.getContext())}
+              </TableHead>
+            ))}
+          </TableRow>
+        ))}
       </TableHeader>
       <TableBody>
-        {
-        isLoading && <div className="flex justify-center items-center w-full"><Spinner className="size-18"/></div>
-        }
-        {periods.length === 0 ? (
+        {table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row) => (
+            <TableRow key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))
+        ) : (
           <TableRow>
-            <TableCell
-              colSpan={6}
-              className="h-24 text-center text-muted-foreground"
-            >
+            <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
               No periods yet.
             </TableCell>
           </TableRow>
-        ) : (
-          periods.map((period, index) => (
-            <TableRow key={period.id}>
-              <TableCell className="font-medium">{index + 1}</TableCell>
-              <TableCell>
-                <Badge variant="secondary">{period.name}</Badge>
-              </TableCell>
-              <TableCell>{fmt(period.start_date)}</TableCell>
-              <TableCell>{fmt(period.end_date)}</TableCell>
-              <TableCell className="text-muted-foreground">
-                {monthRange(period.start_date, period.end_date)}
-              </TableCell>
-            </TableRow>
-          ))
         )}
       </TableBody>
     </Table>

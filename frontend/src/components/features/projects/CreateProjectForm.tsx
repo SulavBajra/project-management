@@ -17,6 +17,7 @@ import api from "@/lib/axios"
 import type { Employee } from "@/types/User"
 import TimelinePopOver from "../timelines/TimelinePopOver"
 import AddUserModal from "../users/AddUserModal"
+import { useAuth } from "@/hooks/useAuth"
 
 const schema = z.object({
   name: z.string().min(1, "Project name is required"),
@@ -29,15 +30,16 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 export default function CreateProjectForm({ onSubmit }: { onSubmit?: () => void }) {
+  const {user} = useAuth()
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { name: "", code: "", description: "", selectedEmployees: [] },
   })
 
   const { data: employees = [], isPending, error } = useQuery({
-    queryKey: ["employees"],
+    queryKey: ["users"],
     queryFn: async () => {
-      const response = await api.get<Employee[]>("api/users/employee")
+      const response = await api.get<Employee[]>(`api/users/${user?.role_id}`)
       return response.data
     },
   })

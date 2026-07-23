@@ -1,4 +1,11 @@
+import { useMemo } from "react"
 import { Trash } from "lucide-react"
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  type ColumnDef,
+} from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -15,36 +22,60 @@ export default function BudgetTable({
 }: {
   budgetHeads: BudgetHead[]
 }) {
+  const columns: ColumnDef<BudgetHead>[] = useMemo(() => [
+    { header: "S.N", cell: ({ row }) => row.index + 1 },
+    { accessorKey: "name", header: "Name" },
+    { accessorKey: "code", header: "Code" },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: () => (
+        <Button variant="destructive">
+          <Trash size={16} />
+        </Button>
+      ),
+    },
+  ], [])
+
+  const table = useReactTable({
+    data: budgetHeads,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
+
   return (
     <Table>
       <TableHeader>
-        <TableRow>
-          <TableHead>S.N</TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Code</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id}>
+            {headerGroup.headers.map((header) => (
+              <TableHead key={header.id}>
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(header.column.columnDef.header, header.getContext())}
+              </TableHead>
+            ))}
+          </TableRow>
+        ))}
       </TableHeader>
       <TableBody>
-        {budgetHeads.length === 0 && (
+        {table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row) => (
+            <TableRow key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))
+        ) : (
           <TableRow>
-            <TableCell colSpan={4} className="text-center">
-              <p>No budget heads available.</p>
+            <TableCell colSpan={4} className="h-24 text-center">
+              No budget heads available.
             </TableCell>
           </TableRow>
         )}
-        {budgetHeads.map((head, index) => (
-          <TableRow key={head.id}>
-            <TableCell>{index + 1}</TableCell>
-            <TableCell>{head.name}</TableCell>
-            <TableCell>{head.code}</TableCell>
-            <TableCell>
-              <Button variant="destructive">
-                <Trash size={16} />
-              </Button>
-            </TableCell>
-          </TableRow>
-        ))}
       </TableBody>
     </Table>
   )

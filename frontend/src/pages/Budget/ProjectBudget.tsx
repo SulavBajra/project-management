@@ -36,8 +36,8 @@ export default function ProjectBudget() {
   const { data: budgetHeads = [] } = useQuery({
     queryKey: budgetHeadsKey,
     queryFn: async () => {
-      const response = await api.get(`api/budget-heads/`)
-      return response.data as BudgetHead[]
+      const response = await api.get<BudgetHead[]>(`api/budget-heads/`)
+      return response.data
     },
   })
 

@@ -27,6 +27,8 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/dashboard/kpi', [DashboardController::class, 'kpi']);
+    Route::get('/dashboard/chart', [DashboardController::class, 'chart']);
     Route::get('users/{role}', [UserController::class, 'getUsersByRole']);
     Route::resource('users', UserController::class)->except(['create', 'edit']);
 

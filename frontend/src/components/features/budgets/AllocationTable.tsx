@@ -1,5 +1,11 @@
 import { useMemo } from "react"
 import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  type ColumnDef,
+} from "@tanstack/react-table"
+import {
   Table,
   TableBody,
   TableCell,
@@ -8,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { monthRange } from "@/lib/utils"
-import type { BudgetPlanItem } from "@/types/Budget/Item"
+import type { BudgetPlanItem, ItemAllocation } from "@/types/Budget/Item"
 import AllocateDialog from "./AllocateDialog"
 import AllocationClear from "./AllocationClear"
 import AllocationRemove from "./AllocationRemove"
@@ -26,6 +32,67 @@ export function AllocationTable({
 }) {
   const periods = useMemo(() => plans?.[0]?.allocations ?? [], [plans])
 
+  const columns: ColumnDef<BudgetPlanItem>[] = useMemo(() => [
+    {
+      id: "budget_head",
+      header: "Budget Head",
+      cell: ({ row }) => (
+        <>
+          <div className="font-medium">{row.original.budget_head_name}</div>
+          <div className="text-xs text-muted-foreground">
+            {row.original.budget_head_code}
+          </div>
+        </>
+      ),
+    },
+    ...periods.map((p) => ({
+      id: `period_${p.period_id}`,
+      header: () => (
+        <div className="text-center">
+          <div className="font-medium">{p.period_name}</div>
+          <div className="text-xs font-normal text-muted-foreground">
+            {monthRange(p.period_start, p.period_end)}
+          </div>
+        </div>
+      ),
+      cell: ({ row }: { row: { original: BudgetPlanItem } }) => {
+        const alloc = row.original.allocations.find(
+          (a: ItemAllocation) => a.period_id === p.period_id
+        )
+        return alloc?.allocated_amount ? (
+          <div className="text-center">
+            {parseFloat(alloc.allocated_amount).toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+            })}
+          </div>
+        ) : (
+          <div className="text-center text-muted-foreground">—</div>
+        )
+      },
+    })),
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <>
+          <AllocateDialog
+            periods={row.original.allocations}
+            item={row.original}
+            onSubmit={onUpdate}
+          />
+          <AllocationClear itemId={row.original.id} onClear={onClear} />
+          <AllocationRemove itemId={row.original.id} onRemove={onRemove} />
+        </>
+      ),
+    },
+  ] as ColumnDef<BudgetPlanItem>[], [periods, onUpdate, onClear, onRemove])
+
+  const table = useReactTable({
+    data: plans ?? [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  })
+
   if (!plans || plans.length === 0) {
     return (
       <div className="rounded-md border p-6 text-center text-sm text-muted-foreground">
@@ -38,53 +105,36 @@ export function AllocationTable({
     <div className="overflow-x-auto rounded-md border">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead className="">Budget Head</TableHead>
-            {periods.map((p) => (
-              <TableHead key={p.period_id} className="min-w-32 text-center">
-                <div className="font-medium">{p.period_name}</div>
-                <div className="text-xs font-normal text-muted-foreground">
-                  {monthRange(p.period_start, p.period_end)}
-                </div>
-              </TableHead>
-            ))}
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {plans.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell>
-                <div className="font-medium">{item.budget_head_name}</div>
-                <div className="text-xs text-muted-foreground">
-                  {item.budget_head_code}
-                </div>
-              </TableCell>
-              {item.allocations.map((alloc) => (
-                <TableCell key={alloc.period_id} className="text-center">
-                  {alloc.allocated_amount ? (
-                    parseFloat(alloc.allocated_amount).toLocaleString(
-                      undefined,
-                      {
-                        minimumFractionDigits: 2,
-                      }
-                    )
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </TableCell>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id} className="min-w-32">
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.header, header.getContext())}
+                </TableHead>
               ))}
-              <TableCell className="">
-                <AllocateDialog
-                  periods={item.allocations}
-                  item={item}
-                  onSubmit={onUpdate}
-                />
-                <AllocationClear itemId={item.id} onClear={onClear} />
-                <AllocationRemove itemId={item.id} onRemove={onRemove} />
-              </TableCell>
             </TableRow>
           ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No items found.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
     </div>
