@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\UserStoreRequest;
+use App\Http\Requests\User\UserUpdateRequest;
 use App\Http\Resources\User\UserResource;
 use App\Models\User;
-use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
@@ -21,11 +21,6 @@ class UserController extends Controller
         return UserResource::collection($users)->additional([
             'usersWithoutAnyRoles' => $usersWithoutAnyRoles,
         ]);
-
-        // return response()->json([
-        //     "users" => $users,
-        //     "usersWithoutAnyRoles" => $usersWithoutAnyRoles,
-        // ]);
     }
 
     /**
@@ -36,7 +31,7 @@ class UserController extends Controller
         $validated = $request->validated();
         $user = User::create($validated);
 
-        return response()->json($user, 201);
+        return new UserResource($user);
     }
 
     /**
@@ -58,9 +53,17 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UserUpdateRequest $request, User $user)
     {
-        //
+        $validated = $request->validated();
+
+        if (empty($validated['password'])) {
+            unset($validated['password']);
+        }
+
+        $user->update($validated);
+
+        return new UserResource($user);
     }
 
     /**
@@ -77,6 +80,7 @@ class UserController extends Controller
             $users = User::role($role)->latest()->get();
         }
         $users = User::withoutRole($role)->latest()->get();
+
         return response()->json($users);
     }
 }

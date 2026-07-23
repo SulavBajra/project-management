@@ -18,6 +18,8 @@ class ApprovalResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
+            'approvable_type' => $this->approvable_type,
+            'is_active' => $this->is_active,
             'current_version' => $this->whenLoaded(
                 'currentVersion',
                 fn () => new VersionResource($this->currentVersion),

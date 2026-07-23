@@ -22,7 +22,8 @@ class ApprovalFlowController extends Controller
     {
         $flows = ApprovalWorkflow::with(
             'currentVersion.statuses',
-            'currentVersion.steps',
+            'currentVersion.steps.role',
+            'currentVersion.steps.approvalStatus',
         )->get();
 
         return response()->json(ApprovalResource::collection($flows));

@@ -214,6 +214,16 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 )}
+                {user?.permissions.includes("read_approval_workflow") && (
+                                <SidebarMenuItem>
+                                  <SidebarMenuButton asChild tooltip="Approval">
+                                    <Link to="/flow">
+                                      <ListChecks className="h-4 w-4" />
+                                      <span>Approval Flow</span>
+                                    </Link>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              )}
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Settings">
                     <Link to="/settings">

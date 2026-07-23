@@ -31,6 +31,12 @@ class VersionResource extends JsonResource
                     fn ($step) => [
                         'id' => $step->id,
                         'name' => $step->name,
+                        'order_no' => $step->order_no,
+                        'is_final' => $step->is_final,
+                        'is_auto_approve' => $step->is_auto_approve,
+                        'role' => $step->relationLoaded('role') && $step->role
+                            ? ['id' => $step->role->id, 'name' => $step->role->name]
+                            : null,
                     ],
                 );
             }),

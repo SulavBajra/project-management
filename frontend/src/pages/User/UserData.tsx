@@ -1,6 +1,7 @@
 import axios from "axios"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
+import { CreateUserModal } from "@/components/features/users/CreateUserModal"
 import { UserTable } from "@/components/features/users/UserTable"
 import { PaginationSimple } from "@/components/layouts/simple-paginaton"
 import { Badge } from "@/components/ui/badge"
@@ -32,24 +33,25 @@ export default function UsersData() {
     fetchRole()
   }, [])
 
-  useEffect(() => {
-    async function fetchUsers() {
-      try {
-        setLoading(true)
-        const response = await api.get<UserDashboardProps>(
-          `/api/users?page=${currentPage}`
-        )
-        setUsers(response.data.data)
-        setUsersWithoutAnyRoles(response.data.usersWithoutAnyRoles)
-        setMeta(response.data.meta)
-      } catch (error) {
-        if (axios.isAxiosError(error)) toast.error(error.message)
-      } finally {
-        setLoading(false)
-      }
+  const fetchUsers = useCallback(async () => {
+    try {
+      setLoading(true)
+      const response = await api.get<UserDashboardProps>(
+        `/api/users?page=${currentPage}`
+      )
+      setUsers(response.data.data)
+      setUsersWithoutAnyRoles(response.data.usersWithoutAnyRoles)
+      setMeta(response.data.meta)
+    } catch (error) {
+      if (axios.isAxiosError(error)) toast.error(error.message)
+    } finally {
+      setLoading(false)
     }
-    fetchUsers()
   }, [currentPage])
+
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
 
   if (loading)
     return (
@@ -63,21 +65,21 @@ export default function UsersData() {
       <Card className="">
         <CardHeader className="flex items-center justify-between">
           <div>
-            {" "}
             <h1 className="text-2xl">Users</h1>
             <p className="text-[15px]">
               Here all the new registered users. Assign a role to each user to
               activate their account.
             </p>
           </div>
-          <div>
+          <div className="flex items-center gap-2">
             <Badge variant="secondary">
               {usersWithoutAnyRoles} New Registered
             </Badge>
+            <CreateUserModal onCreated={fetchUsers} />
           </div>
         </CardHeader>
         <CardContent>
-          <UserTable users={users} />
+          <UserTable users={users} onUserUpdated={fetchUsers} />
         </CardContent>
 
         {meta && (

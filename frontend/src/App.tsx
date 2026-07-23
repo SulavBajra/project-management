@@ -31,6 +31,7 @@ import Settings from "./pages/Setting.tsx"
 import ExpenseView from "./pages/Expense/ExpenseView.tsx"
 import BudgetVsActual from "./pages/Report/BudgetVsActual.tsx"
 import GlobalBudgetVsActual from "./pages/Report/GlobalBudgetVsActual.tsx"
+import Approval from "./pages/Approval.tsx"
 
 function ProtectedRoute() {
   const { user } = useAuth()
@@ -96,6 +97,7 @@ export default function App() {
               <Route path="/budget" element={<Budget />} />
               <Route path="/timeline" element={<TimeLine />} />
               <Route path="/approval" element={<AdminApproval />} />
+              <Route path="/flow" element={<Approval/>}/>
               <Route
                 path="/reports/budget-vs-actual"
                 element={<GlobalBudgetVsActual />}
