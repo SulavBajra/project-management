@@ -77,7 +77,11 @@ class UserController extends Controller
     public function getUsersByRole(int $role)
     {
         if ($role !== 1) {
-            $users = User::role($role)->latest()->get();
+              $users = User::withoutRole($role)
+                  ->withoutRole(1)
+                  ->latest()
+                  ->get();
+              return response()->json($users);
         }
         $users = User::withoutRole($role)->latest()->get();
 

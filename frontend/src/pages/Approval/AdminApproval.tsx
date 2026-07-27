@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react"
+import { useMemo, useEffect, useCallback} from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   useReactTable,
@@ -70,13 +70,13 @@ export default function AdminApproval() {
     }
   })
 
-  const handleNext = (comment: string | null, approvalId: number) => {
+  const handleNext = useCallback((comment: string | null, approvalId: number) => {
     nextMutation.mutate({ comment, approvalId })
-  }
+  }, [nextMutation])
 
-  const handleReject = async (comment: string | null, approvalId: number) => {
-    rejectMutation.mutate({comment, approvalId})
-  }
+  const handleReject = useCallback((comment: string | null, approvalId: number) => {
+    rejectMutation.mutate({ comment, approvalId })
+  }, [rejectMutation])
 
   useEffect(() => {
     if(error) toast.error(error.message)

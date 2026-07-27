@@ -32,6 +32,7 @@ import ExpenseView from "./pages/Expense/ExpenseView.tsx"
 import BudgetVsActual from "./pages/Report/BudgetVsActual.tsx"
 import GlobalBudgetVsActual from "./pages/Report/GlobalBudgetVsActual.tsx"
 import Approval from "./pages/Approval.tsx"
+import ProjectView from "./components/features/projects/ProjectView.tsx"
 
 function ProtectedRoute() {
   const { user } = useAuth()
@@ -67,6 +68,7 @@ export default function App() {
             <Route element={<Layout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/project" element={<ProjectIndex />} />
+              <Route path="/project/:projectId" element={<ProjectView/>}/>
               <Route path="/settings" element={<Settings />} />
 
               <Route path="/projects/:projectId" element={<ProjectLayout />}>
@@ -75,10 +77,10 @@ export default function App() {
                 <Route path="timeline" element={<ProjectTimeline />} />
                 <Route path="expenses" element={<Expenses />} />
                 <Route path="expenses/:expenseCode" element={<ExpenseView/>}/>
-                <Route
+                {/*<Route
                   path="expenses/approvals"
                   element={<ExpenseApproval />}
-                />
+                />*/}
                 <Route path="expense" element={<Expense />} />
                 <Route path="budget" element={<ProjectBudget />} />
                 <Route

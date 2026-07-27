@@ -1,16 +1,14 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery  } from "@tanstack/react-query"
 import { useEffect } from "react"
 import { toast } from "sonner"
 import ApprovalCreateForm from "@/components/features/approvals/ApprovalCreateForm"
 import ApprovalDisplay from "@/components/features/approvals/ApprovalDisplay"
 import { ApprovalStats } from "@/components/features/approvals/ApprovalStats"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 import api from "@/lib/axios"
 import type { ApprovalFlow } from "@/types/ApprovalFlow"
 
 export default function Approval() {
-  const queryClient = useQueryClient()
 
   const { data: approvalFlows = [], isPending, error } = useQuery({
     queryKey: ["approvals"],

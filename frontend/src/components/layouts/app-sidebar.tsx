@@ -10,7 +10,6 @@ import {
   PanelsTopLeft,
   Settings,
   ShieldCheck,
-  Smile,
   Timeline,
   Users,
   Wallet,
@@ -204,7 +203,7 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                {user?.permissions.includes("create_approval_workflow") && (
+
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild tooltip="Approval">
                       <Link to="/approval">
@@ -213,7 +212,6 @@ export function AppSidebar() {
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                )}
                 {user?.permissions.includes("read_approval_workflow") && (
                                 <SidebarMenuItem>
                                   <SidebarMenuButton asChild tooltip="Approval">

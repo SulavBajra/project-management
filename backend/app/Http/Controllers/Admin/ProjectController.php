@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Project\ProjectStoreRequest;
+use App\Http\Requests\Project\ProjectUpdateRequest;
 use App\Http\Resources\Project\BudgetExpenseOverviewResource;
 use App\Http\Resources\Project\ProjectResource;
+use App\Http\Resources\Project\ProjectViewResource;
 use App\Http\Resources\Timeline\TimelineResource;
 use App\Models\Project;
 use App\Services\ProjectService;
@@ -94,10 +96,6 @@ class ProjectController extends Controller
 
     public function endProject(Request $request)
     {
-        // if (!$request->user()->can("end project")) {
-        //     abort(403, "You are not authorized to end a project");
-        // }
-
         $projectId = $request->route('id');
         $project = Project::findOrFail($projectId);
         $project->is_active = false;
@@ -132,11 +130,34 @@ class ProjectController extends Controller
         return response()->json(['message' => 'Users added successfully.']);
     }
 
-    public function getAllProjects()
+    public function getAllProjects(int $userId)
     {
-        $projects = Project::withCount('users')->paginate(10);
+        if ($userId === 3) {
+            $projects = Project::withCount("users")->paginate(10);
+            return ProjectResource::collection($projects);
+        }
+        $projects = Project::whereRelation("users", "id", "=", $userId)->withCount('users')->paginate(10);
 
         return ProjectResource::collection($projects);
+    }
+
+    public function show(int $projectId)
+    {
+        $project = Project::query()
+        ->select("id", "code", "is_active", "name", "description", "created_by")
+        ->with("timelines", "users")->where('id', $projectId)->first();
+        return new ProjectViewResource($project);
+    }
+
+    public function update(int $projectId, ProjectUpdateRequest $request)
+    {
+        $project = Project::findOrFail($projectId);
+        $project->update($request->validated());
+
+        return response()->json([
+            "message" => "Successfully updated",
+            "data" => $project,
+        ]);
     }
 
     public function destroy(Project $project)

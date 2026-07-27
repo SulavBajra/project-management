@@ -1,7 +1,7 @@
-import axios from "axios"
-import { useEffect, useState } from "react"
+import { useQueries, useQueryClient } from "@tanstack/react-query"
+import { useEffect } from "react"
 import { toast } from "sonner"
-import BudgetForm from "@/components/features/budgets/BudgetForm"
+import BudgetHeadDialog from "@/components/features/budgets/BudgetHeadDialog"
 import BudgetStats from "@/components/features/budgets/BudgetStats"
 import BudgetTable from "@/components/features/budgets/BudgetTable"
 import {
@@ -11,53 +11,82 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Spinner } from "@/components/ui/spinner"
 import { useAuth } from "@/hooks/useAuth"
 import api from "@/lib/axios"
-import type { BudgetFormData } from "@/types/Budget/BudgetFormData"
 import type { BudgetHead } from "@/types/Budget/BudgetHead"
 
 export default function Budget() {
-  const [budgetHeads, setBudgetHeads] = useState<BudgetHead[]>([])
   const { user } = useAuth()
+  const queryClient = useQueryClient()
+
+  const [headsQuery, statsQuery] = useQueries({
+    queries: [
+      {
+        queryKey: ["budget-heads"],
+        queryFn: async () => {
+          const response = await api.get<BudgetHead[]>("/api/budget-heads")
+          return response.data
+        },
+      },
+      {
+        queryKey: ["budget-heads", "stats"],
+        queryFn: async () => {
+          const response = await api.get<{ count: number }>("/api/budget-heads/stats")
+          return response.data
+        },
+      },
+    ],
+  })
+
+  const budgetHeads = headsQuery.data ?? []
+  const headCount = statsQuery.data?.count ?? 0
+  const loading = headsQuery.isPending || statsQuery.isPending
+  const error = headsQuery.error || statsQuery.error
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await api.get("api/budget-heads")
-        setBudgetHeads(response.data)
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          toast.error(err.response?.data?.message || "An error occurred")
-        }
-      }
+    if (error) {
+      toast.error(error.message || "An error occurred")
     }
-    fetchData()
-  }, [])
+  }, [error])
 
-  const createBudget = async (data: BudgetFormData) => {
-    await api.post("api/budget-heads", data)
-    toast.success("Budget created successfully")
+  const invalidateBudgetHeads = () => {
+    queryClient.invalidateQueries({ queryKey: ["budget-heads"] })
   }
 
   return (
-    <Card>
-      <CardHeader className="flex justify-between">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <CardTitle>Manage Budget</CardTitle>
-          <CardDescription>
-            <p>Create, edit, and track your budget</p>
-          </CardDescription>
+          <h1 className="text-2xl font-bold tracking-tight">Manage Budget</h1>
+          <p className="text-sm text-muted-foreground">
+            Create, edit, and track budget heads
+          </p>
         </div>
-        <div>
-          {user?.permissions?.includes("create_budget") && (
-            <BudgetForm onSubmit={createBudget} />
-          )}
+        {user?.permissions?.includes("create_budget") && (
+          <BudgetHeadDialog mode="create" onSuccess={invalidateBudgetHeads} />
+        )}
+      </div>
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <Spinner />
         </div>
-      </CardHeader>
-      <CardContent>
-        <BudgetStats />
-        <BudgetTable budgetHeads={budgetHeads} />
-      </CardContent>
-    </Card>
+      ) : (
+        <div className="flex flex-col gap-6">
+          <BudgetStats totalHeads={headCount} />
+          <Card>
+            <CardHeader>
+              <CardTitle>Budget Heads</CardTitle>
+              <CardDescription>
+                {budgetHeads.length} budget head{budgetHeads.length !== 1 ? "s" : ""} defined
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BudgetTable budgetHeads={budgetHeads} onUpdated={invalidateBudgetHeads} />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
   )
 }

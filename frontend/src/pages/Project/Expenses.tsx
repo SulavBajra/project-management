@@ -1,11 +1,12 @@
 import axios from "axios"
-import { Clock } from "lucide-react"
-import { useCallback, useEffect, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
+import { Clock } from "lucide-react"
+import { useState } from "react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import api from "@/lib/axios"
-import type {  ExpenseData } from "@/types/Expenses/Expense"
+import type { ExpenseData } from "@/types/Expenses/Expense"
 import type { ExpenseStatus } from "@/types/Expenses/ExpenseStatus"
 import ExpenseApproval from "../Expense/ExpenseApproval"
 import { DataTable } from "@/types/Expenses/data-table"
@@ -19,63 +20,76 @@ type Meta = {
 
 export default function Expenses() {
   const { projectId } = useParams<{ projectId: string }>()
-  const [expenses, setExpenses] = useState<ExpenseData[]>([])
-  const [expenseStatus, setExpenseStatus] = useState<ExpenseStatus[]>([])
-  const [meta, setMeta] = useState<Meta>()
   const [currentPage, setCurrentPage] = useState(1)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-  const fetchExpenseStatus = useCallback(async () => {
-    try {
+  const { data: expensesData } = useQuery({
+    queryKey: ["expenses", projectId, currentPage],
+    queryFn: async () => {
+      const response = await api.get(
+        `/api/projects/${projectId}/expenses/?page=${currentPage}`
+      )
+      return {
+        expenses: response.data.data as ExpenseData[],
+        meta: response.data.meta as Meta,
+      }
+    },
+    enabled: !!projectId,
+  })
+
+  const expenses = expensesData?.expenses ?? []
+  const meta = expensesData?.meta
+
+  const { data: expenseStatus = [] } = useQuery({
+    queryKey: ["expenses", projectId, "approval"],
+    queryFn: async () => {
       const response = await api.get(`/api/expenses/${projectId}/approval`)
-      setExpenseStatus(response.data.data)
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message)
-      }
-    }
-  }, [projectId])
+      return response.data.data as ExpenseStatus[]
+    },
+    enabled: !!projectId,
+  })
 
-  useEffect(() => {
-    async function fetchExpenses() {
-      try {
-        const response = await api.get(
-          `/api/projects/${projectId}/expenses/?page=${currentPage}`
-        )
-        setExpenses(response.data.data)
-        setMeta(response.data.meta)
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          toast.error(error.response?.data?.message)
-        }
-      }
-    }
-    fetchExpenses()
-    fetchExpenseStatus()
-  }, [projectId, currentPage, fetchExpenseStatus])
-
-  const handleNextStep = async (comment: string | null, approvalId: number) => {
-    try {
-      await api.post(`/api/approvals/${approvalId}`, { comment })
-      toast.success("Approval advanced")
-      fetchExpenseStatus()
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message)
-      }
-    }
+  const invalidateExpenseStatus = () => {
+    queryClient.invalidateQueries({ queryKey: ["expenses", projectId, "approval"] })
   }
 
-  async function handleReject(comment: string | null, approvalId: number) {
-    try {
-      await api.post(`/api/approvals/${approvalId}/reject`, { comment })
-      toast.success("Approval rejected")
-      fetchExpenseStatus()
-    } catch (error) {
+  const advanceMutation = useMutation({
+    mutationFn: async ({ comment, approvalId }: { comment: string | null; approvalId: number }) => {
+      await api.post(`/api/approvals/${approvalId}`, { comment })
+    },
+    onSuccess: () => {
+      toast.success("Approval advanced")
+      invalidateExpenseStatus()
+    },
+    onError: (error) => {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message)
       }
-    }
+    },
+  })
+
+  const rejectMutation = useMutation({
+    mutationFn: async ({ comment, approvalId }: { comment: string | null; approvalId: number }) => {
+      await api.post(`/api/approvals/${approvalId}/reject`, { comment })
+    },
+    onSuccess: () => {
+      toast.success("Approval rejected")
+      invalidateExpenseStatus()
+    },
+    onError: (error) => {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message)
+      }
+    },
+  })
+
+  const handleNextStep = (comment: string | null, approvalId: number) => {
+    advanceMutation.mutate({ comment, approvalId })
+  }
+
+  const handleReject = (comment: string | null, approvalId: number) => {
+    rejectMutation.mutate({ comment, approvalId })
   }
 
   return (
@@ -98,7 +112,6 @@ export default function Expenses() {
         currentPage={currentPage}
         onPageChange={setCurrentPage}
       />
-
     </div>
   )
 }

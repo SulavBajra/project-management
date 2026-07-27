@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Budget\BudgetHeadRequest;
+use App\Http\Requests\Budget\BudgetHeadUpdateRequest;
 use App\Models\BudgetHead;
 use App\Models\BudgetPlanItem;
 use App\Repositories\BudgetHeadRepository;
@@ -33,11 +34,27 @@ class BudgetHeadController extends Controller
 
     public function store(BudgetHeadRequest $request)
     {
-        $request->validated();
+        $validated = $request->validated();
 
-        $budgetHead = BudgetHead::create($request->all());
+        $budgetHead = BudgetHead::create($validated);
 
         return response()->json($budgetHead, 201);
+    }
+
+    public function update(BudgetHeadUpdateRequest $request, BudgetHead $budgetHead)
+    {
+        $validated = $request->validated();
+
+        $budgetHead->update($validated);
+
+        return response()->json($budgetHead);
+    }
+
+    public function destroy(BudgetHead $budgetHead)
+    {
+        $budgetHead->delete();
+
+        return response()->json(['message' => 'Budget head deleted successfully']);
     }
 
     public function show(BudgetPlanItem $item)

@@ -23,6 +23,8 @@ import api from "@/lib/axios"
 import type { ProjectResponse } from "@/types/Project"
 import type { User } from "@/types/User"
 import { useMutation } from "@tanstack/react-query"
+import { useNavigate } from "react-router-dom"
+import ProjectEditDialog from "./ProjectEditDialog"
 
 export default function ProjectTable({
   projects,
@@ -33,7 +35,7 @@ export default function ProjectTable({
   user: User | null
   onDelete: () => void
 }) {
-
+  const navigate = useNavigate()
   const deleteMutate = useMutation({
     mutationFn: async (id: number) => {
       const response = await api.delete(`api/projects/${id}`)
@@ -74,9 +76,12 @@ export default function ProjectTable({
       header: "Actions",
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
-          <Button variant="ghost">
+          <Button variant="ghost" onClick={() => {
+            navigate(`/project/${row.original.id}`)
+          }}>
             <EyeIcon className="h-4 w-4" />
           </Button>
+          <ProjectEditDialog data={row.original} />
           {user?.permissions?.includes("delete_project") && (
             <DeleteDialog itemId={row.original.id} onRemove={handleDelete} />
           )}

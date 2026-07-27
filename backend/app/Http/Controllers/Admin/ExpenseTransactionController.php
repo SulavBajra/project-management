@@ -54,8 +54,11 @@ class ExpenseTransactionController extends Controller
     public function importStatus(ExpenseImport $import)
     {
         return response()->json([
-            'status' => $import->status,
-            'errors' => $import->errors,
+            'data' => [
+                'id' => $import->id,
+                'status' => $import->status,
+                'error_message' => $import->errors,
+            ],
         ]);
     }
 

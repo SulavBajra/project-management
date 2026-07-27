@@ -29,7 +29,7 @@ export default function ProjectIndex() {
   const { data, isPending, error } = useQuery({
     queryKey: ["projects", currentPage],
     queryFn: async () => {
-      const response = await api.get(`/api/projects/?page=${currentPage}`)
+      const response = await api.get(`/api/projects/${user?.id}?page=${currentPage}`)
       return {
         projects: response.data.data as ProjectResponse[],
         meta: response.data.meta as Meta,

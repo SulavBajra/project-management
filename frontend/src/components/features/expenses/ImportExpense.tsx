@@ -1,6 +1,6 @@
 import axios from "axios"
 import { Upload } from "lucide-react"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -14,6 +14,7 @@ import {
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import api from "@/lib/axios"
+import { useImportStatus } from "@/hooks/useImportStatus"
 
 export default function ImportExpense({ projectId }: { projectId: number }) {
   const [file, setFile] = useState<File | null>(null)
@@ -21,6 +22,26 @@ export default function ImportExpense({ projectId }: { projectId: number }) {
   const [open, setOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
+  const [importId, setImportId] = useState<number | null>(null)
+  const {data: importStatus} = useImportStatus(importId)
+
+  useEffect(() => {
+      if (!importStatus) return
+
+      if (importStatus.status === "completed") {
+        toast.success(
+          `Import complete — ${importStatus.rows_processed} expense(s) imported.`
+        )
+        setImportId(null)
+        setOpen(false)
+        navigate(`/projects/${projectId}/expenses`)
+      }
+
+      if (importStatus.status === "failed") {
+        toast.error(importStatus.error_message ?? "Import failed.")
+        setImportId(null)
+      }
+    }, [importStatus, navigate, projectId])
 
   const handleImport = async () => {
     if (!file) return toast.error("Please select a file.")
@@ -29,14 +50,13 @@ export default function ImportExpense({ projectId }: { projectId: number }) {
     formData.append("project_id", String(projectId))
     try {
       setLoading(true)
-      await api.post("/api/expenses/import", formData, {
+      const response = await api.post("/api/expenses/import", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       setFile(null)
       if (fileInputRef.current) fileInputRef.current.value = ""
-      setOpen(false)
-      toast.success("Expenses imported successfully.")
-      navigate(`/projects/${projectId}/expenses`)
+      setImportId(response.data.import_id)
+      toast.info("File uploaded — processing expenses...")
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(
@@ -57,7 +77,7 @@ export default function ImportExpense({ projectId }: { projectId: number }) {
           Add expenses from Excel
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="w-3/8">
         <DialogHeader>
           <DialogTitle>Import Expenses</DialogTitle>
         </DialogHeader>

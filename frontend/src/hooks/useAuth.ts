@@ -5,6 +5,7 @@ type AuthContextType = {
   user: User | null
   setUserSession: (user: User, remember?: boolean) => void
   clearSession: () => void
+  updateUser: (updates: Partial<User>) => void
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null)

@@ -1,4 +1,6 @@
-import { useMemo } from "react"
+import { useState, useMemo } from "react"
+import axios from "axios"
+import { toast } from "sonner"
 import { Trash } from "lucide-react"
 import {
   useReactTable,
@@ -15,13 +17,43 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import type { BudgetHead } from "@/types/Budget/BudgetHead"
+import BudgetHeadDialog from "./BudgetHeadDialog"
+import api from "@/lib/axios"
 
 export default function BudgetTable({
   budgetHeads,
+  onUpdated,
 }: {
   budgetHeads: BudgetHead[]
+  onUpdated: () => void
 }) {
+  const [deletingId, setDeletingId] = useState<number | null>(null)
+
+  const handleDelete = async (id: number) => {
+    try {
+      await api.delete(`/api/budget-heads/${id}`)
+      toast.success("Budget head deleted")
+      onUpdated()
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message ?? "Failed to delete")
+      }
+    }
+    setDeletingId(null)
+  }
+
   const columns: ColumnDef<BudgetHead>[] = useMemo(() => [
     { header: "S.N", cell: ({ row }) => row.index + 1 },
     { accessorKey: "name", header: "Name" },
@@ -29,13 +61,43 @@ export default function BudgetTable({
     {
       id: "actions",
       header: "Actions",
-      cell: () => (
-        <Button variant="destructive">
-          <Trash size={16} />
-        </Button>
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <BudgetHeadDialog
+            mode="edit"
+            budgetHead={row.original}
+            onSuccess={onUpdated}
+          />
+          <AlertDialog
+            open={deletingId === row.original.id}
+            onOpenChange={(o) => setDeletingId(o ? row.original.id : null)}
+          >
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="icon">
+                <Trash size={16} />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Budget Head</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete{" "}
+                  <strong>{row.original.name}</strong>? This action cannot be
+                  undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => handleDelete(row.original.id)}>
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       ),
     },
-  ], [])
+  ], [deletingId, onUpdated])
 
   const table = useReactTable({
     data: budgetHeads,

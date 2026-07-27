@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Budgets\BudgetPlanController;
 use App\Http\Controllers\Budgets\BudgetPlanItemController;
 use App\Http\Controllers\Expense\ExpenseController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Report\ReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -23,9 +24,10 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::post('/register', [AuthController::class, 'register']);
 
+Route::post('/register', [AuthController::class, 'register']);
 Route::middleware(['auth:sanctum'])->group(function () {
+    Route::put('/profile', [ProfileController::class, 'update']);
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/dashboard/kpi', [DashboardController::class, 'kpi']);
     Route::get('/dashboard/chart', [DashboardController::class, 'chart']);
@@ -37,8 +39,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->name('projects.')
         ->controller(ProjectController::class)
         ->group(function () {
-            Route::get('/', 'getAllProjects');
             Route::get('/list', 'listActiveProjects');
+            Route::get('/{userId}', 'getAllProjects');
+            Route::get('/{id}', 'show');
+            Route::put('/{projectId}', 'update');
             Route::post('/', 'storeProject');
             Route::delete('/{project}', 'destroy');
 
@@ -101,6 +105,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
             Route::post('/', 'store');
             Route::get('/stats', 'getBudgetHeadStats');
             Route::get('/{item}', 'show');
+            Route::put('/{budgetHead}', 'update');
+            Route::delete('/{budgetHead}', 'destroy');
         });
 
     Route::prefix('projects')
