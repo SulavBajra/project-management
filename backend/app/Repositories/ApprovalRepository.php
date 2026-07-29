@@ -70,6 +70,7 @@ class ApprovalRepository
                 'currentStep.approvalStatus:id,name',
             ])
             ->whereRelation('currentStep', 'role_id', '=', $roleId)
+            ->whereRelation('currentStatus', 'name', '!==', "Approved")
             ->paginate(10);
     }
 }

@@ -23,7 +23,11 @@ class ProjectViewResource extends JsonResource
         "name" => $this->name,
         "description" => $this->description,
         "created_by" => $this->created_by,
-        "timelines" => TimelineResource::collection($this->whenLoaded('timelines')),
+        "timelines" => $this->timelines->first() ? [
+            "id" => $this->timelines->first()->id,
+            "start_date" => $this->timelines->first()->start_date->format('Y-m-d'),
+            "end_date" => $this->timelines->first()->end_date->format("Y-m-d"),
+        ] : null,
         'users' => UserResource::collection($this->whenLoaded('users')),
         ];
     }

@@ -24,13 +24,17 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-
 Route::post('/register', [AuthController::class, 'register']);
-Route::middleware(['auth:sanctum'])->group(function () {
+
+Route::get('projects/{id}', [ProjectController::class, "show"]);
+
+Route::middleware(['auth:sanctum','throttle:api'])->group(function () {
     Route::put('/profile', [ProfileController::class, 'update']);
+
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::get('/dashboard/kpi', [DashboardController::class, 'kpi']);
     Route::get('/dashboard/chart', [DashboardController::class, 'chart']);
+
     Route::get('users/{role}', [UserController::class, 'getUsersByRole']);
     Route::resource('users', UserController::class)->except(['create', 'edit']);
 
@@ -41,7 +45,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->group(function () {
             Route::get('/list', 'listActiveProjects');
             Route::get('/{userId}', 'getAllProjects');
-            Route::get('/{id}', 'show');
+            // Route::get('/{id}', 'show');
             Route::put('/{projectId}', 'update');
             Route::post('/', 'storeProject');
             Route::delete('/{project}', 'destroy');
@@ -151,15 +155,17 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::get('approvals/steps/{role_id}', 'show');
         Route::patch('/approvals/steps/{step}', 'update');
     });
-});
-Route::prefix('reports')
+
+    Route::prefix('reports')
     ->name('reports.')
     ->controller(ReportController::class)
     ->group(function () {
         Route::get('budget-vs-actual', 'index');
         Route::get('budget-vs-actual/{project_id}', 'show');
     });
-Route::get('approvals/history', [ApprovalHistoryController::class, 'index']);
+
+    Route::get('approvals/history', [ApprovalHistoryController::class, 'index']);
+});
 // Route::get('projects/{id}/expenses', [ExpenseController::class, 'show']);
 // Route::delete('projects/expenses/{id}', [ExpenseController::class, 'destroy']);
 // Route::get("approvals/{id}", [ApprovalController::class, "show"]);

@@ -144,8 +144,13 @@ class ProjectController extends Controller
     public function show(int $projectId)
     {
         $project = Project::query()
-        ->select("id", "code", "is_active", "name", "description", "created_by")
-        ->with("timelines", "users")->where('id', $projectId)->first();
+            ->select("id", "code", "is_active", "name", "description", "created_by")
+            ->with([
+                "timelines" => fn($query) => $query->where("end_date", ">", now()),
+                "users",
+            ])
+            ->where("id", $projectId)
+            ->first();
         return new ProjectViewResource($project);
     }
 

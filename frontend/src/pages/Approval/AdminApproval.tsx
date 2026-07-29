@@ -1,28 +1,19 @@
 import { useMemo, useEffect, useCallback} from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  type ColumnDef,
-} from "@tanstack/react-table"
+import type { ColumnDef} from "@tanstack/react-table"
 import axios from "axios"
 import { toast } from "sonner"
 import ApprovalConfirm from "@/components/features/approvals/ApprovalConfirm"
 import StatusBadge from "@/components/status-badge/StatusBadge"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { useAuth } from "@/hooks/useAuth"
 import api from "@/lib/axios"
 import type { ApprovalList } from "@/types/Approval/ApprovalList"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import ApprovalHistory from "./ApprovalHistory"
+import { DataTable, SortableHeader } from "@/types/Expenses/data-table"
+import { ClipboardClock,  RotateCcw } from "lucide-react"
 
 export default function AdminApproval() {
   const { user } = useAuth()
@@ -84,12 +75,24 @@ export default function AdminApproval() {
 
   const columns: ColumnDef<ApprovalList>[] = useMemo(() => [
     { header: "S.N", cell: ({ row }) => row.index + 1 },
-    { accessorKey: "approvable_type", header: "Approval Request" },
-    { accessorKey: "project_name", header: "Project Name" },
-    { accessorKey: "created_by", header: "Created By" },
+    {
+      accessorKey: "approvable_type",
+      header: ({ column }) => <SortableHeader column={column} title="Approval Request" />,
+      cell: ({ row }) => (<span>{ row.original.approvable_type}</span>)
+    },
+    {
+      accessorKey: "project_name",
+      header: ({ column }) => <SortableHeader column={column} title="Project Name" />,
+      cell: ({ row }) => (<span>{row.original.project_name}</span>)
+    },
+    {
+      accessorKey: "created_by",
+      header: ({ column }) => <SortableHeader column={column} title="Created By" />,
+      cell: ({row}) => (<span>{row.original.created_by}</span>)
+    },
     {
       accessorKey: "current_status",
-      header: "Status",
+      header: ({column}) => <SortableHeader column={column} title="Status"/>,
       cell: ({ row }) => (
         <StatusBadge
           status={row.original.current_status}
@@ -112,12 +115,6 @@ export default function AdminApproval() {
     },
   ], [handleNext, handleReject])
 
-  const table = useReactTable({
-    data: approvals,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  })
-
   if (isPending) {
     return (
       <div className="flex justify-center py-8">
@@ -128,43 +125,28 @@ export default function AdminApproval() {
 
   return (
     <div>
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell
-                colSpan={6}
-                className="h-24 text-center text-muted-foreground"
-              >
-                No pending approvals
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+      <Tabs defaultValue="pending">
+        <TabsList variant="line" className="pb-3">
+          <TabsTrigger value="pending" className="pb-2">
+            <ClipboardClock/>
+            Pending
+          </TabsTrigger>
+          <TabsTrigger value="history" className="pb-2">
+            <RotateCcw/>
+            History
+          </TabsTrigger>
+       </TabsList>
+        <TabsContent value="pending">
+          <DataTable
+            columns={columns}
+            data={approvals}
+            searchPlaceholder="Approval Name"
+          />
+       </TabsContent>
+        <TabsContent value="history">
+          <ApprovalHistory/>
+       </TabsContent>
+      </Tabs>
     </div>
   )
 }

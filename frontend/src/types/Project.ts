@@ -26,7 +26,7 @@ export type ProjectViewData = {
     id: number
     start_date: string
     end_date: string
-    }[]
+    }
   users: {
     id: number
     name: string
