@@ -24,7 +24,7 @@ export default function ProjectView() {
   } = useQuery({
     queryKey: ["project", projectId],
     queryFn: async () => {
-      const response = await api.get(`/api/projects/${projectId}`);
+      const response = await api.get(`/api/projects/view/${projectId}`);
       return response.data.data as ProjectViewData;
     },
     enabled: !!projectId,

@@ -2,29 +2,17 @@ import { useMemo } from "react"
 import axios from "axios"
 import { EyeIcon } from "lucide-react"
 import { toast } from "sonner"
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  type ColumnDef,
-} from "@tanstack/react-table"
+import type{ColumnDef} from "@tanstack/react-table"
 import DeleteDialog from "@/components/DeleteDialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import api from "@/lib/axios"
 import type { ProjectResponse } from "@/types/Project"
 import type { User } from "@/types/User"
 import { useMutation } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
 import ProjectEditDialog from "./ProjectEditDialog"
+import { DataTable } from "@/types/Expenses/data-table"
 
 export default function ProjectTable({
   projects,
@@ -88,48 +76,14 @@ export default function ProjectTable({
         </div>
       ),
     },
-  ], [user, handleDelete])
-
-  const table = useReactTable({
-    data: projects,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  })
+  ], [user, handleDelete, navigate])
 
   return (
-    <Table>
-      <TableHeader>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <TableHead key={header.id}>
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(header.column.columnDef.header, header.getContext())}
-              </TableHead>
-            ))}
-          </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody>
-        {table.getRowModel().rows?.length ? (
-          table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))
-        ) : (
-          <TableRow>
-            <TableCell colSpan={9} className="h-24 text-center">
-              No projects available.
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+   <div>
+     <DataTable
+        columns={columns}
+        data={projects}
+        />
+   </div>
   )
 }

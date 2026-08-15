@@ -24,9 +24,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::post('/register', [AuthController::class, 'register']);
-
-Route::get('projects/{id}', [ProjectController::class, "show"]);
+Route::post('/register', [AuthController::class, 'register'])->middleware("throttle:login");
 
 Route::middleware(['auth:sanctum','throttle:api'])->group(function () {
     Route::put('/profile', [ProfileController::class, 'update']);
@@ -45,7 +43,7 @@ Route::middleware(['auth:sanctum','throttle:api'])->group(function () {
         ->group(function () {
             Route::get('/list', 'listActiveProjects');
             Route::get('/{userId}', 'getAllProjects');
-            // Route::get('/{id}', 'show');
+            Route::get('/view/{id}', 'show');
             Route::put('/{projectId}', 'update');
             Route::post('/', 'storeProject');
             Route::delete('/{project}', 'destroy');
@@ -76,6 +74,7 @@ Route::middleware(['auth:sanctum','throttle:api'])->group(function () {
         Route::get('roles', 'getRoles');
         Route::post('roles', 'assignPermissionToRole');
         Route::post('users/{user}/role', 'assignRole');
+        Route::patch('users/{user}/role', 'update');
     });
 
     Route::controller(ExpenseTransactionController::class)->group(function () {
@@ -139,6 +138,8 @@ Route::middleware(['auth:sanctum','throttle:api'])->group(function () {
             )->middleware('throttle:import');
         });
 
+    Route::get('approvals/history', [ApprovalHistoryController::class, 'index']);
+
     Route::controller(ApprovalFlowController::class)->group(function () {
         Route::get('approval-flow', 'index');
         Route::post('approval-flow', 'store');
@@ -163,25 +164,4 @@ Route::middleware(['auth:sanctum','throttle:api'])->group(function () {
         Route::get('budget-vs-actual', 'index');
         Route::get('budget-vs-actual/{project_id}', 'show');
     });
-
-    Route::get('approvals/history', [ApprovalHistoryController::class, 'index']);
 });
-// Route::get('projects/{id}/expenses', [ExpenseController::class, 'show']);
-// Route::delete('projects/expenses/{id}', [ExpenseController::class, 'destroy']);
-// Route::get("approvals/{id}", [ApprovalController::class, "show"]);
-// test field
-// Route::get("projects/budget-plan/{plan}/export", [
-//     BudgetPlanItemController::class,
-//     "export",
-// ]);
-// Route::get("projects/{id}/stat/compare", [
-//     ProjectController::class,
-//     "getBudgetVsExpense",
-// ]);
-// Route::put("approvals/{id}", [ApprovalController::class, "store"]);
-// Route::get("approval-flow/{id}", [ApprovalFlowController::class, "show"]);
-// Route::post("approvals/{id}", [ApprovalController::class, "store"]);
-// Route::get("expenses/{project_id}", [
-//     ExpenseTransactionController::class,
-//     "getExpenses",
-// ]);

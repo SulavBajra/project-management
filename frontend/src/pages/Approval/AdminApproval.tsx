@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ApprovalHistory from "./ApprovalHistory"
 import { DataTable, SortableHeader } from "@/types/Expenses/data-table"
 import { ClipboardClock,  RotateCcw } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 
 export default function AdminApproval() {
   const { user } = useAuth()
@@ -115,38 +116,41 @@ export default function AdminApproval() {
     },
   ], [handleNext, handleReject])
 
-  if (isPending) {
-    return (
-      <div className="flex justify-center py-8">
-        <Spinner className="size-15" />
-      </div>
-    )
-  }
-
   return (
     <div>
-      <Tabs defaultValue="pending">
-        <TabsList variant="line" className="pb-3">
-          <TabsTrigger value="pending" className="pb-2">
-            <ClipboardClock/>
-            Pending
-          </TabsTrigger>
-          <TabsTrigger value="history" className="pb-2">
-            <RotateCcw/>
-            History
-          </TabsTrigger>
-       </TabsList>
-        <TabsContent value="pending">
-          <DataTable
-            columns={columns}
-            data={approvals}
-            searchPlaceholder="Approval Name"
-          />
-       </TabsContent>
-        <TabsContent value="history">
-          <ApprovalHistory/>
-       </TabsContent>
-      </Tabs>
+      <Card>
+        <CardContent>
+          <Tabs defaultValue="pending">
+             <TabsList variant="line" className="pb-3">
+               <TabsTrigger value="pending" className="pb-2">
+                 <ClipboardClock/>
+                 Pending
+               </TabsTrigger>
+               <TabsTrigger value="history" className="pb-2">
+                 <RotateCcw/>
+                 History
+               </TabsTrigger>
+            </TabsList>
+             <TabsContent value="pending">
+              {
+                isPending ? (
+                  <div className="flex justify-center py-8">
+                    <Spinner className="size-15" />
+                  </div>) :
+                  (<DataTable
+                    columns={columns}
+                    data={approvals}
+                    searchPlaceholder="Approval Name"
+                  />)
+               }
+
+            </TabsContent>
+             <TabsContent value="history">
+               <ApprovalHistory/>
+            </TabsContent>
+           </Tabs>
+        </CardContent>
+      </Card>
     </div>
   )
 }

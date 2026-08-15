@@ -25,12 +25,14 @@ interface AddRoleModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   userId: string
+  onRoleAdded: () => void
 }
 
 export const AddRoleModal = ({
   open,
   onOpenChange,
   userId,
+  onRoleAdded,
 }: AddRoleModalProps) => {
   const { roles } = useRoles()
   const [role, setRole] = useState("")
@@ -39,12 +41,13 @@ export const AddRoleModal = ({
     try {
       await api.post(`/api/users/${userId}/role`, { role })
       toast.success("Role added successfully")
+      onRoleAdded()
+      onOpenChange(false)
     } catch (error) {
       if (axios.isAxiosError(error)) {
         toast.error(error.message)
       }
     }
-    onOpenChange(false)
   }
 
   return (

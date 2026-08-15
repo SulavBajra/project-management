@@ -19,7 +19,7 @@ class ApprovalController extends Controller
         //
     }
 
-    // This is to show the approval request according to the role
+    // This is to show the approval requests assigned to the role
     public function show(int $roleId)
     {
         $approvals = $this->approvalRepo->findApprovalFromRole($roleId);

@@ -1,5 +1,4 @@
-import axios from "axios"
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { CreateUserModal } from "@/components/features/users/CreateUserModal"
 import { UserTable } from "@/components/features/users/UserTable"
@@ -9,61 +8,55 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 import RolesContext from "@/contexts/RolesContext"
 import api from "@/lib/axios"
-import type { User } from "@/types/User"
 import type { UserDashboardProps } from "@/types/UserDashboardProps"
+import { useQueries  } from "@tanstack/react-query"
 
 export default function UsersData() {
-  const [users, setUsers] = useState<User[]>([])
-  const [usersWithoutAnyRoles, setUsersWithoutAnyRoles] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [roles, setRoles] = useState<string[]>([])
-
   const [currentPage, setCurrentPage] = useState(1)
-  const [meta, setMeta] = useState<UserDashboardProps["meta"] | null>(null)
 
-  useEffect(() => {
-    async function fetchRole() {
-      try {
-        const response = await api.get<string[]>("/api/roles")
-        setRoles(response.data)
-      } catch (error) {
-        if (axios.isAxiosError(error)) toast.error(error.message)
+  const results = useQueries({
+    queries: [
+      {
+        queryKey: ["users", currentPage],
+        queryFn: async () => {
+          const response = await api.get<UserDashboardProps>(`/api/users?page=${currentPage}`)
+          return {
+            users: response.data.data,
+            usersWithoutAnyRoles: response.data.usersWithoutAnyRoles,
+            meta: response.data.meta,
+          }
+        },
+        enabled: !!currentPage,
+      },
+      {
+        queryKey: ["roles"],
+        queryFn: async () => {
+          const response = await api.get("/api/roles")
+          return response.data
+        }
       }
-    }
-    fetchRole()
-  }, [])
+    ],
+  })
 
-  const fetchUsers = useCallback(async () => {
-    try {
-      setLoading(true)
-      const response = await api.get<UserDashboardProps>(
-        `/api/users?page=${currentPage}`
-      )
-      setUsers(response.data.data)
-      setUsersWithoutAnyRoles(response.data.usersWithoutAnyRoles)
-      setMeta(response.data.meta)
-    } catch (error) {
-      if (axios.isAxiosError(error)) toast.error(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [currentPage])
+  const [usersQuery, rolesQuery] = results
+
+  const userData = usersQuery.data
+  const isPending = usersQuery.isPending || rolesQuery.isPending
+  const error = usersQuery.error || rolesQuery.error
+  const users = userData?.users ?? []
+  const usersWithoutAnyRoles = userData?.usersWithoutAnyRoles
+  const meta = userData?.meta
+  const roles = rolesQuery.data
 
   useEffect(() => {
-    fetchUsers()
-  }, [fetchUsers])
-
-  if (loading)
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner className="size-20" />
-      </div>
-    )
+    if (error) toast.error(error.message)
+  },[error])
 
   return (
     <RolesContext.Provider value={{ roles: roles }}>
       <Card className="">
         <CardHeader className="flex items-center justify-between">
+
           <div>
             <h1 className="text-2xl">Users</h1>
             <p className="text-[15px]">
@@ -75,11 +68,16 @@ export default function UsersData() {
             <Badge variant="secondary">
               {usersWithoutAnyRoles} New Registered
             </Badge>
-            <CreateUserModal onCreated={fetchUsers} />
+            <CreateUserModal onCreated={()=>usersQuery.refetch()} />
           </div>
         </CardHeader>
         <CardContent>
-          <UserTable users={users} onUserUpdated={fetchUsers} />
+          {
+            isPending ? (<div className="flex h-screen items-center justify-center">
+              <Spinner className="size-20" />
+            </div>) :
+              <UserTable users={users} onUserUpdated={()=> usersQuery.refetch()} />
+          }
         </CardContent>
 
         {meta && (

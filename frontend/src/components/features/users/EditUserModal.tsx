@@ -12,17 +12,17 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Pencil } from "lucide-react"
-import api from "@/lib/axios"
 import type { User } from "@/types/User"
+import api from "@/lib/axios"
 
 interface EditUserModalProps {
   user: User
+  open: boolean
+  onOpenChange: (open: boolean) => void
   onUpdated: () => void
 }
 
-export function EditUserModal({ user, onUpdated }: EditUserModalProps) {
-  const [open, setOpen] = useState(false)
+export function EditUserModal({ user, open, onOpenChange, onUpdated }: EditUserModalProps) {
   const [name, setName] = useState(user.name)
   const [email, setEmail] = useState(user.email)
   const [password, setPassword] = useState("")
@@ -40,7 +40,7 @@ export function EditUserModal({ user, onUpdated }: EditUserModalProps) {
         password_confirmation: passwordConfirmation || undefined,
       })
       toast.success("User updated successfully")
-      setOpen(false)
+      onOpenChange(false)
       onUpdated()
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -55,7 +55,7 @@ export function EditUserModal({ user, onUpdated }: EditUserModalProps) {
     <Dialog
       open={open}
       onOpenChange={(o) => {
-        setOpen(o)
+        onOpenChange(o)
         if (o) {
           setName(user.name)
           setEmail(user.email)

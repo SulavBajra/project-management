@@ -1,31 +1,22 @@
 import { useMemo, useState } from "react"
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  type ColumnDef,
-} from "@tanstack/react-table"
+import type {ColumnDef} from "@tanstack/react-table"
 import { Pencil } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import type { User } from "@/types/User.ts"
 import { AddRoleModal } from "./AddRoleModal.tsx"
 import { EditUserModal } from "./EditUserModal.tsx"
+import { DataTable } from "@/types/Expenses/data-table.tsx"
+import ConfirmDialog from "@/components/ConfirmDialog.tsx"
 
 export const UserTable = ({
   users,
   onUserUpdated,
+  removeRole
 }: {
   users: User[]
   onUserUpdated: () => void
+  removeRole: (id: number) => void
 }) => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
   const [editingUser, setEditingUser] = useState<User | null>(null)
@@ -71,65 +62,40 @@ export const UserTable = ({
               Add Role
             </Button>
           ) : (
-            <Button variant="destructive">Delete Role</Button>
+              <ConfirmDialog
+                title="Remove Role"
+                trigger={<Button variant="destructive">Remove Role</Button>}
+                description="Are you sure you want to remove the role"
+                confirmVariant="destructive"
+                onConfirm={()=> removeRole(row.original.id)}
+              />
           )}
         </div>
       ),
     },
-  ], [setSelectedUserId, setEditingUser])
+  ], [])
 
-  const table = useReactTable({
-    data: users,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  })
-
-  return (
+   return (
     <>
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(header.column.columnDef.header, header.getContext())}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center">
-                No users found.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-
+      <DataTable
+        columns={columns}
+        data={users}
+      />
       <AddRoleModal
         open={selectedUserId !== null}
         onOpenChange={(open) => !open && setSelectedUserId(null)}
         userId={selectedUserId!}
+        onRoleAdded={() => {
+          setSelectedUserId(null)
+          onUserUpdated()
+        }}
       />
 
       {editingUser && (
         <EditUserModal
           user={editingUser}
+          open={editingUser !== null}
+          onOpenChange={(open) => !open && setEditingUser(null)}
           onUpdated={() => {
             setEditingUser(null)
             onUserUpdated()

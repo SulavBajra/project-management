@@ -58,4 +58,9 @@ class RolePermissionController extends Controller
             201,
         );
     }
+
+    public function update(int $id)
+    {
+        //
+    }
 }
